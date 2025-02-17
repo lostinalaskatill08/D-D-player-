@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="mobile-web-app-capable" content="yes" />
 
-  <!-- Tailwind from CDN (fine for demos; not for production) -->
+  <!-- Tailwind CSS from CDN (fine for demos; not for production) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- React 17 + ReactDOM 17 from jsDelivr (ensures correct MIME type) -->
+  <!-- React + ReactDOM 17 from jsDelivr (avoids MIME issues) -->
   <script
     src="https://cdn.jsdelivr.net/npm/react@17/umd/react.development.js"
     crossorigin
@@ -19,7 +19,7 @@
     crossorigin
   ></script>
 
-  <!-- Babel to compile inline JSX (not for production) -->
+  <!-- Babel for inline JSX transforms (not for production) -->
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 </head>
 
@@ -30,9 +30,14 @@
     /************************************************
      * 1) CharacterCard Component
      * 2) StatsSection (Multi-Row Stat Calculator)
-     * 3) Main DnDTracker Component
+     * 3) DiceRoller (d20, d10)
+     * 4) Main DnDTracker (Manages Characters/Enemies/Saving)
      ************************************************/
 
+    /* ---------------------------
+       CharacterCard Component
+       Renders a single party member
+    ---------------------------- */
     function CharacterCard({
       char,
       onUpdateChar,
@@ -43,7 +48,7 @@
       onRemoveItem,
       onRemoveChar,
     }) {
-      // Toggle for edit mode
+      // Toggle for "edit mode"
       const [isEditing, setIsEditing] = React.useState(false);
 
       // Local states for editing name/class/maxHealth
@@ -51,12 +56,13 @@
       const [editClass, setEditClass] = React.useState(char.class);
       const [editMaxHealth, setEditMaxHealth] = React.useState(String(char.maxHealth));
 
-      // Local states for adding status/effect/item
+      // For adding status, effect, or item
       const [newStatus, setNewStatus] = React.useState("");
       const [newEffect, setNewEffect] = React.useState("");
       const [newItem, setNewItem] = React.useState("");
 
       React.useEffect(() => {
+        // Sync local states if the parent passes a different char object
         setEditName(char.name);
         setEditClass(char.class);
         setEditMaxHealth(String(char.maxHealth));
@@ -320,20 +326,15 @@
       );
     }
 
-    function StatsSection() {
-      const [statRows, setStatRows] = React.useState([
-        {
-          id: 1,
-          label: "Character #1",
-          str: 10,
-          dex: 10,
-          con: 10,
-          int: 10,
-          wis: 10,
-          cha: 10,
-        },
-      ]);
-      const [nextId, setNextId] = React.useState(2);
+    /* ---------------------------
+       StatsSection - multi-row
+       ability score table
+    ---------------------------- */
+    function StatsSection({ statRows, setStatRows }) {
+      // Helper to get next ID
+      const [nextId, setNextId] = React.useState(
+        statRows.length ? Math.max(...statRows.map((r) => r.id)) + 1 : 2
+      );
 
       function addStatRow() {
         setStatRows((prev) => [
@@ -416,7 +417,6 @@
                     Remove Row
                   </button>
                 </div>
-                {/* Stats */}
                 <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2">
                   {/* STR */}
                   <div className="flex flex-col">
@@ -522,8 +522,55 @@
       );
     }
 
+    /* ---------------------------
+       DiceRoller - for random d20 / d10
+    ---------------------------- */
+    function DiceRoller() {
+      const [roll, setRoll] = React.useState(null);
+
+      function rollD20() {
+        const result = Math.floor(Math.random() * 20) + 1;
+        setRoll(`Rolled d20 ⇒ ${result}`);
+      }
+
+      function rollD10() {
+        const result = Math.floor(Math.random() * 10) + 1;
+        setRoll(`Rolled d10 ⇒ ${result}`);
+      }
+
+      return (
+        <div className="bg-gray-100 p-4 rounded-lg">
+          <h2 className="text-xl font-bold mb-2">Dice Roller</h2>
+          <p className="mb-2">
+            {roll === null ? "No roll yet" : roll}
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={rollD20}
+              className="px-3 py-1 bg-blue-500 text-white rounded"
+            >
+              Roll d20
+            </button>
+            <button
+              onClick={rollD10}
+              className="px-3 py-1 bg-blue-500 text-white rounded"
+            >
+              Roll d10
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    /* ---------------------------
+       Main DnDTracker Component
+       - Saves/loads from localStorage
+       - Manages Characters, Enemies, Stats, etc.
+    ---------------------------- */
     function DnDTracker() {
-      // Party Characters
+      // ----------------------
+      // Character State
+      // ----------------------
       const [characters, setCharacters] = React.useState([
         {
           id: 1,
@@ -557,9 +604,55 @@
         },
       ]);
 
+      // ----------------------
+      // Enemy State
+      // ----------------------
       const [enemies, setEnemies] = React.useState([]);
 
-      // Characters
+      // ----------------------
+      // Stats Rows for Calculator
+      // ----------------------
+      const [statRows, setStatRows] = React.useState([
+        {
+          id: 1,
+          label: "Character #1",
+          str: 10,
+          dex: 10,
+          con: 10,
+          int: 10,
+          wis: 10,
+          cha: 10,
+        },
+      ]);
+
+      // ----------------------
+      // On Mount: Load from localStorage if present
+      // ----------------------
+      React.useEffect(() => {
+        const saved = localStorage.getItem("dndTrackerData");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.characters) setCharacters(parsed.characters);
+          if (parsed.enemies) setEnemies(parsed.enemies);
+          if (parsed.statRows) setStatRows(parsed.statRows);
+        }
+      }, []);
+
+      // ----------------------
+      // Whenever data changes, save to localStorage
+      // ----------------------
+      React.useEffect(() => {
+        const payload = {
+          characters,
+          enemies,
+          statRows,
+        };
+        localStorage.setItem("dndTrackerData", JSON.stringify(payload));
+      }, [characters, enemies, statRows]);
+
+      // ----------------------
+      // Character Functions
+      // ----------------------
       function addCharacter() {
         const newId = Date.now();
         setCharacters((prev) => [
@@ -652,7 +745,9 @@
         );
       }
 
-      // Enemies
+      // ----------------------
+      // Enemy Functions
+      // ----------------------
       function addEnemy() {
         setEnemies((prev) => [
           ...prev,
@@ -697,6 +792,9 @@
         );
       }
 
+      // ----------------------
+      // Render
+      // ----------------------
       return (
         <div className="container mx-auto p-4">
           <div className="grid gap-4">
@@ -729,7 +827,7 @@
             </div>
 
             {/* Multi-Row Stat Section */}
-            <StatsSection />
+            <StatsSection statRows={statRows} setStatRows={setStatRows} />
 
             {/* Enemy Section */}
             <div className="bg-gray-100 p-4 rounded-lg">
@@ -810,11 +908,15 @@
                 ))}
               </div>
             </div>
+
+            {/* Dice Roller at bottom */}
+            <DiceRoller />
           </div>
         </div>
       );
     }
 
+    // Render the main tracker
     ReactDOM.render(<DnDTracker />, document.getElementById("root"));
   </script>
 </body>
