@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="mobile-web-app-capable" content="yes" />
   
-  <!-- Tailwind CSS from CDN (not recommended for production, but OK for a quick demo) -->
+  <!-- Tailwind CSS from CDN (fine for demos, not for production) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- React + ReactDOM (Development versions) -->
+  <!-- React + ReactDOM (Development builds) -->
   <script
     src="https://unpkg.com/react@17/umd/react.development.js"
     crossorigin
@@ -19,16 +19,17 @@
     crossorigin
   ></script>
 
-  <!-- Babel to compile JSX in the browser (not recommended for production) -->
+  <!-- Babel for inline JSX (not for production) -->
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 </head>
 <body class="bg-gray-50 text-gray-800">
   <div id="root" class="p-4"></div>
 
-  <!-- Our React code -->
   <script type="text/babel">
     function DnDTracker() {
-      // State: Characters
+      // -------------------------------
+      // State: Characters & Enemies
+      // -------------------------------
       const [characters, setCharacters] = React.useState([
         {
           id: 1,
@@ -65,43 +66,64 @@
         },
       ]);
 
-      // State: Enemies
       const [enemies, setEnemies] = React.useState([]);
 
-      // Editing
+      // For editing a specific character, store separate "edit" fields so user can type multiple digits
       const [editingChar, setEditingChar] = React.useState(null);
-
-      // Inputs
-      const [newItem, setNewItem] = React.useState("");
+      
+      // Quick inputs for applying heal/damage to any character or enemy
       const [damageAmount, setDamageAmount] = React.useState(10);
       const [healAmount, setHealAmount] = React.useState(10);
-      const [newEffect, setNewEffect] = React.useState("");
+
+      // Shared text inputs for status/effects/inventory
       const [newStatus, setNewStatus] = React.useState("");
+      const [newEffect, setNewEffect] = React.useState("");
+      const [newItem, setNewItem] = React.useState("");
 
       // ---------------------------------------------
       // Party Character Functions
       // ---------------------------------------------
       const startEditing = (char) => {
-        // Make a copy so we don't mutate original directly
-        setEditingChar({ ...char });
+        // Copy existing character fields into an edit object
+        setEditingChar({
+          id: char.id,
+          editName: char.name,
+          editClass: char.class,
+          editMaxHealth: String(char.maxHealth), // store as a string
+        });
       };
 
       const saveCharacter = () => {
         if (!editingChar) return;
-        setCharacters((prev) =>
-          prev.map((c) => (c.id === editingChar.id ? editingChar : c))
+
+        const parsedMax = parseInt(editingChar.editMaxHealth, 10) || 0;
+        setCharacters((prev) => 
+          prev.map((c) => {
+            if (c.id === editingChar.id) {
+              // If new max < current health, clip health
+              const clippedHealth = Math.min(c.health, parsedMax);
+              return {
+                ...c,
+                name: editingChar.editName,
+                class: editingChar.editClass,
+                maxHealth: parsedMax,
+                health: clippedHealth,
+              };
+            }
+            return c;
+          })
         );
+
+        // Clear the edit state
         setEditingChar(null);
       };
 
+      // Adjust health
       const adjustHealth = (charId, amount) => {
         setCharacters((prev) =>
           prev.map((c) => {
             if (c.id === charId) {
-              const newHealth = Math.min(
-                c.maxHealth,
-                Math.max(0, c.health + amount)
-              );
+              const newHealth = Math.min(c.maxHealth, Math.max(0, c.health + amount));
               return { ...c, health: newHealth };
             }
             return c;
@@ -109,8 +131,9 @@
         );
       };
 
+      // Add/Remove Status
       const addStatus = (charId, statusText) => {
-        if (!statusText) return;
+        if (!statusText.trim()) return;
         setCharacters((prev) =>
           prev.map((c) => {
             if (c.id === charId) {
@@ -135,8 +158,9 @@
         );
       };
 
+      // Add/Remove Effects
       const addEffect = (charId, effectText) => {
-        if (!effectText) return;
+        if (!effectText.trim()) return;
         setCharacters((prev) =>
           prev.map((c) => {
             if (c.id === charId) {
@@ -161,8 +185,9 @@
         );
       };
 
+      // Add/Remove Inventory
       const addInventoryItem = (charId) => {
-        if (!newItem) return;
+        if (!newItem.trim()) return;
         setCharacters((prev) =>
           prev.map((c) => {
             if (c.id === charId) {
@@ -193,10 +218,10 @@
       const addEnemy = () => {
         const newEnemy = {
           id: Date.now(),
-          name: `Undead ${enemies.length + 1}`,
+          // renamed from "Undead" to "Enemy"
+          name: `Enemy ${enemies.length + 1}`,
           health: 50,
           maxHealth: 50,
-          position: "front",
           effects: [],
           status: [],
         };
@@ -211,10 +236,7 @@
         setEnemies((prev) =>
           prev.map((enemy) => {
             if (enemy.id === enemyId) {
-              const newHealth = Math.min(
-                enemy.maxHealth,
-                Math.max(0, enemy.health + amount)
-              );
+              const newHealth = Math.min(enemy.maxHealth, Math.max(0, enemy.health + amount));
               return { ...enemy, health: newHealth };
             }
             return enemy;
@@ -226,229 +248,223 @@
       // CharacterCard Sub-Component
       // ---------------------------------------------
       const CharacterCard = ({ char }) => {
-        // Instead of optional chaining, use a safe check:
         const isEditing = editingChar && editingChar.id === char.id;
 
+        if (isEditing) {
+          return (
+            <div className="bg-white p-4 rounded-lg shadow space-y-2">
+              <div className="flex gap-2">
+                <input
+                  className="border p-1 rounded"
+                  value={editingChar.editName}
+                  onChange={(e) =>
+                    setEditingChar({ ...editingChar, editName: e.target.value })
+                  }
+                  placeholder="Name"
+                />
+                <input
+                  className="border p-1 rounded"
+                  value={editingChar.editClass}
+                  onChange={(e) =>
+                    setEditingChar({ ...editingChar, editClass: e.target.value })
+                  }
+                  placeholder="Class"
+                />
+              </div>
+              <div className="flex gap-2 items-center">
+                <input
+                  type="number"
+                  className="border p-1 rounded w-24"
+                  value={editingChar.editMaxHealth}
+                  onChange={(e) =>
+                    setEditingChar({ ...editingChar, editMaxHealth: e.target.value })
+                  }
+                  placeholder="Max Health"
+                />
+                <button
+                  className="px-3 py-1 bg-green-500 text-white rounded"
+                  onClick={saveCharacter}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          );
+        }
+
+        // View Mode
         return (
           <div className="bg-white p-4 rounded-lg shadow">
-            {isEditing ? (
-              /* Edit Mode */
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <input
-                    className="border p-1 rounded"
-                    value={editingChar.name}
-                    onChange={(e) =>
-                      setEditingChar({ ...editingChar, name: e.target.value })
-                    }
-                    placeholder="Name"
-                  />
-                  <input
-                    className="border p-1 rounded"
-                    value={editingChar.class}
-                    onChange={(e) =>
-                      setEditingChar({ ...editingChar, class: e.target.value })
-                    }
-                    placeholder="Class"
-                  />
+            {/* Header Row */}
+            <div className="flex justify-between items-center">
+              <h3 className="font-bold">{char.name}</h3>
+              <div className="flex gap-2 items-center">
+                <span className="text-sm text-gray-600">{char.class}</span>
+                <button
+                  className="p-1 text-gray-500 hover:text-gray-700"
+                  onClick={() => startEditing(char)}
+                >
+                  [EDIT]
+                </button>
+              </div>
+            </div>
+
+            {/* Health Bar */}
+            <div className="mt-2">
+              <div className="flex items-center gap-2">
+                <span className="text-red-500">❤️</span>
+                <div className="w-full bg-gray-200 rounded-full h-4">
+                  <div
+                    className="bg-red-500 rounded-full h-4"
+                    style={{
+                      width: `${(char.health / char.maxHealth) * 100}%`,
+                    }}
+                  ></div>
                 </div>
-                <div className="flex gap-2 items-center">
-                  <input
-                    type="number"
-                    className="border p-1 rounded w-24"
-                    value={editingChar.maxHealth}
-                    onChange={(e) =>
-                      setEditingChar({
-                        ...editingChar,
-                        maxHealth: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    placeholder="Max Health"
-                  />
-                  <button
-                    className="px-3 py-1 bg-green-500 text-white rounded"
-                    onClick={saveCharacter}
+                <span className="text-sm">
+                  {char.health}/{char.maxHealth}
+                </span>
+              </div>
+            </div>
+
+            {/* Status Conditions */}
+            <div className="mt-2">
+              <h4 className="font-semibold text-sm">Status Conditions:</h4>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {char.status.map((stat, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-1 text-sm bg-red-100 text-red-800 rounded-full flex items-center gap-1"
                   >
-                    Save
-                  </button>
-                </div>
+                    [SKULL] {stat}
+                    <button
+                      className="hover:text-red-500"
+                      onClick={() => removeStatus(char.id, idx)}
+                    >
+                      [X]
+                    </button>
+                  </span>
+                ))}
               </div>
-            ) : (
-              /* View Mode */
-              <div>
-                <div className="flex justify-between items-center">
-                  <h3 className="font-bold">{char.name}</h3>
-                  <div className="flex gap-2 items-center">
-                    <span className="text-sm text-gray-600">{char.class}</span>
-                    <button
-                      className="p-1 text-gray-500 hover:text-gray-700"
-                      onClick={() => startEditing(char)}
-                    >
-                      [EDIT]
-                    </button>
-                  </div>
-                </div>
-
-                {/* Health Bar */}
-                <div className="mt-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-red-500">❤️</span>
-                    <div className="w-full bg-gray-200 rounded-full h-4">
-                      <div
-                        className="bg-red-500 rounded-full h-4"
-                        style={{
-                          width: `${(char.health / char.maxHealth) * 100}%`,
-                        }}
-                      ></div>
-                    </div>
-                    <span className="text-sm">
-                      {char.health}/{char.maxHealth}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Status Conditions */}
-                <div className="mt-2">
-                  <h4 className="font-semibold text-sm">Status Conditions:</h4>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {char.status.map((stat, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-1 text-sm bg-red-100 text-red-800 rounded-full flex items-center gap-1"
-                      >
-                        [SKULL] {stat}
-                        <button
-                          className="hover:text-red-500"
-                          onClick={() => removeStatus(char.id, idx)}
-                        >
-                          [X]
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-2 mt-1">
-                    <input
-                      className="border p-1 rounded text-sm"
-                      value={newStatus}
-                      onChange={(e) => setNewStatus(e.target.value)}
-                      placeholder="Add status condition"
-                    />
-                    <button
-                      className="px-2 py-1 bg-red-500 text-white rounded text-sm"
-                      onClick={() => addStatus(char.id, newStatus)}
-                    >
-                      Add
-                    </button>
-                  </div>
-                </div>
-
-                {/* Effects */}
-                <div className="mt-2">
-                  <h4 className="font-semibold text-sm">Effects:</h4>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {char.effects.map((eff, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-1 text-sm bg-blue-100 text-blue-800 rounded-full flex items-center gap-1"
-                      >
-                        {eff}
-                        <button
-                          className="hover:text-red-500"
-                          onClick={() => removeEffect(char.id, idx)}
-                        >
-                          [X]
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-2 mt-1">
-                    <input
-                      className="border p-1 rounded text-sm"
-                      value={newEffect}
-                      onChange={(e) => setNewEffect(e.target.value)}
-                      placeholder="Add buff/effect"
-                    />
-                    <button
-                      className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
-                      onClick={() => addEffect(char.id, newEffect)}
-                    >
-                      Add
-                    </button>
-                  </div>
-                </div>
-
-                {/* Inventory */}
-                <div className="mt-2">
-                  <h4 className="font-semibold text-sm">Inventory:</h4>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {char.inventory.map((item, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-1 text-sm bg-gray-100 rounded-full flex items-center gap-1"
-                      >
-                        {item}
-                        <button
-                          className="hover:text-red-500"
-                          onClick={() => removeInventoryItem(char.id, idx)}
-                        >
-                          [X]
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-2 mt-1">
-                    <input
-                      className="border p-1 rounded text-sm"
-                      value={newItem}
-                      onChange={(e) => setNewItem(e.target.value)}
-                      placeholder="New item"
-                    />
-                    <button
-                      className="px-2 py-1 bg-gray-500 text-white rounded text-sm"
-                      onClick={() => addInventoryItem(char.id)}
-                    >
-                      Add
-                    </button>
-                  </div>
-                </div>
-
-                {/* Actions: Heal / Damage */}
-                <div className="mt-4 flex gap-2 items-center flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      className="w-16 border rounded p-1"
-                      value={healAmount}
-                      onChange={(e) =>
-                        setHealAmount(parseInt(e.target.value) || 0)
-                      }
-                    />
-                    <button
-                      className="px-3 py-1 bg-green-500 text-white rounded"
-                      onClick={() => adjustHealth(char.id, healAmount)}
-                    >
-                      Heal
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      className="w-16 border rounded p-1"
-                      value={damageAmount}
-                      onChange={(e) =>
-                        setDamageAmount(parseInt(e.target.value) || 0)
-                      }
-                    />
-                    <button
-                      className="px-3 py-1 bg-red-500 text-white rounded"
-                      onClick={() => adjustHealth(char.id, -damageAmount)}
-                    >
-                      Damage
-                    </button>
-                  </div>
-                </div>
+              <div className="flex gap-2 mt-1">
+                <input
+                  className="border p-1 rounded text-sm"
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value)}
+                  placeholder="Add status condition"
+                />
+                <button
+                  className="px-2 py-1 bg-red-500 text-white rounded text-sm"
+                  onClick={() => addStatus(char.id, newStatus)}
+                >
+                  Add
+                </button>
               </div>
-            )}
+            </div>
+
+            {/* Effects */}
+            <div className="mt-2">
+              <h4 className="font-semibold text-sm">Effects:</h4>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {char.effects.map((eff, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-1 text-sm bg-blue-100 text-blue-800 rounded-full flex items-center gap-1"
+                  >
+                    {eff}
+                    <button
+                      className="hover:text-red-500"
+                      onClick={() => removeEffect(char.id, idx)}
+                    >
+                      [X]
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2 mt-1">
+                <input
+                  className="border p-1 rounded text-sm"
+                  value={newEffect}
+                  onChange={(e) => setNewEffect(e.target.value)}
+                  placeholder="Add buff/effect"
+                />
+                <button
+                  className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
+                  onClick={() => addEffect(char.id, newEffect)}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {/* Inventory */}
+            <div className="mt-2">
+              <h4 className="font-semibold text-sm">Inventory:</h4>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {char.inventory.map((item, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-1 text-sm bg-gray-100 rounded-full flex items-center gap-1"
+                  >
+                    {item}
+                    <button
+                      className="hover:text-red-500"
+                      onClick={() => removeInventoryItem(char.id, idx)}
+                    >
+                      [X]
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2 mt-1">
+                <input
+                  className="border p-1 rounded text-sm"
+                  value={newItem}
+                  onChange={(e) => setNewItem(e.target.value)}
+                  placeholder="New item"
+                />
+                <button
+                  className="px-2 py-1 bg-gray-500 text-white rounded text-sm"
+                  onClick={() => addInventoryItem(char.id)}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {/* Actions: Heal / Damage */}
+            <div className="mt-4 flex gap-2 items-center flex-wrap">
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  className="w-16 border rounded p-1"
+                  value={healAmount}
+                  onChange={(e) => setHealAmount(parseInt(e.target.value) || 0)}
+                />
+                <button
+                  className="px-3 py-1 bg-green-500 text-white rounded"
+                  onClick={() => adjustHealth(char.id, healAmount)}
+                >
+                  Heal
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  className="w-16 border rounded p-1"
+                  value={damageAmount}
+                  onChange={(e) =>
+                    setDamageAmount(parseInt(e.target.value) || 0)
+                  }
+                />
+                <button
+                  className="px-3 py-1 bg-red-500 text-white rounded"
+                  onClick={() => adjustHealth(char.id, -damageAmount)}
+                >
+                  Damage
+                </button>
+              </div>
+            </div>
           </div>
         );
       };
@@ -493,6 +509,7 @@
                         Defeat
                       </button>
                     </div>
+                    {/* Health Bar */}
                     <div className="mt-2">
                       <div className="flex items-center gap-2">
                         <span className="text-red-500">❤️</span>
@@ -500,9 +517,7 @@
                           <div
                             className="bg-red-500 rounded-full h-4"
                             style={{
-                              width: `${
-                                (enemy.health / enemy.maxHealth) * 100
-                              }%`,
+                              width: `${(enemy.health / enemy.maxHealth) * 100}%`,
                             }}
                           ></div>
                         </div>
@@ -524,9 +539,7 @@
                         />
                         <button
                           className="px-3 py-1 bg-green-500 text-white rounded"
-                          onClick={() =>
-                            adjustEnemyHealth(enemy.id, healAmount)
-                          }
+                          onClick={() => adjustEnemyHealth(enemy.id, healAmount)}
                         >
                           Heal
                         </button>
