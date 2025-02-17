@@ -11,11 +11,11 @@
 
   <!-- React + ReactDOM (Development builds) -->
   <script
-    src="https://unpkg.com/react@17/umd/react.development.js"
+    src="https://unpkg.com/react@17/umd/react-dom.development.js"
     crossorigin
   ></script>
   <script
-    src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    src="https://unpkg.com/react@17/umd/react.development.js"
     crossorigin
   ></script>
 
@@ -27,16 +27,13 @@
 
   <script type="text/babel">
     /*************************************************************
-     * 1) CharacterCard component                                *
-     * 2) StatCalculator component                               *
-     * 3) Main DnDTracker component (manages Characters/Enemies) *
+     * 1) CharacterCard component (Party Status)
+     * 2) StatsSection component (Multi-row stat calculator)
+     * 3) Main DnDTracker component (manages Characters/Enemies)
      *************************************************************/
 
     /*************************************************************
      * CharacterCard - Each party member’s UI
-     * - Local states for editing name, class, maxHealth
-     * - Local states for adding status/effects/items
-     * - Calls parent callbacks to actually update the array
      *************************************************************/
     function CharacterCard({
       char,
@@ -61,20 +58,18 @@
       const [newEffect, setNewEffect] = React.useState("");
       const [newItem, setNewItem] = React.useState("");
 
-      // Sync local states if a different character object is passed in from the parent
+      // Sync local states if the parent passes a different char object
       React.useEffect(() => {
         setEditName(char.name);
         setEditClass(char.class);
         setEditMaxHealth(String(char.maxHealth));
       }, [char]);
 
-      // Save changes in edit mode
+      // Save changes
       const handleSave = () => {
         const parsedMax = parseInt(editMaxHealth, 10) || 0;
-        // Clip health if new max < current health
         const clippedHealth = Math.min(char.health, parsedMax);
 
-        // Send updated object to parent
         onUpdateChar({
           ...char,
           name: editName,
@@ -334,158 +329,223 @@
     }
 
     /*************************************************************
-     * StatCalculator - a separate section for inputting STR,
-     * DEX, CON, INT, WIS, CHA (6-20) and showing their modifiers
+     * StatsSection - Allows multiple "Stat Rows" for different
+     * characters or references. You can add rows, remove rows,
+     * each with a name label and 6 ability scores.
      *************************************************************/
-    function StatCalculator() {
-      // Each ability score
-      const [str, setStr] = React.useState(10);
-      const [dex, setDex] = React.useState(10);
-      const [con, setCon] = React.useState(10);
-      const [intVal, setIntVal] = React.useState(10);
-      const [wis, setWis] = React.useState(10);
-      const [cha, setCha] = React.useState(10);
+    function StatsSection() {
+      const [statRows, setStatRows] = React.useState([
+        {
+          id: 1,
+          label: "Character #1",
+          str: 10,
+          dex: 10,
+          con: 10,
+          int: 10,
+          wis: 10,
+          cha: 10,
+        },
+      ]);
 
-      // Helper to clamp 6–20
+      // We'll increment row IDs each time we add a row
+      const [nextId, setNextId] = React.useState(2);
+
+      function addStatRow() {
+        setStatRows((prev) => [
+          ...prev,
+          {
+            id: nextId,
+            label: `Character #${nextId}`,
+            str: 10,
+            dex: 10,
+            con: 10,
+            int: 10,
+            wis: 10,
+            cha: 10,
+          },
+        ]);
+        setNextId((n) => n + 1);
+      }
+
+      function removeStatRow(rowId) {
+        setStatRows((prev) => prev.filter((row) => row.id !== rowId));
+      }
+
+      // Update a single row
+      function updateStatRow(rowId, updated) {
+        setStatRows((prev) =>
+          prev.map((row) => (row.id === rowId ? updated : row))
+        );
+      }
+
+      // Clamps 6–20
       function clampScore(val) {
         if (val < 6) return 6;
         if (val > 20) return 20;
         return val;
       }
 
-      // Common formula: modifier = floor((score - 10)/2)
+      // Compute the D&D modifier, e.g. (score - 10)/2 floored
       function computeMod(score) {
         const mod = Math.floor((score - 10) / 2);
-        // If mod >= 0, show a plus sign
         return mod >= 0 ? `+${mod}` : `${mod}`;
       }
 
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
-          <h2 className="text-xl font-bold mb-4">Stat Calculator</h2>
-          <p className="text-sm text-gray-700 mb-2">
-            Enter scores (6–20) to see modifiers. The average is 10/11, with lower 
-            meaning a penalty and higher meaning a bonus.
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {/* STR */}
-            <div className="flex flex-col">
-              <label className="font-semibold">STR</label>
-              <input
-                type="number"
-                min="6"
-                max="20"
-                className="border p-1 rounded"
-                value={str}
-                onChange={(e) => {
-                  const num = clampScore(parseInt(e.target.value) || 10);
-                  setStr(num);
-                }}
-              />
-              <span className="text-center text-blue-600 mt-1">
-                Mod: {computeMod(str)}
-              </span>
-            </div>
-            {/* DEX */}
-            <div className="flex flex-col">
-              <label className="font-semibold">DEX</label>
-              <input
-                type="number"
-                min="6"
-                max="20"
-                className="border p-1 rounded"
-                value={dex}
-                onChange={(e) => {
-                  const num = clampScore(parseInt(e.target.value) || 10);
-                  setDex(num);
-                }}
-              />
-              <span className="text-center text-blue-600 mt-1">
-                Mod: {computeMod(dex)}
-              </span>
-            </div>
-            {/* CON */}
-            <div className="flex flex-col">
-              <label className="font-semibold">CON</label>
-              <input
-                type="number"
-                min="6"
-                max="20"
-                className="border p-1 rounded"
-                value={con}
-                onChange={(e) => {
-                  const num = clampScore(parseInt(e.target.value) || 10);
-                  setCon(num);
-                }}
-              />
-              <span className="text-center text-blue-600 mt-1">
-                Mod: {computeMod(con)}
-              </span>
-            </div>
-            {/* INT */}
-            <div className="flex flex-col">
-              <label className="font-semibold">INT</label>
-              <input
-                type="number"
-                min="6"
-                max="20"
-                className="border p-1 rounded"
-                value={intVal}
-                onChange={(e) => {
-                  const num = clampScore(parseInt(e.target.value) || 10);
-                  setIntVal(num);
-                }}
-              />
-              <span className="text-center text-blue-600 mt-1">
-                Mod: {computeMod(intVal)}
-              </span>
-            </div>
-            {/* WIS */}
-            <div className="flex flex-col">
-              <label className="font-semibold">WIS</label>
-              <input
-                type="number"
-                min="6"
-                max="20"
-                className="border p-1 rounded"
-                value={wis}
-                onChange={(e) => {
-                  const num = clampScore(parseInt(e.target.value) || 10);
-                  setWis(num);
-                }}
-              />
-              <span className="text-center text-blue-600 mt-1">
-                Mod: {computeMod(wis)}
-              </span>
-            </div>
-            {/* CHA */}
-            <div className="flex flex-col">
-              <label className="font-semibold">CHA</label>
-              <input
-                type="number"
-                min="6"
-                max="20"
-                className="border p-1 rounded"
-                value={cha}
-                onChange={(e) => {
-                  const num = clampScore(parseInt(e.target.value) || 10);
-                  setCha(num);
-                }}
-              />
-              <span className="text-center text-blue-600 mt-1">
-                Mod: {computeMod(cha)}
-              </span>
-            </div>
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-xl font-bold">Stat Calculator</h2>
+            <button
+              className="px-2 py-1 bg-blue-500 text-white rounded"
+              onClick={addStatRow}
+            >
+              Add Stat Row
+            </button>
           </div>
+          <p className="text-sm text-gray-700 mb-4">
+            Enter scores (6–20) to see modifiers. The average is 10/11, with lower 
+            meaning a penalty and higher meaning a bonus. Each row can represent 
+            a character's stats.
+          </p>
+
+          {statRows.map((row) => {
+            // We'll define a sub-render for each row
+            const modSTR = computeMod(row.str);
+            const modDEX = computeMod(row.dex);
+            const modCON = computeMod(row.con);
+            const modINT = computeMod(row.int);
+            const modWIS = computeMod(row.wis);
+            const modCHA = computeMod(row.cha);
+
+            return (
+              <div
+                key={row.id}
+                className="bg-white p-4 rounded shadow mb-4 space-y-2"
+              >
+                <div className="flex justify-between items-center">
+                  <input
+                    className="border rounded p-1 text-sm"
+                    value={row.label}
+                    onChange={(e) =>
+                      updateStatRow(row.id, { ...row, label: e.target.value })
+                    }
+                  />
+                  <button
+                    className="px-2 py-1 bg-red-500 text-white rounded text-sm"
+                    onClick={() => removeStatRow(row.id)}
+                  >
+                    Remove Row
+                  </button>
+                </div>
+                {/* Stats Grid */}
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2">
+                  {/* STR */}
+                  <div className="flex flex-col">
+                    <label className="font-semibold">STR</label>
+                    <input
+                      type="number"
+                      className="border p-1 rounded"
+                      value={row.str}
+                      onChange={(e) => {
+                        const val = clampScore(parseInt(e.target.value) || 10);
+                        updateStatRow(row.id, { ...row, str: val });
+                      }}
+                    />
+                    <span className="text-center text-blue-600 mt-1">
+                      {modSTR}
+                    </span>
+                  </div>
+                  {/* DEX */}
+                  <div className="flex flex-col">
+                    <label className="font-semibold">DEX</label>
+                    <input
+                      type="number"
+                      className="border p-1 rounded"
+                      value={row.dex}
+                      onChange={(e) => {
+                        const val = clampScore(parseInt(e.target.value) || 10);
+                        updateStatRow(row.id, { ...row, dex: val });
+                      }}
+                    />
+                    <span className="text-center text-blue-600 mt-1">
+                      {modDEX}
+                    </span>
+                  </div>
+                  {/* CON */}
+                  <div className="flex flex-col">
+                    <label className="font-semibold">CON</label>
+                    <input
+                      type="number"
+                      className="border p-1 rounded"
+                      value={row.con}
+                      onChange={(e) => {
+                        const val = clampScore(parseInt(e.target.value) || 10);
+                        updateStatRow(row.id, { ...row, con: val });
+                      }}
+                    />
+                    <span className="text-center text-blue-600 mt-1">
+                      {modCON}
+                    </span>
+                  </div>
+                  {/* INT */}
+                  <div className="flex flex-col">
+                    <label className="font-semibold">INT</label>
+                    <input
+                      type="number"
+                      className="border p-1 rounded"
+                      value={row.int}
+                      onChange={(e) => {
+                        const val = clampScore(parseInt(e.target.value) || 10);
+                        updateStatRow(row.id, { ...row, int: val });
+                      }}
+                    />
+                    <span className="text-center text-blue-600 mt-1">
+                      {modINT}
+                    </span>
+                  </div>
+                  {/* WIS */}
+                  <div className="flex flex-col">
+                    <label className="font-semibold">WIS</label>
+                    <input
+                      type="number"
+                      className="border p-1 rounded"
+                      value={row.wis}
+                      onChange={(e) => {
+                        const val = clampScore(parseInt(e.target.value) || 10);
+                        updateStatRow(row.id, { ...row, wis: val });
+                      }}
+                    />
+                    <span className="text-center text-blue-600 mt-1">
+                      {modWIS}
+                    </span>
+                  </div>
+                  {/* CHA */}
+                  <div className="flex flex-col">
+                    <label className="font-semibold">CHA</label>
+                    <input
+                      type="number"
+                      className="border p-1 rounded"
+                      value={row.cha}
+                      onChange={(e) => {
+                        const val = clampScore(parseInt(e.target.value) || 10);
+                        updateStatRow(row.id, { ...row, cha: val });
+                      }}
+                    />
+                    <span className="text-center text-blue-600 mt-1">
+                      {modCHA}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       );
     }
 
     /*************************************************************
-     * Main DnDTracker - holds characters & enemies in state
-     * - Renders CharacterCard for each party member
-     * - Renders a StatCalculator between characters and enemies
-     * - Manages Add/Remove logic for characters/enemies
+     * Main DnDTracker - holds characters & enemies in state,
+     * plus the multi-row StatsSection in the middle
      *************************************************************/
     function DnDTracker() {
       // Party Characters
@@ -701,8 +761,8 @@
               </div>
             </div>
 
-            {/* Stat Calculator Section */}
-            <StatCalculator />
+            {/* Multi-Row Stat Section */}
+            <StatsSection />
 
             {/* Enemy Section */}
             <div className="bg-gray-100 p-4 rounded-lg">
@@ -789,7 +849,7 @@
       );
     }
 
-    // Render into #root
+    // Render everything into #root
     ReactDOM.render(<DnDTracker />, document.getElementById("root"));
   </script>
 </body>
