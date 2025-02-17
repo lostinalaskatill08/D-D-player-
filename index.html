@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="mobile-web-app-capable" content="yes" />
   
-  <!-- Tailwind CSS from CDN (fine for demos, not for production) -->
+  <!-- Tailwind CSS from CDN (fine for demos, not recommended for production) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- React + ReactDOM (Development versions) -->
+  <!-- React + ReactDOM (Development builds) -->
   <script
     src="https://unpkg.com/react@17/umd/react.development.js"
     crossorigin
@@ -19,14 +19,25 @@
     crossorigin
   ></script>
 
-  <!-- Babel to compile JSX in the browser (again, not recommended for production) -->
+  <!-- Babel for inline JSX (again, not for production) -->
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 </head>
 <body class="bg-gray-50 text-gray-800">
   <div id="root" class="p-4"></div>
 
   <script type="text/babel">
-    // CharacterCard handles all local text states to avoid losing focus on each keystroke
+    /*************************************************************
+     * 1) CharacterCard component                                *
+     * 2) StatCalculator component                               *
+     * 3) Main DnDTracker component (manages Characters/Enemies) *
+     *************************************************************/
+
+    /*************************************************************
+     * CharacterCard - Each party member’s UI
+     * - Local states for editing name, class, maxHealth
+     * - Local states for adding status/effects/items
+     * - Calls parent callbacks to actually update the array
+     *************************************************************/
     function CharacterCard({
       char,
       onUpdateChar,
@@ -34,70 +45,70 @@
       onDamage,
       onRemoveStatus,
       onRemoveEffect,
-      onRemoveItem
+      onRemoveItem,
+      onRemoveChar,
     }) {
-      // Are we editing (name/class/maxHealth), or just viewing?
+      // Toggle for edit mode
       const [isEditing, setIsEditing] = React.useState(false);
 
-      // Local states to store typed input for name/class/maxHealth
+      // Local states for editing name, class, maxHealth
       const [editName, setEditName] = React.useState(char.name);
       const [editClass, setEditClass] = React.useState(char.class);
-      // Store as string so multi-digit typing works
       const [editMaxHealth, setEditMaxHealth] = React.useState(String(char.maxHealth));
 
-      // Local states for new status, effect, and item
+      // Local states for new status/effect/item
       const [newStatus, setNewStatus] = React.useState("");
       const [newEffect, setNewEffect] = React.useState("");
       const [newItem, setNewItem] = React.useState("");
 
-      // If the parent re-renders with a different char, sync up local states
+      // Sync local states if a different character object is passed in from the parent
       React.useEffect(() => {
         setEditName(char.name);
         setEditClass(char.class);
         setEditMaxHealth(String(char.maxHealth));
       }, [char]);
 
-      // Save button in edit mode
-      function handleSave() {
+      // Save changes in edit mode
+      const handleSave = () => {
         const parsedMax = parseInt(editMaxHealth, 10) || 0;
         // Clip health if new max < current health
         const clippedHealth = Math.min(char.health, parsedMax);
 
+        // Send updated object to parent
         onUpdateChar({
           ...char,
           name: editName,
           class: editClass,
           maxHealth: parsedMax,
-          health: clippedHealth
+          health: clippedHealth,
         });
         setIsEditing(false);
-      }
+      };
 
-      // Add a new status
-      function handleAddStatus() {
+      // Add new status
+      const handleAddStatus = () => {
         if (!newStatus.trim()) return;
         const updatedStatus = [...char.status, newStatus.trim()];
         onUpdateChar({ ...char, status: updatedStatus });
         setNewStatus("");
-      }
+      };
 
-      // Add a new effect
-      function handleAddEffect() {
+      // Add new effect
+      const handleAddEffect = () => {
         if (!newEffect.trim()) return;
-        const updatedEff = [...char.effects, newEffect.trim()];
-        onUpdateChar({ ...char, effects: updatedEff });
+        const updatedEffects = [...char.effects, newEffect.trim()];
+        onUpdateChar({ ...char, effects: updatedEffects });
         setNewEffect("");
-      }
+      };
 
-      // Add a new item
-      function handleAddItem() {
+      // Add new item
+      const handleAddItem = () => {
         if (!newItem.trim()) return;
-        const updatedItems = [...char.inventory, newItem.trim()];
-        onUpdateChar({ ...char, inventory: updatedItems });
+        const updatedInventory = [...char.inventory, newItem.trim()];
+        onUpdateChar({ ...char, inventory: updatedInventory });
         setNewItem("");
-      }
+      };
 
-      // Render
       if (isEditing) {
         // Edit Mode
         return (
@@ -130,190 +141,354 @@
               >
                 Save
               </button>
-            </div>
-          </div>
-        );
-      } else {
-        // View Mode
-        return (
-          <div className="bg-white p-4 rounded-lg shadow">
-            {/* Header Row */}
-            <div className="flex justify-between items-center">
-              <h3 className="font-bold">{char.name}</h3>
-              <div className="flex gap-2 items-center">
-                <span className="text-sm text-gray-600">{char.class}</span>
-                <button
-                  className="p-1 text-gray-500 hover:text-gray-700"
-                  onClick={() => setIsEditing(true)}
-                >
-                  [EDIT]
-                </button>
-              </div>
-            </div>
-
-            {/* Health Bar */}
-            <div className="mt-2">
-              <div className="flex items-center gap-2">
-                <span className="text-red-500">❤️</span>
-                <div className="w-full bg-gray-200 rounded-full h-4">
-                  <div
-                    className="bg-red-500 rounded-full h-4"
-                    style={{
-                      width: `${(char.health / char.maxHealth) * 100}%`,
-                    }}
-                  ></div>
-                </div>
-                <span className="text-sm">
-                  {char.health}/{char.maxHealth}
-                </span>
-              </div>
-            </div>
-
-            {/* Status Conditions */}
-            <div className="mt-2">
-              <h4 className="font-semibold text-sm">Status Conditions:</h4>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {char.status.map((stat, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2 py-1 text-sm bg-red-100 text-red-800 rounded-full flex items-center gap-1"
-                  >
-                    [SKULL] {stat}
-                    <button
-                      className="hover:text-red-500"
-                      onClick={() => onRemoveStatus(char.id, idx)}
-                    >
-                      [X]
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-2 mt-1">
-                <input
-                  className="border p-1 rounded text-sm"
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  placeholder="Add status condition"
-                />
-                <button
-                  className="px-2 py-1 bg-red-500 text-white rounded text-sm"
-                  onClick={handleAddStatus}
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-
-            {/* Effects */}
-            <div className="mt-2">
-              <h4 className="font-semibold text-sm">Effects:</h4>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {char.effects.map((eff, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2 py-1 text-sm bg-blue-100 text-blue-800 rounded-full flex items-center gap-1"
-                  >
-                    {eff}
-                    <button
-                      className="hover:text-red-500"
-                      onClick={() => onRemoveEffect(char.id, idx)}
-                    >
-                      [X]
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-2 mt-1">
-                <input
-                  className="border p-1 rounded text-sm"
-                  value={newEffect}
-                  onChange={(e) => setNewEffect(e.target.value)}
-                  placeholder="Add buff/effect"
-                />
-                <button
-                  className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
-                  onClick={handleAddEffect}
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-
-            {/* Inventory */}
-            <div className="mt-2">
-              <h4 className="font-semibold text-sm">Inventory:</h4>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {char.inventory.map((item, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2 py-1 text-sm bg-gray-100 rounded-full flex items-center gap-1"
-                  >
-                    {item}
-                    <button
-                      className="hover:text-red-500"
-                      onClick={() => onRemoveItem(char.id, idx)}
-                    >
-                      [X]
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-2 mt-1">
-                <input
-                  className="border p-1 rounded text-sm"
-                  value={newItem}
-                  onChange={(e) => setNewItem(e.target.value)}
-                  placeholder="New item"
-                />
-                <button
-                  className="px-2 py-1 bg-gray-500 text-white rounded text-sm"
-                  onClick={handleAddItem}
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-
-            {/* Actions: Heal / Damage */}
-            <div className="mt-4 flex gap-2 items-center flex-wrap">
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  className="w-16 border rounded p-1"
-                  placeholder="Heal #"
-                  onChange={(e) => onHeal(char.id, parseInt(e.target.value) || 0)}
-                />
-                <button
-                  className="px-3 py-1 bg-green-500 text-white rounded"
-                  onClick={() => onHeal(char.id, 10)}
-                >
-                  Heal 10
-                </button>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  className="w-16 border rounded p-1"
-                  placeholder="Dmg #"
-                  onChange={(e) => onDamage(char.id, parseInt(e.target.value) || 0)}
-                />
-                <button
-                  className="px-3 py-1 bg-red-500 text-white rounded"
-                  onClick={() => onDamage(char.id, 10)}
-                >
-                  Damage 10
-                </button>
-              </div>
+              <button
+                className="px-2 py-1 bg-gray-400 text-white rounded"
+                onClick={() => setIsEditing(false)}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         );
       }
+
+      // View Mode
+      return (
+        <div className="bg-white p-4 rounded-lg shadow">
+          {/* Header Row */}
+          <div className="flex justify-between items-center">
+            <h3 className="font-bold">{char.name}</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">{char.class}</span>
+              <button
+                className="p-1 text-gray-500 hover:text-gray-700"
+                onClick={() => setIsEditing(true)}
+              >
+                [EDIT]
+              </button>
+              <button
+                className="px-2 py-1 bg-red-500 text-white rounded"
+                onClick={() => onRemoveChar(char.id)}
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+
+          {/* Health Bar */}
+          <div className="mt-2">
+            <div className="flex items-center gap-2">
+              <span className="text-red-500">❤️</span>
+              <div className="w-full bg-gray-200 rounded-full h-4">
+                <div
+                  className="bg-red-500 rounded-full h-4"
+                  style={{
+                    width: `${(char.health / char.maxHealth) * 100}%`,
+                  }}
+                ></div>
+              </div>
+              <span className="text-sm">
+                {char.health}/{char.maxHealth}
+              </span>
+            </div>
+          </div>
+
+          {/* Status Conditions */}
+          <div className="mt-2">
+            <h4 className="font-semibold text-sm">Status Conditions:</h4>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {char.status.map((stat, idx) => (
+                <span
+                  key={idx}
+                  className="px-2 py-1 text-sm bg-red-100 text-red-800 rounded-full flex items-center gap-1"
+                >
+                  [SKULL] {stat}
+                  <button
+                    className="hover:text-red-500"
+                    onClick={() => onRemoveStatus(char.id, idx)}
+                  >
+                    [X]
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2 mt-1">
+              <input
+                className="border p-1 rounded text-sm"
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+                placeholder="Add status condition"
+              />
+              <button
+                className="px-2 py-1 bg-red-500 text-white rounded text-sm"
+                onClick={handleAddStatus}
+              >
+                Add
+              </button>
+            </div>
+          </div>
+
+          {/* Effects */}
+          <div className="mt-2">
+            <h4 className="font-semibold text-sm">Effects:</h4>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {char.effects.map((eff, idx) => (
+                <span
+                  key={idx}
+                  className="px-2 py-1 text-sm bg-blue-100 text-blue-800 rounded-full flex items-center gap-1"
+                >
+                  {eff}
+                  <button
+                    className="hover:text-red-500"
+                    onClick={() => onRemoveEffect(char.id, idx)}
+                  >
+                    [X]
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2 mt-1">
+              <input
+                className="border p-1 rounded text-sm"
+                value={newEffect}
+                onChange={(e) => setNewEffect(e.target.value)}
+                placeholder="Add buff/effect"
+              />
+              <button
+                className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
+                onClick={handleAddEffect}
+              >
+                Add
+              </button>
+            </div>
+          </div>
+
+          {/* Inventory */}
+          <div className="mt-2">
+            <h4 className="font-semibold text-sm">Inventory:</h4>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {char.inventory.map((item, idx) => (
+                <span
+                  key={idx}
+                  className="px-2 py-1 text-sm bg-gray-100 rounded-full flex items-center gap-1"
+                >
+                  {item}
+                  <button
+                    className="hover:text-red-500"
+                    onClick={() => onRemoveItem(char.id, idx)}
+                  >
+                    [X]
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2 mt-1">
+              <input
+                className="border p-1 rounded text-sm"
+                value={newItem}
+                onChange={(e) => setNewItem(e.target.value)}
+                placeholder="New item"
+              />
+              <button
+                className="px-2 py-1 bg-gray-500 text-white rounded text-sm"
+                onClick={handleAddItem}
+              >
+                Add
+              </button>
+            </div>
+          </div>
+
+          {/* Actions: Heal / Damage */}
+          <div className="mt-4 flex gap-2 items-center flex-wrap">
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                className="w-16 border rounded p-1"
+                placeholder="Heal #"
+                onChange={(e) => onHeal(char.id, parseInt(e.target.value) || 0)}
+              />
+              <button
+                className="px-3 py-1 bg-green-500 text-white rounded"
+                onClick={() => onHeal(char.id, 10)}
+              >
+                Heal 10
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                className="w-16 border rounded p-1"
+                placeholder="Dmg #"
+                onChange={(e) => onDamage(char.id, parseInt(e.target.value) || 0)}
+              />
+              <button
+                className="px-3 py-1 bg-red-500 text-white rounded"
+                onClick={() => onDamage(char.id, 10)}
+              >
+                Damage 10
+              </button>
+            </div>
+          </div>
+        </div>
+      );
     }
 
+    /*************************************************************
+     * StatCalculator - a separate section for inputting STR,
+     * DEX, CON, INT, WIS, CHA (6-20) and showing their modifiers
+     *************************************************************/
+    function StatCalculator() {
+      // Each ability score
+      const [str, setStr] = React.useState(10);
+      const [dex, setDex] = React.useState(10);
+      const [con, setCon] = React.useState(10);
+      const [intVal, setIntVal] = React.useState(10);
+      const [wis, setWis] = React.useState(10);
+      const [cha, setCha] = React.useState(10);
+
+      // Helper to clamp 6–20
+      function clampScore(val) {
+        if (val < 6) return 6;
+        if (val > 20) return 20;
+        return val;
+      }
+
+      // Common formula: modifier = floor((score - 10)/2)
+      function computeMod(score) {
+        const mod = Math.floor((score - 10) / 2);
+        // If mod >= 0, show a plus sign
+        return mod >= 0 ? `+${mod}` : `${mod}`;
+      }
+
+      return (
+        <div className="bg-gray-100 p-4 rounded-lg">
+          <h2 className="text-xl font-bold mb-4">Stat Calculator</h2>
+          <p className="text-sm text-gray-700 mb-2">
+            Enter scores (6–20) to see modifiers. The average is 10/11, with lower 
+            meaning a penalty and higher meaning a bonus.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {/* STR */}
+            <div className="flex flex-col">
+              <label className="font-semibold">STR</label>
+              <input
+                type="number"
+                min="6"
+                max="20"
+                className="border p-1 rounded"
+                value={str}
+                onChange={(e) => {
+                  const num = clampScore(parseInt(e.target.value) || 10);
+                  setStr(num);
+                }}
+              />
+              <span className="text-center text-blue-600 mt-1">
+                Mod: {computeMod(str)}
+              </span>
+            </div>
+            {/* DEX */}
+            <div className="flex flex-col">
+              <label className="font-semibold">DEX</label>
+              <input
+                type="number"
+                min="6"
+                max="20"
+                className="border p-1 rounded"
+                value={dex}
+                onChange={(e) => {
+                  const num = clampScore(parseInt(e.target.value) || 10);
+                  setDex(num);
+                }}
+              />
+              <span className="text-center text-blue-600 mt-1">
+                Mod: {computeMod(dex)}
+              </span>
+            </div>
+            {/* CON */}
+            <div className="flex flex-col">
+              <label className="font-semibold">CON</label>
+              <input
+                type="number"
+                min="6"
+                max="20"
+                className="border p-1 rounded"
+                value={con}
+                onChange={(e) => {
+                  const num = clampScore(parseInt(e.target.value) || 10);
+                  setCon(num);
+                }}
+              />
+              <span className="text-center text-blue-600 mt-1">
+                Mod: {computeMod(con)}
+              </span>
+            </div>
+            {/* INT */}
+            <div className="flex flex-col">
+              <label className="font-semibold">INT</label>
+              <input
+                type="number"
+                min="6"
+                max="20"
+                className="border p-1 rounded"
+                value={intVal}
+                onChange={(e) => {
+                  const num = clampScore(parseInt(e.target.value) || 10);
+                  setIntVal(num);
+                }}
+              />
+              <span className="text-center text-blue-600 mt-1">
+                Mod: {computeMod(intVal)}
+              </span>
+            </div>
+            {/* WIS */}
+            <div className="flex flex-col">
+              <label className="font-semibold">WIS</label>
+              <input
+                type="number"
+                min="6"
+                max="20"
+                className="border p-1 rounded"
+                value={wis}
+                onChange={(e) => {
+                  const num = clampScore(parseInt(e.target.value) || 10);
+                  setWis(num);
+                }}
+              />
+              <span className="text-center text-blue-600 mt-1">
+                Mod: {computeMod(wis)}
+              </span>
+            </div>
+            {/* CHA */}
+            <div className="flex flex-col">
+              <label className="font-semibold">CHA</label>
+              <input
+                type="number"
+                min="6"
+                max="20"
+                className="border p-1 rounded"
+                value={cha}
+                onChange={(e) => {
+                  const num = clampScore(parseInt(e.target.value) || 10);
+                  setCha(num);
+                }}
+              />
+              <span className="text-center text-blue-600 mt-1">
+                Mod: {computeMod(cha)}
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /*************************************************************
+     * Main DnDTracker - holds characters & enemies in state
+     * - Renders CharacterCard for each party member
+     * - Renders a StatCalculator between characters and enemies
+     * - Manages Add/Remove logic for characters/enemies
+     *************************************************************/
     function DnDTracker() {
-      // ----------------------------------
-      // Party Characters & Enemies in Parent
-      // ----------------------------------
+      // Party Characters
       const [characters, setCharacters] = React.useState([
         {
           id: 1,
@@ -347,22 +522,45 @@
         },
       ]);
 
+      // Enemies
       const [enemies, setEnemies] = React.useState([]);
 
-      // ----------------------------
-      // Parent Callbacks for Characters
-      // ----------------------------
-      function updateCharacter(updatedChar) {
+      // ------------------------------
+      // Character Functions
+      // ------------------------------
+      function addCharacter() {
+        const newId = Date.now();
+        setCharacters((prev) => [
+          ...prev,
+          {
+            id: newId,
+            name: "New Character",
+            class: "Unassigned",
+            health: 50,
+            maxHealth: 50,
+            effects: [],
+            status: [],
+            inventory: [],
+          },
+        ]);
+      }
+
+      function removeCharacter(charId) {
+        setCharacters((prev) => prev.filter((c) => c.id !== charId));
+      }
+
+      function updateCharacter(updated) {
         setCharacters((prev) =>
-          prev.map((c) => (c.id === updatedChar.id ? updatedChar : c))
+          prev.map((c) => (c.id === updated.id ? updated : c))
         );
       }
 
-      function healCharacter(charId, amt) {
+      function healCharacter(charId, amount) {
+        if (!amount || amount < 0) return;
         setCharacters((prev) =>
           prev.map((c) => {
             if (c.id === charId) {
-              const newHealth = Math.min(c.maxHealth, c.health + amt);
+              const newHealth = Math.min(c.maxHealth, c.health + amount);
               return { ...c, health: newHealth };
             }
             return c;
@@ -370,11 +568,12 @@
         );
       }
 
-      function damageCharacter(charId, amt) {
+      function damageCharacter(charId, amount) {
+        if (!amount || amount < 0) return;
         setCharacters((prev) =>
           prev.map((c) => {
             if (c.id === charId) {
-              const newHealth = Math.max(0, c.health - amt);
+              const newHealth = Math.max(0, c.health - amount);
               return { ...c, health: newHealth };
             }
             return c;
@@ -421,9 +620,9 @@
         );
       }
 
-      // ----------------------------
+      // ------------------------------
       // Enemy Functions
-      // ----------------------------
+      // ------------------------------
       function addEnemy() {
         setEnemies((prev) => [
           ...prev,
@@ -443,43 +642,54 @@
       }
 
       function healEnemy(enemyId, amt) {
+        if (!amt || amt < 0) return;
         setEnemies((prev) =>
-          prev.map((enemy) => {
-            if (enemy.id === enemyId) {
-              const newHealth = Math.min(enemy.maxHealth, enemy.health + amt);
-              return { ...enemy, health: newHealth };
+          prev.map((e) => {
+            if (e.id === enemyId) {
+              const newHealth = Math.min(e.maxHealth, e.health + amt);
+              return { ...e, health: newHealth };
             }
-            return enemy;
+            return e;
           })
         );
       }
 
       function damageEnemy(enemyId, amt) {
+        if (!amt || amt < 0) return;
         setEnemies((prev) =>
-          prev.map((enemy) => {
-            if (enemy.id === enemyId) {
-              const newHealth = Math.max(0, enemy.health - amt);
-              return { ...enemy, health: newHealth };
+          prev.map((e) => {
+            if (e.id === enemyId) {
+              const newHealth = Math.max(0, e.health - amt);
+              return { ...e, health: newHealth };
             }
-            return enemy;
+            return e;
           })
         );
       }
 
-      // ----------------------------
+      // ------------------------------
       // Render
-      // ----------------------------
+      // ------------------------------
       return (
         <div className="container mx-auto p-4">
           <div className="grid gap-4">
             {/* Party Status */}
             <div className="bg-gray-100 p-4 rounded-lg">
-              <h2 className="text-xl font-bold mb-4">Party Status</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Party Status</h2>
+                <button
+                  className="px-3 py-1 bg-green-500 text-white rounded"
+                  onClick={addCharacter}
+                >
+                  Add Character
+                </button>
+              </div>
               <div className="grid gap-4">
                 {characters.map((char) => (
                   <CharacterCard
                     key={char.id}
                     char={char}
+                    onRemoveChar={removeCharacter}
                     onUpdateChar={updateCharacter}
                     onHeal={healCharacter}
                     onDamage={damageCharacter}
@@ -490,6 +700,9 @@
                 ))}
               </div>
             </div>
+
+            {/* Stat Calculator Section */}
+            <StatCalculator />
 
             {/* Enemy Section */}
             <div className="bg-gray-100 p-4 rounded-lg">
@@ -576,6 +789,7 @@
       );
     }
 
+    // Render into #root
     ReactDOM.render(<DnDTracker />, document.getElementById("root"));
   </script>
 </body>
