@@ -5,8 +5,8 @@
   <title>D&D Player Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="mobile-web-app-capable" content="yes" />
-  
-  <!-- Tailwind CSS from CDN (fine for demos, not for production) -->
+
+  <!-- Tailwind CSS from CDN (fine for demos, not recommended for production) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- React + ReactDOM (Development builds) -->
@@ -27,9 +27,9 @@
 
   <script type="text/babel">
     function DnDTracker() {
-      // -------------------------------
-      // State: Characters & Enemies
-      // -------------------------------
+      // ---------------------------
+      // Party Characters
+      // ---------------------------
       const [characters, setCharacters] = React.useState([
         {
           id: 1,
@@ -66,12 +66,24 @@
         },
       ]);
 
+      // ---------------------------
+      // Enemies
+      // ---------------------------
       const [enemies, setEnemies] = React.useState([]);
 
-      // For editing a specific character, store separate "edit" fields so user can type multiple digits
-      const [editingChar, setEditingChar] = React.useState(null);
-      
-      // Quick inputs for applying heal/damage to any character or enemy
+      // ---------------------------
+      // Editing State
+      // ---------------------------
+      // Which character are we editing?
+      const [editingId, setEditingId] = React.useState(null);
+
+      // Temporary fields for name, class, maxHealth
+      // so we can type multiple chars/digits without losing focus
+      const [charName, setCharName] = React.useState("");
+      const [charClass, setCharClass] = React.useState("");
+      const [charMaxHealth, setCharMaxHealth] = React.useState("");
+
+      // Shared numeric inputs for Heal / Damage
       const [damageAmount, setDamageAmount] = React.useState(10);
       const [healAmount, setHealAmount] = React.useState(10);
 
@@ -81,31 +93,30 @@
       const [newItem, setNewItem] = React.useState("");
 
       // ---------------------------------------------
-      // Party Character Functions
+      // Character Editing Functions
       // ---------------------------------------------
       const startEditing = (char) => {
-        // Copy existing character fields into an edit object
-        setEditingChar({
-          id: char.id,
-          editName: char.name,
-          editClass: char.class,
-          editMaxHealth: String(char.maxHealth), // store as a string
-        });
+        setEditingId(char.id);
+        setCharName(char.name);
+        setCharClass(char.class);
+        setCharMaxHealth(String(char.maxHealth)); // store as string for multi-digit editing
       };
 
       const saveCharacter = () => {
-        if (!editingChar) return;
+        if (editingId == null) return;
 
-        const parsedMax = parseInt(editingChar.editMaxHealth, 10) || 0;
-        setCharacters((prev) => 
+        // parse the numeric input
+        const parsedMax = parseInt(charMaxHealth, 10) || 0;
+
+        setCharacters((prev) =>
           prev.map((c) => {
-            if (c.id === editingChar.id) {
-              // If new max < current health, clip health
+            if (c.id === editingId) {
+              // If we lowered maxHealth below current, clip health
               const clippedHealth = Math.min(c.health, parsedMax);
               return {
                 ...c,
-                name: editingChar.editName,
-                class: editingChar.editClass,
+                name: charName,
+                class: charClass,
                 maxHealth: parsedMax,
                 health: clippedHealth,
               };
@@ -114,11 +125,13 @@
           })
         );
 
-        // Clear the edit state
-        setEditingChar(null);
+        // Clear editing
+        setEditingId(null);
       };
 
-      // Adjust health
+      // ---------------------------------------------
+      // Adjust Health (Party)
+      // ---------------------------------------------
       const adjustHealth = (charId, amount) => {
         setCharacters((prev) =>
           prev.map((c) => {
@@ -131,13 +144,15 @@
         );
       };
 
+      // ---------------------------------------------
       // Add/Remove Status
-      const addStatus = (charId, statusText) => {
-        if (!statusText.trim()) return;
+      // ---------------------------------------------
+      const addStatus = (charId, text) => {
+        if (!text.trim()) return;
         setCharacters((prev) =>
           prev.map((c) => {
             if (c.id === charId) {
-              return { ...c, status: [...c.status, statusText] };
+              return { ...c, status: [...c.status, text] };
             }
             return c;
           })
@@ -158,13 +173,15 @@
         );
       };
 
+      // ---------------------------------------------
       // Add/Remove Effects
-      const addEffect = (charId, effectText) => {
-        if (!effectText.trim()) return;
+      // ---------------------------------------------
+      const addEffect = (charId, text) => {
+        if (!text.trim()) return;
         setCharacters((prev) =>
           prev.map((c) => {
             if (c.id === charId) {
-              return { ...c, effects: [...c.effects, effectText] };
+              return { ...c, effects: [...c.effects, text] };
             }
             return c;
           })
@@ -185,7 +202,9 @@
         );
       };
 
+      // ---------------------------------------------
       // Add/Remove Inventory
+      // ---------------------------------------------
       const addInventoryItem = (charId) => {
         if (!newItem.trim()) return;
         setCharacters((prev) =>
@@ -213,19 +232,20 @@
       };
 
       // ---------------------------------------------
-      // Enemy Functions
+      // Enemies
       // ---------------------------------------------
       const addEnemy = () => {
-        const newEnemy = {
-          id: Date.now(),
-          // renamed from "Undead" to "Enemy"
-          name: `Enemy ${enemies.length + 1}`,
-          health: 50,
-          maxHealth: 50,
-          effects: [],
-          status: [],
-        };
-        setEnemies((prev) => [...prev, newEnemy]);
+        setEnemies((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            name: `Enemy ${prev.length + 1}`,
+            health: 50,
+            maxHealth: 50,
+            effects: [],
+            status: [],
+          },
+        ]);
       };
 
       const removeEnemy = (id) => {
@@ -236,7 +256,10 @@
         setEnemies((prev) =>
           prev.map((enemy) => {
             if (enemy.id === enemyId) {
-              const newHealth = Math.min(enemy.maxHealth, Math.max(0, enemy.health + amount));
+              const newHealth = Math.min(
+                enemy.maxHealth,
+                Math.max(0, enemy.health + amount)
+              );
               return { ...enemy, health: newHealth };
             }
             return enemy;
@@ -248,7 +271,7 @@
       // CharacterCard Sub-Component
       // ---------------------------------------------
       const CharacterCard = ({ char }) => {
-        const isEditing = editingChar && editingChar.id === char.id;
+        const isEditing = editingId === char.id;
 
         if (isEditing) {
           return (
@@ -256,18 +279,14 @@
               <div className="flex gap-2">
                 <input
                   className="border p-1 rounded"
-                  value={editingChar.editName}
-                  onChange={(e) =>
-                    setEditingChar({ ...editingChar, editName: e.target.value })
-                  }
+                  value={charName}
+                  onChange={(e) => setCharName(e.target.value)}
                   placeholder="Name"
                 />
                 <input
                   className="border p-1 rounded"
-                  value={editingChar.editClass}
-                  onChange={(e) =>
-                    setEditingChar({ ...editingChar, editClass: e.target.value })
-                  }
+                  value={charClass}
+                  onChange={(e) => setCharClass(e.target.value)}
                   placeholder="Class"
                 />
               </div>
@@ -275,10 +294,8 @@
                 <input
                   type="number"
                   className="border p-1 rounded w-24"
-                  value={editingChar.editMaxHealth}
-                  onChange={(e) =>
-                    setEditingChar({ ...editingChar, editMaxHealth: e.target.value })
-                  }
+                  value={charMaxHealth}
+                  onChange={(e) => setCharMaxHealth(e.target.value)}
                   placeholder="Max Health"
                 />
                 <button
@@ -453,9 +470,7 @@
                   type="number"
                   className="w-16 border rounded p-1"
                   value={damageAmount}
-                  onChange={(e) =>
-                    setDamageAmount(parseInt(e.target.value) || 0)
-                  }
+                  onChange={(e) => setDamageAmount(parseInt(e.target.value) || 0)}
                 />
                 <button
                   className="px-3 py-1 bg-red-500 text-white rounded"
@@ -572,7 +587,7 @@
       );
     }
 
-    // Render the tracker
+    // Render into #root
     ReactDOM.render(<DnDTracker />, document.getElementById("root"));
   </script>
 </body>
