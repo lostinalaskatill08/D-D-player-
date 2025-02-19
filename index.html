@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -220,7 +221,7 @@
                 <div
                   className="bg-red-500 rounded-full h-4"
                   style={{
-                    width: ${(char.health / char.maxHealth) * 100}%,
+                    width: `${(char.health / char.maxHealth) * 100}%`,
                   }}
                 ></div>
               </div>
@@ -574,7 +575,7 @@
                 <div
                   className="bg-red-500 rounded-full h-4"
                   style={{
-                    width: ${(enemy.health / enemy.maxHealth) * 100}%,
+                    width: `${(enemy.health / enemy.maxHealth) * 100}%`,
                   }}
                 ></div>
               </div>
@@ -633,7 +634,7 @@
           ...prev,
           {
             id: nextId,
-            label: Character #${nextId},
+            label: `Character #${nextId}`,
             str: 10,
             dex: 10,
             con: 10,
@@ -663,7 +664,7 @@
 
       function computeMod(score) {
         const mod = Math.floor((score - 10) / 2);
-        return mod >= 0 ? +${mod} : ${mod};
+        return mod >= 0 ? `+${mod}` : `${mod}`;
       }
 
       return (
@@ -819,12 +820,12 @@
 
       function rollD20() {
         const result = Math.floor(Math.random() * 20) + 1;
-        setRoll(Rolled d20 ⇒ ${result});
+        setRoll(`Rolled d20 ⇒ ${result}`);
       }
 
       function rollD10() {
         const result = Math.floor(Math.random() * 10) + 1;
-        setRoll(Rolled d10 ⇒ ${result});
+        setRoll(`Rolled d10 ⇒ ${result}`);
       }
 
       return (
@@ -1064,7 +1065,7 @@
           ...prev,
           {
             id: Date.now(),
-            name: Enemy ${prev.length + 1},
+            name: `Enemy ${prev.length + 1}`,
             health: 50,
             maxHealth: 50,
             effects: [],
