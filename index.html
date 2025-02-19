@@ -28,70 +28,19 @@
 
   <script type="text/babel">
     /************************************************
-     *  ADD THIS COMPONENT: SheetTable
-     *  ---------------------------------
-     *  Fetches data from your Google Sheets Web App
-     *  and displays a table of the rows.
-     ************************************************/
-    function SheetTable() {
-      const [sheetData, setSheetData] = React.useState([]);
-
-      React.useEffect(() => {
-        const url = "https://script.google.com/macros/s/AKfycbzQ8m71L2B06WMsSYE7f7G62201OhOLCU7QWP7brGr_t2S-DRwywHJ-zVIoPI3YS0Ab/exec";
-        (async () => {
-          try {
-            const response = await fetch(url);
-            const data = await response.json();
-            setSheetData(data);
-          } catch (err) {
-            console.error("Error fetching sheet data:", err);
-          }
-        })();
-      }, []);
-
-      return (
-        <div className="bg-gray-100 p-4 rounded-lg">
-          <h2 className="text-xl font-bold mb-2">Live Character Tracker (from Google Sheets)</h2>
-          <table className="min-w-full bg-white">
-            <thead>
-              <tr>
-                <th className="py-2 px-4 border-b">Player Name</th>
-                <th className="py-2 px-4 border-b">Class & Race</th>
-                <th className="py-2 px-4 border-b">HP</th>
-                <th className="py-2 px-4 border-b">AC</th>
-                <th className="py-2 px-4 border-b">Inventory</th>
-                <th className="py-2 px-4 border-b">Conditions</th>
-                <th className="py-2 px-4 border-b">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sheetData.map((row, idx) => (
-                <tr key={idx}>
-                  <td className="py-2 px-4 border-b">{row["Player Name"]}</td>
-                  <td className="py-2 px-4 border-b">{row["Class & Race"]}</td>
-                  <td className="py-2 px-4 border-b">{row["HP"]}</td>
-                  <td className="py-2 px-4 border-b">{row["AC"]}</td>
-                  <td className="py-2 px-4 border-b">{row["Inventory"]}</td>
-                  <td className="py-2 px-4 border-b">{row["Conditions"]}</td>
-                  <td className="py-2 px-4 border-b">{row["Status"]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
-
-
-    /************************************************
-     * The rest is your existing code:
      * 1) CharacterCard Component
      * 2) EnemyCard Component
-     * 3) StatsSection
-     * 4) DiceRoller
-     * 5) Main DnDTracker (with localStorage saving)
+     * 3) StatsSection (Multi-Row Stat Calculator)
+     * 4) DiceRoller (d20, d10)
+     * 5) Main DnDTracker
      ************************************************/
 
+    /* ---------------------------
+       CharacterCard
+       - now has two new sections:
+         "Special Abilities/Moves"
+         "Spells/Magic/Divinity"
+    ---------------------------- */
     function CharacterCard({
       char,
       onUpdateChar,
@@ -104,26 +53,35 @@
       onRemoveSpell,
       onRemoveChar,
     }) {
+      // Toggle for "edit mode" (name/class/maxHealth)
       const [isEditing, setIsEditing] = React.useState(false);
+
+      // Local states for editing name/class/maxHealth
       const [editName, setEditName] = React.useState(char.name);
       const [editClass, setEditClass] = React.useState(char.class);
       const [editMaxHealth, setEditMaxHealth] = React.useState(String(char.maxHealth));
 
+      // Local states for new status/effect/item
       const [newStatus, setNewStatus] = React.useState("");
       const [newEffect, setNewEffect] = React.useState("");
       const [newItem, setNewItem] = React.useState("");
+
+      // **New**: local states for adding special abilities & spells
       const [newAbility, setNewAbility] = React.useState("");
       const [newSpell, setNewSpell] = React.useState("");
 
+      // Heal/Damage input fields
       const [healInput, setHealInput] = React.useState("0");
       const [dmgInput, setDmgInput] = React.useState("0");
 
+      // Sync if parent passes a different character
       React.useEffect(() => {
         setEditName(char.name);
         setEditClass(char.class);
         setEditMaxHealth(String(char.maxHealth));
       }, [char]);
 
+      // Save changes in edit mode
       function handleSave() {
         const parsedMax = parseInt(editMaxHealth, 10) || 0;
         const clippedHealth = Math.min(char.health, parsedMax);
@@ -138,6 +96,7 @@
         setIsEditing(false);
       }
 
+      // Add new status
       function handleAddStatus() {
         if (!newStatus.trim()) return;
         const updated = [...char.status, newStatus.trim()];
@@ -145,6 +104,7 @@
         setNewStatus("");
       }
 
+      // Add new effect
       function handleAddEffect() {
         if (!newEffect.trim()) return;
         const updated = [...char.effects, newEffect.trim()];
@@ -152,6 +112,7 @@
         setNewEffect("");
       }
 
+      // Add new item
       function handleAddItem() {
         if (!newItem.trim()) return;
         const updated = [...char.inventory, newItem.trim()];
@@ -159,6 +120,7 @@
         setNewItem("");
       }
 
+      // New: Add new special ability
       function handleAddAbility() {
         if (!newAbility.trim()) return;
         const updated = [...char.specialAbilities, newAbility.trim()];
@@ -166,6 +128,7 @@
         setNewAbility("");
       }
 
+      // New: Add new spell
       function handleAddSpell() {
         if (!newSpell.trim()) return;
         const updated = [...char.spellsMagic, newSpell.trim()];
@@ -173,6 +136,7 @@
         setNewSpell("");
       }
 
+      // Apply typed heal/damage
       function applyHeal() {
         const amt = parseInt(healInput, 10) || 0;
         onHeal(char.id, amt);
@@ -256,7 +220,7 @@
                 <div
                   className="bg-red-500 rounded-full h-4"
                   style={{
-                    width: `${(char.health / char.maxHealth) * 100}%`,
+                    width: ${(char.health / char.maxHealth) * 100}%,
                   }}
                 ></div>
               </div>
@@ -266,7 +230,7 @@
             </div>
           </div>
 
-          {/* Status */}
+          {/* Status Conditions */}
           <div className="mt-2">
             <h4 className="font-semibold text-sm">Status Conditions:</h4>
             <div className="flex flex-wrap gap-1 mt-1">
@@ -371,7 +335,7 @@
             </div>
           </div>
 
-          {/* Special Abilities */}
+          {/* NEW: Special Abilities */}
           <div className="mt-2">
             <h4 className="font-semibold text-sm">Special Abilities/Moves:</h4>
             <div className="flex flex-wrap gap-1 mt-1">
@@ -406,7 +370,7 @@
             </div>
           </div>
 
-          {/* Spells/Magic */}
+          {/* NEW: Spells/Magic/Divinity */}
           <div className="mt-2">
             <h4 className="font-semibold text-sm">Spells/Magic/Divinity:</h4>
             <div className="flex flex-wrap gap-1 mt-1">
@@ -441,7 +405,7 @@
             </div>
           </div>
 
-          {/* Heal / Damage */}
+          {/* Actions: typed Heal / Damage */}
           <div className="mt-4 flex gap-2 items-center flex-wrap">
             <div className="flex items-center gap-2">
               <input
@@ -478,7 +442,9 @@
       );
     }
 
-
+    /* ---------------------------
+       EnemyCard
+    ---------------------------- */
     function EnemyCard({
       enemy,
       onHealEnemy,
@@ -486,11 +452,15 @@
       onRemoveEnemy,
       onUpdateEnemy,
     }) {
+      // Toggle for editing
       const [isEditing, setIsEditing] = React.useState(false);
+
+      // Local states for name, maxHealth, current health
       const [editName, setEditName] = React.useState(enemy.name);
       const [editMaxHealth, setEditMaxHealth] = React.useState(String(enemy.maxHealth));
       const [editHealth, setEditHealth] = React.useState(String(enemy.health));
 
+      // Heal/dmg inputs
       const [healInput, setHealInput] = React.useState("0");
       const [dmgInput, setDmgInput] = React.useState("0");
 
@@ -576,6 +546,7 @@
         );
       }
 
+      // View Mode
       return (
         <div className="bg-white p-4 rounded-lg shadow">
           <div className="flex justify-between items-center">
@@ -603,7 +574,7 @@
                 <div
                   className="bg-red-500 rounded-full h-4"
                   style={{
-                    width: `${(enemy.health / enemy.maxHealth) * 100}%`,
+                    width: ${(enemy.health / enemy.maxHealth) * 100}%,
                   }}
                 ></div>
               </div>
@@ -612,7 +583,7 @@
               </span>
             </div>
           </div>
-          {/* Heal / Damage */}
+          {/* Heal / Damage with typed amounts */}
           <div className="mt-4 flex gap-2 items-center">
             <div className="flex items-center gap-2">
               <input
@@ -649,7 +620,9 @@
       );
     }
 
-
+    /* ---------------------------
+       StatsSection
+    ---------------------------- */
     function StatsSection({ statRows, setStatRows }) {
       const [nextId, setNextId] = React.useState(
         statRows.length ? Math.max(...statRows.map((r) => r.id)) + 1 : 2
@@ -660,7 +633,7 @@
           ...prev,
           {
             id: nextId,
-            label: `Character #${nextId}`,
+            label: Character #${nextId},
             str: 10,
             dex: 10,
             con: 10,
@@ -690,7 +663,7 @@
 
       function computeMod(score) {
         const mod = Math.floor((score - 10) / 2);
-        return mod >= 0 ? `+${mod}` : `${mod}`;
+        return mod >= 0 ? +${mod} : ${mod};
       }
 
       return (
@@ -838,17 +811,20 @@
       );
     }
 
+    /* ---------------------------
+       DiceRoller
+    ---------------------------- */
     function DiceRoller() {
       const [roll, setRoll] = React.useState(null);
 
       function rollD20() {
         const result = Math.floor(Math.random() * 20) + 1;
-        setRoll(`Rolled d20 ⇒ ${result}`);
+        setRoll(Rolled d20 ⇒ ${result});
       }
 
       function rollD10() {
         const result = Math.floor(Math.random() * 10) + 1;
-        setRoll(`Rolled d10 ⇒ ${result}`);
+        setRoll(Rolled d10 ⇒ ${result});
       }
 
       return (
@@ -873,12 +849,14 @@
       );
     }
 
-    /************************************************
-     * Main DnDTracker:
-     * - Renders Party, Stats, Enemies, DiceRoller
-     * - Now also renders <SheetTable />
-     ************************************************/
+    /* ---------------------------
+       Main DnDTracker
+       - localStorage saving
+       - Characters + new arrays for abilities/spells
+       - Enemies + StatsSection + DiceRoller
+    ---------------------------- */
     function DnDTracker() {
+      // Characters (now with specialAbilities, spellsMagic arrays)
       const [characters, setCharacters] = React.useState([
         {
           id: 1,
@@ -918,8 +896,10 @@
         },
       ]);
 
+      // Enemies
       const [enemies, setEnemies] = React.useState([]);
 
+      // Stat rows
       const [statRows, setStatRows] = React.useState([
         {
           id: 1,
@@ -933,6 +913,7 @@
         },
       ]);
 
+      // Load from localStorage if present
       React.useEffect(() => {
         const saved = localStorage.getItem("dndTrackerData");
         if (saved) {
@@ -943,12 +924,17 @@
         }
       }, []);
 
+      // Save to localStorage whenever characters/enemies/statRows change
       React.useEffect(() => {
-        const payload = { characters, enemies, statRows };
+        const payload = {
+          characters,
+          enemies,
+          statRows,
+        };
         localStorage.setItem("dndTrackerData", JSON.stringify(payload));
       }, [characters, enemies, statRows]);
 
-      // Characters
+      // Character operations
       function addCharacter() {
         const newId = Date.now();
         setCharacters((prev) => [
@@ -973,7 +959,9 @@
       }
 
       function updateCharacter(updated) {
-        setCharacters((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+        setCharacters((prev) =>
+          prev.map((c) => (c.id === updated.id ? updated : c))
+        );
       }
 
       function healCharacter(charId, amount) {
@@ -1002,6 +990,7 @@
         );
       }
 
+      // Remove a single status/effect/item/ability/spell
       function removeStatus(charId, idx) {
         setCharacters((prev) =>
           prev.map((c) => {
@@ -1041,6 +1030,7 @@
         );
       }
 
+      // New: remove special ability
       function removeAbility(charId, idx) {
         setCharacters((prev) =>
           prev.map((c) => {
@@ -1054,6 +1044,7 @@
         );
       }
 
+      // New: remove spell
       function removeSpell(charId, idx) {
         setCharacters((prev) =>
           prev.map((c) => {
@@ -1067,13 +1058,13 @@
         );
       }
 
-      // Enemies
+      // Enemy operations
       function addEnemy() {
         setEnemies((prev) => [
           ...prev,
           {
             id: Date.now(),
-            name: `Enemy ${prev.length + 1}`,
+            name: Enemy ${prev.length + 1},
             health: 50,
             maxHealth: 50,
             effects: [],
@@ -1113,7 +1104,9 @@
       }
 
       function updateEnemy(updated) {
-        setEnemies((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+        setEnemies((prev) =>
+          prev.map((e) => (e.id === updated.id ? updated : e))
+        );
       }
 
       return (
@@ -1149,10 +1142,10 @@
               </div>
             </div>
 
-            {/* Stat Section */}
+            {/* Multi-Row Stat Section */}
             <StatsSection statRows={statRows} setStatRows={setStatRows} />
 
-            {/* Enemies */}
+            {/* Enemy Section */}
             <div className="bg-gray-100 p-4 rounded-lg">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">Enemies</h2>
@@ -1177,11 +1170,8 @@
               </div>
             </div>
 
-            {/* Dice Roller */}
+            {/* Dice Roller at bottom */}
             <DiceRoller />
-
-            {/* 🔥 NEW: Live Data from Google Sheets */}
-            <SheetTable />
           </div>
         </div>
       );
