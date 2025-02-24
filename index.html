@@ -34,7 +34,9 @@
      * 4) DiceRoller (d20, d10, d2, d4, d6, d8, d12, d15)
      * 5) MapSection (Image Upload + Red Dot)
      * 6) PartyImages (Dynamic Character Images)
-     * 7) Main DnDTracker
+     * 7) ClassesSection (NEW: D&D 5e Classes with Links)
+     * 8) RacesSection (NEW: D&D 5e Races with Links)
+     * 9) Main DnDTracker
      ************************************************/
 
     /* ---------------------------
@@ -65,14 +67,12 @@
       const [healInput, setHealInput] = React.useState("0");
       const [dmgInput, setDmgInput] = React.useState("0");
 
-      // Sync if parent passes a different character
       React.useEffect(() => {
         setEditName(char.name);
         setEditClass(char.class);
         setEditMaxHealth(String(char.maxHealth));
       }, [char]);
 
-      // Handle image upload for the character
       function handleImageUpload(event) {
         const file = event.target.files[0];
         if (file) {
@@ -84,7 +84,6 @@
         }
       }
 
-      // Save changes in edit mode
       function handleSave() {
         const parsedMax = parseInt(editMaxHealth, 10) || 0;
         const clippedHealth = Math.min(char.health, parsedMax);
@@ -98,7 +97,6 @@
         setIsEditing(false);
       }
 
-      // Add new status
       function handleAddStatus() {
         if (!newStatus.trim()) return;
         const updated = [...char.status, newStatus.trim()];
@@ -106,7 +104,6 @@
         setNewStatus("");
       }
 
-      // Add new effect
       function handleAddEffect() {
         if (!newEffect.trim()) return;
         const updated = [...char.effects, newEffect.trim()];
@@ -114,7 +111,6 @@
         setNewEffect("");
       }
 
-      // Add new item
       function handleAddItem() {
         if (!newItem.trim()) return;
         const updated = [...char.inventory, newItem.trim()];
@@ -122,7 +118,6 @@
         setNewItem("");
       }
 
-      // Add new special ability
       function handleAddAbility() {
         if (!newAbility.trim()) return;
         const updated = [...char.specialAbilities, newAbility.trim()];
@@ -130,7 +125,6 @@
         setNewAbility("");
       }
 
-      // Add new spell
       function handleAddSpell() {
         if (!newSpell.trim()) return;
         const updated = [...char.spellsMagic, newSpell.trim()];
@@ -138,7 +132,6 @@
         setNewSpell("");
       }
 
-      // Apply typed heal/damage
       function applyHeal() {
         const amt = parseInt(healInput, 10) || 0;
         onHeal(char.id, amt);
@@ -150,7 +143,6 @@
       }
 
       if (isEditing) {
-        // Edit Mode
         return (
           <div className="bg-white p-4 rounded-lg shadow space-y-2">
             <div className="flex gap-2">
@@ -192,7 +184,6 @@
         );
       }
 
-      // View Mode
       return (
         <div className="bg-white p-4 rounded-lg shadow">
           <div className="flex justify-between items-center">
@@ -214,7 +205,6 @@
             </div>
           </div>
 
-          {/* Character Image Upload and Display */}
           <div className="mt-2">
             <label className="block text-sm font-medium text-gray-700">Character Image</label>
             {char.image ? (
@@ -237,7 +227,6 @@
             )}
           </div>
 
-          {/* Health Bar */}
           <div className="mt-2">
             <div className="flex items-center gap-2">
               <span className="text-red-500">❤️</span>
@@ -255,7 +244,6 @@
             </div>
           </div>
 
-          {/* Status Conditions */}
           <div className="mt-2">
             <h4 className="font-semibold text-sm">Status Conditions:</h4>
             <div className="flex flex-wrap gap-1 mt-1">
@@ -290,7 +278,6 @@
             </div>
           </div>
 
-          {/* Effects */}
           <div className="mt-2">
             <h4 className="font-semibold text-sm">Effects:</h4>
             <div className="flex flex-wrap gap-1 mt-1">
@@ -325,7 +312,6 @@
             </div>
           </div>
 
-          {/* Inventory */}
           <div className="mt-2">
             <h4 className="font-semibold text-sm">Inventory:</h4>
             <div className="flex flex-wrap gap-1 mt-1">
@@ -360,7 +346,6 @@
             </div>
           </div>
 
-          {/* Special Abilities */}
           <div className="mt-2">
             <h4 className="font-semibold text-sm">Special Abilities/Moves:</h4>
             <div className="flex flex-wrap gap-1 mt-1">
@@ -395,7 +380,6 @@
             </div>
           </div>
 
-          {/* Spells/Magic/Divinity */}
           <div className="mt-2">
             <h4 className="font-semibold text-sm">Spells/Magic/Divinity:</h4>
             <div className="flex flex-wrap gap-1 mt-1">
@@ -430,7 +414,6 @@
             </div>
           </div>
 
-          {/* Actions: typed Heal / Damage */}
           <div className="mt-4 flex gap-2 items-center flex-wrap">
             <div className="flex items-center gap-2">
               <input
@@ -584,7 +567,6 @@
               </button>
             </div>
           </div>
-          {/* Health Bar */}
           <div className="mt-2">
             <div className="flex items-center gap-2">
               <span className="text-red-500">❤️</span>
@@ -601,7 +583,6 @@
               </span>
             </div>
           </div>
-          {/* Heal / Damage with typed amounts */}
           <div className="mt-4 flex gap-2 items-center">
             <div className="flex items-center gap-2">
               <input
@@ -725,7 +706,6 @@
                   </button>
                 </div>
                 <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2">
-                  {/* STR */}
                   <div className="flex flex-col">
                     <label className="font-semibold">STR</label>
                     <input
@@ -741,7 +721,6 @@
                       {modSTR}
                     </span>
                   </div>
-                  {/* DEX */}
                   <div className="flex flex-col">
                     <label className="font-semibold">DEX</label>
                     <input
@@ -757,7 +736,6 @@
                       {modDEX}
                     </span>
                   </div>
-                  {/* CON */}
                   <div className="flex flex-col">
                     <label className="font-semibold">CON</label>
                     <input
@@ -773,7 +751,6 @@
                       {modCON}
                     </span>
                   </div>
-                  {/* INT */}
                   <div className="flex flex-col">
                     <label className="font-semibold">INT</label>
                     <input
@@ -789,7 +766,6 @@
                       {modINT}
                     </span>
                   </div>
-                  {/* WIS */}
                   <div className="flex flex-col">
                     <label className="font-semibold">WIS</label>
                     <input
@@ -805,7 +781,6 @@
                       {modWIS}
                     </span>
                   </div>
-                  {/* CHA */}
                   <div className="flex flex-col">
                     <label className="font-semibold">CHA</label>
                     <input
@@ -846,52 +821,28 @@
           <h2 className="text-xl font-bold mb-2">Dice Roller</h2>
           <p className="mb-2">{roll === null ? "No roll yet" : roll}</p>
           <div className="flex gap-2">
-            <button
-              onClick={() => rollD(2)}
-              className="px-3 py-1 bg-blue-500 text-white rounded"
-            >
+            <button onClick={() => rollD(2)} className="px-3 py-1 bg-blue-500 text-white rounded">
               Roll d2
             </button>
-            <button
-              onClick={() => rollD(4)}
-              className="px-3 py-1 bg-blue-500 text-white rounded"
-            >
+            <button onClick={() => rollD(4)} className="px-3 py-1 bg-blue-500 text-white rounded">
               Roll d4
             </button>
-            <button
-              onClick={() => rollD(6)}
-              className="px-3 py-1 bg-blue-500 text-white rounded"
-            >
+            <button onClick={() => rollD(6)} className="px-3 py-1 bg-blue-500 text-white rounded">
               Roll d6
             </button>
-            <button
-              onClick={() => rollD(8)}
-              className="px-3 py-1 bg-blue-500 text-white rounded"
-            >
+            <button onClick={() => rollD(8)} className="px-3 py-1 bg-blue-500 text-white rounded">
               Roll d8
             </button>
-            <button
-              onClick={() => rollD(10)}
-              className="px-3 py-1 bg-blue-500 text-white rounded"
-            >
+            <button onClick={() => rollD(10)} className="px-3 py-1 bg-blue-500 text-white rounded">
               Roll d10
             </button>
-            <button
-              onClick={() => rollD(12)}
-              className="px-3 py-1 bg-blue-500 text-white rounded"
-            >
+            <button onClick={() => rollD(12)} className="px-3 py-1 bg-blue-500 text-white rounded">
               Roll d12
             </button>
-            <button
-              onClick={() => rollD(15)}
-              className="px-3 py-1 bg-blue-500 text-white rounded"
-            >
+            <button onClick={() => rollD(15)} className="px-3 py-1 bg-blue-500 text-white rounded">
               Roll d15
             </button>
-            <button
-              onClick={() => rollD(20)}
-              className="px-3 py-1 bg-blue-500 text-white rounded"
-            >
+            <button onClick={() => rollD(20)} className="px-3 py-1 bg-blue-500 text-white rounded">
               Roll d20
             </button>
           </div>
@@ -907,20 +858,18 @@
       const [isDragging, setIsDragging] = React.useState(false);
       const containerRef = React.useRef(null);
 
-      // Handle image upload
       const handleImageUpload = (event) => {
         const file = event.target.files[0];
         if (file) {
           const reader = new FileReader();
           reader.onload = (e) => {
             setMapImage(e.target.result);
-            setDotPosition({ x: 50, y: 50 }); // Default to center
+            setDotPosition({ x: 50, y: 50 });
           };
           reader.readAsDataURL(file);
         }
       };
 
-      // Handle dot movement
       const handleMouseDown = (e) => {
         setIsDragging(true);
         moveDot(e);
@@ -1005,8 +954,145 @@
     }
 
     /* ---------------------------
+       NEW: ClassesSection
+       - Lists D&D 5e classes with links to RPGBot guides
+    ---------------------------- */
+    function ClassesSection() {
+      const classes = [
+        { name: "Artificer", url: "https://rpgbot.net/dnd5/characters/artificer/" },
+        { name: "Barbarian", url: "https://rpgbot.net/dnd5/characters/barbarian/" },
+        { name: "Bard", url: "https://rpgbot.net/dnd5/characters/bard/" },
+        { name: "Cleric", url: "https://rpgbot.net/dnd5/characters/cleric/" },
+        { name: "Druid", url: "https://rpgbot.net/dnd5/characters/druid/" },
+        { name: "Fighter", url: "https://rpgbot.net/dnd5/characters/fighter/" },
+        { name: "Monk", url: "https://rpgbot.net/dnd5/characters/monk/" },
+        { name: "Paladin", url: "https://rpgbot.net/dnd5/characters/paladin/" },
+        { name: "Ranger", url: "https://rpgbot.net/dnd5/characters/ranger/" },
+        { name: "Rogue", url: "https://rpgbot.net/dnd5/characters/rogue/" },
+        { name: "Sorcerer", url: "https://rpgbot.net/dnd5/characters/sorcerer/" },
+        { name: "Warlock", url: "https://rpgbot.net/dnd5/characters/warlock/" },
+        { name: "Wizard", url: "https://rpgbot.net/dnd5/characters/wizard/" },
+      ];
+
+      return (
+        <div className="bg-gray-100 p-4 rounded-lg">
+          <h2 className="text-xl font-bold mb-2">D&D 5th Edition Classes</h2>
+          <p className="mb-2">
+            Source:{" "}
+            <a
+              href="https://rpgbot.net/dnd5/characters/classes/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              RPGBot Classes
+            </a>
+          </p>
+          <ul className="list-disc list-inside">
+            {classes.map((cls) => (
+              <li key={cls.name}>
+                <a
+                  href={cls.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-500 hover:underline"
+                >
+                  {cls.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+
+    /* ---------------------------
+       NEW: RacesSection
+       - Lists D&D 5e races with descriptions and a link to RPGBot
+    ---------------------------- */
+    function RacesSection() {
+      const races = [
+        { name: "Aarakocra", desc: "Bird-like humanoids with the ability to fly and sharp talons, often living in high-altitude environments." },
+        { name: "Aasimar", desc: "Celestial-touched beings with divine power, resistant to necrotic and radiant damage, and capable of radiant transformations." },
+        { name: "Autognome", desc: "Small robotic beings from Spelljammer, resilient with built-in mechanical advantages." },
+        { name: "Bugbear", desc: "Large goblinoid ambush predators with extended reach and powerful surprise attacks." },
+        { name: "Centaur", desc: "Half-human, half-horse creatures with natural speed and melee combat prowess." },
+        { name: "Changeling", desc: "Shapeshifters who can alter their appearance at will, making them excellent spies and social manipulators." },
+        { name: "Custom Lineage", desc: "A flexible non-race option that allows custom origins, granting a feat and bonus abilities." },
+        { name: "Dhampir", desc: "Half-vampires with supernatural abilities such as wall-climbing and life-draining bites." },
+        { name: "Dragonborn", desc: "Draconic humanoids with breath weapons and elemental resistances based on their draconic ancestry." },
+        { name: "Dwarf", desc: "Stocky, resilient warriors and craftsmen known for their endurance, resistance to poison, and expertise in mining." },
+        { name: "Elf", desc: "Graceful, long-lived humanoids with various subraces offering magical abilities and keen perception." },
+        { name: "Fairy", desc: "Tiny winged beings with natural flight and innate spellcasting abilities." },
+        { name: "Firbolg", desc: "Gentle giant-kin with druidic abilities, including limited invisibility and plant communication." },
+        { name: "Genasi", desc: "Elemental humanoids influenced by air, earth, fire, or water, each with unique traits and spell-like abilities." },
+        { name: "Giff", desc: "Large, gun-wielding hippo-like humanoids from Spelljammer with strength-based combat prowess." },
+        { name: "Gith", desc: "Psionic humanoids split into Githyanki (warriors and conquerors) and Githzerai (monks and mystics)." },
+        { name: "Gnome", desc: "Small, inventive, and magically inclined humanoids with innate resistance to mind-affecting magic." },
+        { name: "Goblin", desc: "Small, quick, and cunning humanoids with mobility-focused traits and the ability to disengage easily." },
+        { name: "Goliath", desc: "Towering mountain-dwellers with natural endurance and damage-reducing abilities." },
+        { name: "Hadozee", desc: "Gliding, monkey-like humanoids from Spelljammer with prehensile feet." },
+        { name: "Half-Elf", desc: "A mix of humans and elves, gaining benefits from both, including adaptability and social skills." },
+        { name: "Half-Orc", desc: "Fierce warriors with relentless endurance and the ability to deal devastating critical strikes." },
+        { name: "Halfling", desc: "Small, lucky humanoids known for their nimbleness and ability to reroll natural 1s on d20 rolls." },
+        { name: "Harengon", desc: "Rabbit-like humanoids with enhanced reflexes and exceptional mobility." },
+        { name: "Hexblood", desc: "Individuals influenced by hags, gaining minor divination and disguise-based magic." },
+        { name: "Hobgoblin", desc: "Military-minded goblinoids with teamwork-based abilities and martial discipline." },
+        { name: "Human", desc: "Versatile and adaptable, with a variant option allowing for a feat at level 1." },
+        { name: "Kalashtar", desc: "Psychic beings connected to the plane of dreams, resistant to psychic damage and skilled in telepathy." },
+        { name: "Kender", desc: "Mischievous, fear-resistant humanoids from Krynn (Dragonlance) with a knack for acquiring random objects." },
+        { name: "Kenku", desc: "Crow-like humanoids that can perfectly mimic sounds, making them excellent spies and thieves." },
+        { name: "Kobold", desc: "Small draconic humanoids, often working in groups, with a variety of combat-focused abilities." },
+        { name: "Leonin", desc: "Lion-like humanoids with powerful roars and natural combat prowess." },
+        { name: "Lizardfolk", desc: "Cold-blooded reptilian humanoids with durable scales, natural weapons, and an ability to craft from slain foes." },
+        { name: "Loxodon", desc: "Elephant-like humanoids with tough skin, a powerful trunk, and a calm, meditative nature." },
+        { name: "Minotaur", desc: "Large, bull-headed warriors built for charging into battle with deadly efficiency." },
+        { name: "Orc", desc: "Powerful and resilient warriors with a drive for battle and an ability to endure massive damage." },
+        { name: "Owlin", desc: "Owl-like humanoids with natural flight and silent movement, making them great scouts." },
+        { name: "Plasmoid", desc: "Ooze-like beings with amorphous bodies, able to squeeze through tight spaces and extend pseudopods." },
+        { name: "Reborn", desc: "Undead or resurrected beings with fragmented memories and resistance to disease and poison." },
+        { name: "Satyr", desc: "Goat-like humanoids with magical resistance and an affinity for revelry and adventure." },
+        { name: "Shifter", desc: "Werebeast-like humanoids that can temporarily transform into more animalistic forms." },
+        { name: "Simic Hybrid", desc: "Magically altered humanoids with animal-like features and customizable traits." },
+        { name: "Tabaxi", desc: "Cat-like humanoids with keen senses, exceptional speed, and curiosity-driven instincts." },
+        { name: "Thri-Kreen", desc: "Four-armed, mantis-like humanoids with natural armor and telepathic communication." },
+        { name: "Tiefling", desc: "Fiend-touched humanoids with infernal resistances, innate magic, and an affinity for dark powers." },
+        { name: "Tortle", desc: "Turtle-like humanoids with natural armor and a laid-back but sturdy nature." },
+        { name: "Triton", desc: "Amphibious ocean-dwellers with command over sea creatures and innate water-based magic." },
+        { name: "Vedalken", desc: "Intellectual, blue-skinned humanoids with heightened mental resistance and a focus on logic." },
+        { name: "Verdan", desc: "Green-skinned, magically mutating humanoids that change in size as they age." },
+        { name: "Warforged", desc: "Living constructs built for durability and adaptability, making them excellent warriors or spellcasters." },
+        { name: "Yuan-Ti", desc: "Snake-like humanoids with resistance to poison and magic, often linked to dark deities." },
+      ];
+
+      return (
+        <div className="bg-gray-100 p-4 rounded-lg">
+          <h2 className="text-xl font-bold mb-2">D&D 5th Edition Races</h2>
+          <p className="mb-2">
+            Source:{" "}
+            <a
+              href="https://rpgbot.net/dnd5/characters/races/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              RPGBot Races
+            </a>
+          </p>
+          <ul className="list-disc list-inside space-y-1">
+            {races.map((race) => (
+              <li key={race.name}>
+                <span className="font-semibold">{race.name}</span>: {race.desc}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+
+    /* ---------------------------
        Main DnDTracker
-       - Includes all sections with restored map and dynamic images
+       - Includes all sections with new classes and races sections
     ---------------------------- */
     function DnDTracker() {
       const [characters, setCharacters] = React.useState(() => {
@@ -1065,7 +1151,6 @@
         localStorage.setItem("dotPosition", JSON.stringify(dotPosition));
       }, [mapImage, dotPosition]);
 
-      // Character operations
       function addCharacter() {
         const newId = Date.now();
         setCharacters((prev) => [
@@ -1171,7 +1256,6 @@
         );
       }
 
-      // Enemy operations
       function addEnemy() {
         setEnemies((prev) => [
           ...prev,
@@ -1278,6 +1362,12 @@
 
             {/* Dice Roller */}
             <DiceRoller />
+
+            {/* NEW: Classes Section */}
+            <ClassesSection />
+
+            {/* NEW: Races Section */}
+            <RacesSection />
           </div>
         </div>
       );
