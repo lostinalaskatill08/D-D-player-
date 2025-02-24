@@ -37,7 +37,8 @@
      * 7) ClassesSection (Updated: D&D 5e Classes with New Descriptions)
      * 8) RacesSection (D&D 5e Races with Links)
      * 9) CopyButton (NEW: Copies Character and Enemy Data)
-     * 10) Main DnDTracker
+     * 10) MonsterCreatureList (NEW: Links to Monster Database)
+     * 11) Main DnDTracker
      ************************************************/
 
     /* ---------------------------
@@ -1156,8 +1157,34 @@ Health: ${enemy.health}/${enemy.maxHealth}
     }
 
     /* ---------------------------
+       MonsterCreatureList
+       - Links to monster database for easy reference
+    ---------------------------- */
+    function MonsterCreatureList() {
+      return (
+        <div className="bg-gray-100 p-4 rounded-lg">
+          <h2 className="text-xl font-bold mb-2">Monster/Creature List</h2>
+          <p className="mb-2">
+            Access a comprehensive database of D&D monsters and creatures at:
+          </p>
+          <a
+            href="https://www.aidedd.org/dnd-filters/monsters.php"
+            target="_blank"
+            rel="noreferrer"
+            className="text-blue-500 hover:underline"
+          >
+            AIDEDD Monster Database
+          </a>
+          <p className="mt-2 text-sm text-gray-700">
+            Use this resource to find detailed stats and information for monsters in your campaign.
+          </p>
+        </div>
+      );
+    }
+
+    /* ---------------------------
        Main DnDTracker
-       - Includes all sections with new copy button
+       - Includes all sections with new copy button and monster list
     ---------------------------- */
     function DnDTracker() {
       const [characters, setCharacters] = React.useState(() => {
@@ -1436,6 +1463,9 @@ Health: ${enemy.health}/${enemy.maxHealth}
 
             {/* Races Section */}
             <RacesSection />
+
+            {/* Monster/Creature List Section */}
+            <MonsterCreatureList />
           </div>
         </div>
       );
