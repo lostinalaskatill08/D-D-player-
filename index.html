@@ -5,7 +5,6 @@
   <title>D&D Player Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="icon" type="image/x-icon" href="favicon.ico" /> <!-- Basic favicon to prevent 404 -->
 
   <!-- Tailwind CSS (CDN, for demos) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,9 +36,8 @@
      * 6) PartyImages (Dynamic Character Images)
      * 7) ClassesSection (Updated: D&D 5e Classes with New Descriptions)
      * 8) RacesSection (D&D 5e Races with Links)
-     * 9) CopyButton (Copies Character and Enemy Data)
-     * 10) MonsterCreatureList (NEW: Monster/Creature List as Text)
-     * 11) Main DnDTracker
+     * 9) CopyButton (NEW: Copies Character and Enemy Data)
+     * 10) Main DnDTracker
      ************************************************/
 
     /* ---------------------------
@@ -985,7 +983,7 @@
 
     /* ---------------------------
        NEW: CopyButton
-       - Copies character, enemy, and monster/creature data to clipboard in text format
+       - Copies character and enemy data to clipboard in text format
     ---------------------------- */
     function CopyButton({ characters, enemies }) {
       const handleCopy = () => {
@@ -1010,7 +1008,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
         ].join("\n\n");
 
         navigator.clipboard.writeText(text).then(() => {
-          alert("Character, enemy, and monster/creature data copied to clipboard!");
+          alert("Character and enemy data copied to clipboard!");
         }).catch((err) => {
           console.error("Failed to copy text: ", err);
           alert("Failed to copy data. Check console for details.");
@@ -1158,87 +1156,293 @@ Health: ${enemy.health}/${enemy.maxHealth}
     }
 
     /* ---------------------------
-       NEW: MonsterCreatureList
-       - Lists monsters/creatures as text, formatted like other sections
+       Main DnDTracker
+       - Includes all sections with new copy button
     ---------------------------- */
-    function MonsterCreatureList() {
-      const creatures = [
-        { name: "Aarakocra", cr: "1/4", type: "Humanoid (Aarakocra)", size: "Medium", ac: 12, hp: 13, speed: "fly", alignment: "neutral good", legendary: "" },
-        { name: "Aboleth", cr: 10, type: "Aberration", size: "Large", ac: 17, hp: 135, speed: "swim", alignment: "lawful evil", legendary: "Legendary" },
-        { name: "Abominable Yeti", cr: 9, type: "Monstrosity", size: "Huge", ac: 15, hp: 137, speed: "", alignment: "chaotic evil", legendary: "" },
-        { name: "Acolyte", cr: "1/4", type: "Humanoid (any race)", size: "Medium", ac: 10, hp: 9, speed: "", alignment: "any alignment", legendary: "" },
-        { name: "Adult Black Dragon", cr: 14, type: "Dragon (Chromatic)", size: "Huge", ac: 19, hp: 195, speed: "fly, swim", alignment: "chaotic evil", legendary: "Legendary" },
-        { name: "Adult Blue Dracolich", cr: 17, type: "Undead", size: "Huge", ac: 19, hp: 225, speed: "fly", alignment: "lawful evil", legendary: "Legendary" },
-        { name: "Adult Blue Dragon", cr: 16, type: "Dragon (Chromatic)", size: "Huge", ac: 19, hp: 225, speed: "fly", alignment: "lawful evil", legendary: "Legendary" },
-        { name: "Adult Brass Dragon", cr: 13, type: "Dragon (Metallic)", size: "Huge", ac: 18, hp: 172, speed: "fly", alignment: "chaotic good", legendary: "Legendary" },
-        { name: "Adult Bronze Dragon", cr: 15, type: "Dragon (Metallic)", size: "Huge", ac: 19, hp: 212, speed: "fly, swim", alignment: "lawful good", legendary: "Legendary" },
-        { name: "Adult Copper Dragon", cr: 14, type: "Dragon (Metallic)", size: "Huge", ac: 18, hp: 184, speed: "fly", alignment: "chaotic good", legendary: "Legendary" },
-        { name: "Adult Gold Dragon", cr: 17, type: "Dragon (Metallic)", size: "Huge", ac: 19, hp: 256, speed: "fly, swim", alignment: "lawful good", legendary: "Legendary" },
-        { name: "Adult Green Dragon", cr: 15, type: "Dragon (Chromatic)", size: "Huge", ac: 19, hp: 207, speed: "fly, swim", alignment: "lawful evil", legendary: "Legendary" },
-        { name: "Adult Red Dragon", cr: 17, type: "Dragon (Chromatic)", size: "Huge", ac: 19, hp: 256, speed: "fly", alignment: "chaotic evil", legendary: "Legendary" },
-        { name: "Adult Silver Dragon", cr: 16, type: "Dragon (Metallic)", size: "Huge", ac: 19, hp: 243, speed: "fly", alignment: "lawful good", legendary: "Legendary" },
-        { name: "Adult White Dragon", cr: 13, type: "Dragon (Chromatic)", size: "Huge", ac: 18, hp: 200, speed: "fly, swim", alignment: "chaotic evil", legendary: "Legendary" },
-        { name: "Air Elemental", cr: 5, type: "Elemental", size: "Large", ac: 15, hp: 90, speed: "fly", alignment: "neutral", legendary: "" },
-        { name: "Allosaurus", cr: 2, type: "Beast", size: "Large", ac: 13, hp: 51, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Ancient Black Dragon", cr: 21, type: "Dragon (Chromatic)", size: "Gargantuan", ac: 22, hp: 367, speed: "fly, swim", alignment: "chaotic evil", legendary: "Legendary" },
-        { name: "Ancient Blue Dragon", cr: 23, type: "Dragon (Chromatic)", size: "Gargantuan", ac: 22, hp: 481, speed: "fly", alignment: "lawful evil", legendary: "Legendary" },
-        { name: "Ancient Brass Dragon", cr: 20, type: "Dragon (Metallic)", size: "Gargantuan", ac: 20, hp: 297, speed: "fly", alignment: "chaotic good", legendary: "Legendary" },
-        { name: "Ancient Bronze Dragon", cr: 22, type: "Dragon (Metallic)", size: "Gargantuan", ac: 22, hp: 444, speed: "fly, swim", alignment: "lawful good", legendary: "Legendary" },
-        { name: "Ancient Copper Dragon", cr: 21, type: "Dragon (Metallic)", size: "Gargantuan", ac: 21, hp: 350, speed: "fly", alignment: "chaotic good", legendary: "Legendary" },
-        { name: "Ancient Gold Dragon", cr: 24, type: "Dragon (Metallic)", size: "Gargantuan", ac: 22, hp: 546, speed: "fly, swim", alignment: "lawful good", legendary: "Legendary" },
-        { name: "Ancient Green Dragon", cr: 22, type: "Dragon (Chromatic)", size: "Gargantuan", ac: 21, hp: 385, speed: "fly, swim", alignment: "lawful evil", legendary: "Legendary" },
-        { name: "Ancient Red Dragon", cr: 24, type: "Dragon (Chromatic)", size: "Gargantuan", ac: 22, hp: 546, speed: "fly", alignment: "chaotic evil", legendary: "Legendary" },
-        { name: "Ancient Silver Dragon", cr: 23, type: "Dragon (Metallic)", size: "Gargantuan", ac: 22, hp: 487, speed: "fly", alignment: "lawful good", legendary: "Legendary" },
-        { name: "Ancient White Dragon", cr: 20, type: "Dragon (Chromatic)", size: "Gargantuan", ac: 20, hp: 333, speed: "fly, swim", alignment: "chaotic evil", legendary: "Legendary" },
-        { name: "Androsphinx", cr: 17, type: "Monstrosity", size: "Large", ac: 17, hp: 199, speed: "fly", alignment: "lawful neutral", legendary: "Legendary" },
-        { name: "Animated Armor", cr: 1, type: "Construct", size: "Medium", ac: 18, hp: 33, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Ankheg", cr: 2, type: "Monstrosity", size: "Large", ac: 14, hp: 39, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Ankylosaurus", cr: 3, type: "Beast", size: "Huge", ac: 15, hp: 68, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Ape", cr: "1/2", type: "Beast", size: "Medium", ac: 12, hp: 19, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Arcanaloth", cr: 12, type: "Fiend (Yugoloth)", size: "Medium", ac: 17, hp: 104, speed: "fly", alignment: "neutral evil", legendary: "" },
-        { name: "Archmage", cr: 12, type: "Humanoid (any race)", size: "Medium", ac: 12, hp: 99, speed: "", alignment: "any alignment", legendary: "" },
-        { name: "Assassin", cr: 8, type: "Humanoid (any race)", size: "Medium", ac: 15, hp: 78, speed: "", alignment: "any non-good alignment", legendary: "" },
-        { name: "Awakened Shrub", cr: 0, type: "Plant", size: "Small", ac: 9, hp: 10, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Awakened Tree", cr: 2, type: "Plant", size: "Huge", ac: 13, hp: 59, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Axe Beak", cr: "1/4", type: "Beast", size: "Large", ac: 11, hp: 19, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Azer", cr: 2, type: "Elemental", size: "Medium", ac: 17, hp: 39, speed: "", alignment: "lawful neutral", legendary: "" },
-        { name: "Baboon", cr: 0, type: "Beast", size: "Small", ac: 12, hp: 3, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Badger", cr: 0, type: "Beast", size: "Tiny", ac: 10, hp: 3, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Balor", cr: 19, type: "Fiend (Demon)", size: "Huge", ac: 19, hp: 262, speed: "fly", alignment: "chaotic evil", legendary: "" },
-        { name: "Bandit", cr: "1/8", type: "Humanoid (any race)", size: "Medium", ac: 12, hp: 11, speed: "", alignment: "any non-lawful alignment", legendary: "" },
-        { name: "Bandit Captain", cr: 2, type: "Humanoid (any race)", size: "Medium", ac: 15, hp: 65, speed: "", alignment: "any non-lawful alignment", legendary: "" },
-        { name: "Banshee", cr: 4, type: "Undead", size: "Medium", ac: 12, hp: 58, speed: "fly", alignment: "chaotic evil", legendary: "" },
-        { name: "Barbed Devil", cr: 5, type: "Fiend (Devil)", size: "Medium", ac: 15, hp: 110, speed: "", alignment: "lawful evil", legendary: "" },
-        { name: "Barlgura", cr: 5, type: "Fiend (Demon)", size: "Large", ac: 15, hp: 68, speed: "", alignment: "chaotic evil", legendary: "" },
-        { name: "Basilisk", cr: 3, type: "Monstrosity", size: "Medium", ac: 15, hp: 52, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Bat", cr: 0, type: "Beast", size: "Tiny", ac: 12, hp: 1, speed: "fly", alignment: "unaligned", legendary: "" },
-        { name: "Bearded Devil", cr: 3, type: "Fiend (Devil)", size: "Medium", ac: 13, hp: 52, speed: "", alignment: "lawful evil", legendary: "" },
-        { name: "Behir", cr: 11, type: "Monstrosity", size: "Huge", ac: 17, hp: 168, speed: "", alignment: "neutral evil", legendary: "" },
-        { name: "Beholder", cr: 13, type: "Aberration", size: "Large", ac: 18, hp: 180, speed: "fly", alignment: "lawful evil", legendary: "Legendary" },
-        { name: "Beholder Zombie", cr: 5, type: "Undead", size: "Large", ac: 15, hp: 93, speed: "fly", alignment: "neutral evil", legendary: "" },
-        { name: "Berserker", cr: 2, type: "Humanoid (any race)", size: "Medium", ac: 13, hp: 67, speed: "", alignment: "any chaotic alignment", legendary: "" },
-        { name: "Black Bear", cr: "1/2", type: "Beast", size: "Medium", ac: 11, hp: 19, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Black Dragon Wyrmling", cr: 2, type: "Dragon (Chromatic)", size: "Medium", ac: 17, hp: 33, speed: "fly, swim", alignment: "chaotic evil", legendary: "" },
-        { name: "Black Pudding", cr: 4, type: "Ooze", size: "Large", ac: 7, hp: 85, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Blink Dog", cr: "1/4", type: "Fey", size: "Medium", ac: 13, hp: 22, speed: "", alignment: "lawful good", legendary: "" },
-        { name: "Blood Hawk", cr: "1/8", type: "Beast", size: "Small", ac: 12, hp: 7, speed: "fly", alignment: "unaligned", legendary: "" },
-        { name: "Blue Dragon Wyrmling", cr: 3, type: "Dragon (Chromatic)", size: "Medium", ac: 17, hp: 52, speed: "fly", alignment: "lawful evil", legendary: "" },
-        { name: "Blue Slaad", cr: 7, type: "Aberration", size: "Large", ac: 15, hp: 123, speed: "", alignment: "chaotic neutral", legendary: "" },
-        { name: "Boar", cr: "1/4", type: "Beast", size: "Medium", ac: 11, hp: 11, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Bone Devil", cr: 9, type: "Fiend (Devil)", size: "Large", ac: 19, hp: 142, speed: "fly", alignment: "lawful evil", legendary: "" },
-        { name: "Bone Naga", cr: 4, type: "Undead", size: "Large", ac: 15, hp: 58, speed: "", alignment: "lawful evil", legendary: "" },
-        { name: "Brass Dragon Wyrmling", cr: 1, type: "Dragon (Metallic)", size: "Medium", ac: 16, hp: 16, speed: "fly", alignment: "chaotic good", legendary: "" },
-        { name: "Bronze Dragon Wyrmling", cr: 2, type: "Dragon (Metallic)", size: "Medium", ac: 17, hp: 32, speed: "fly, swim", alignment: "lawful good", legendary: "" },
-        { name: "Brown Bear", cr: 1, type: "Beast", size: "Large", ac: 11, hp: 34, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Bugbear", cr: 1, type: "Humanoid (Goblinoid)", size: "Medium", ac: 16, hp: 27, speed: "", alignment: "chaotic evil", legendary: "" },
-        { name: "Bugbear Chief", cr: 3, type: "Humanoid (Goblinoid)", size: "Medium", ac: 17, hp: 65, speed: "", alignment: "chaotic evil", legendary: "" },
-        { name: "Bulette", cr: 5, type: "Monstrosity", size: "Large", ac: 17, hp: 94, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Bullywug", cr: "1/4", type: "Humanoid (Bullywug)", size: "Medium", ac: 15, hp: 11, speed: "swim", alignment: "neutral evil", legendary: "" },
-        { name: "Cambion", cr: 5, type: "Fiend", size: "Medium", ac: 19, hp: 82, speed: "fly", alignment: "any evil alignment", legendary: "" },
-        { name: "Camel", cr: "1/8", type: "Beast", size: "Large", ac: 9, hp: 15, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Carrion Crawler", cr: 2, type: "Monstrosity", size: "Large", ac: 13, hp: 51, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Cat", cr: 0, type: "Beast", size: "Tiny", ac: 12, hp: 2, speed: "", alignment: "unaligned", legendary: "" },
-        { name: "Centaur", cr: 2, type: "Monstrosity", size: "Large", ac: 12, hp: 45, speed: "", alignment: "neutral good", legendary: "" },
-        { name: "Chain Devil", cr: 8, type: "Fiend (Devil)", size: "Medium", ac: 16, hp: 85, speed: "", alignment: "lawful evil", legendary: "" },
-        { name: "Chasme", cr: 6, type: "Fiend (Demon)", size: "Large", ac: 15, hp: 84, speed: "fly", alignment: "chaotic evil", legendary: "" },
-        { name: "Chimera", cr: 6, type: "Monst
+    function DnDTracker() {
+      const [characters, setCharacters] = React.useState(() => {
+        const saved = localStorage.getItem("characters");
+        return saved
+          ? JSON.parse(saved)
+          : [
+              {
+                id: 1,
+                name: "Jory",
+                class: "Cleric",
+                health: 100,
+                maxHealth: 100,
+                status: [],
+                effects: [],
+                inventory: ["Mace", "Shield"],
+                specialAbilities: ["Turn Undead"],
+                spellsMagic: ["Cure Wounds"],
+                image: null,
+              },
+            ];
+      });
+
+      const [enemies, setEnemies] = React.useState(() => {
+        const saved = localStorage.getItem("enemies");
+        return saved ? JSON.parse(saved) : [];
+      });
+
+      const [statRows, setStatRows] = React.useState(() => {
+        const saved = localStorage.getItem("statRows");
+        return saved
+          ? JSON.parse(saved)
+          : [{ id: 1, label: "Character #1", str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }];
+      });
+
+      const [mapImage, setMapImage] = React.useState(() => localStorage.getItem("mapImage") || null);
+      const [dotPosition, setDotPosition] = React.useState(() => {
+        const saved = localStorage.getItem("dotPosition");
+        return saved ? JSON.parse(saved) : { x: 50, y: 50 };
+      });
+
+      React.useEffect(() => {
+        localStorage.setItem("characters", JSON.stringify(characters));
+      }, [characters]);
+
+      React.useEffect(() => {
+        localStorage.setItem("enemies", JSON.stringify(enemies));
+      }, [enemies]);
+
+      React.useEffect(() => {
+        localStorage.setItem("statRows", JSON.stringify(statRows));
+      }, [statRows]);
+
+      React.useEffect(() => {
+        localStorage.setItem("mapImage", mapImage);
+        localStorage.setItem("dotPosition", JSON.stringify(dotPosition));
+      }, [mapImage, dotPosition]);
+
+      function addCharacter() {
+        const newId = Date.now();
+        setCharacters((prev) => [
+          ...prev,
+          {
+            id: newId,
+            name: "New Character",
+            class: "Unassigned",
+            health: 50,
+            maxHealth: 50,
+            status: [],
+            effects: [],
+            inventory: [],
+            specialAbilities: [],
+            spellsMagic: [],
+            image: null,
+          },
+        ]);
+      }
+
+      function removeCharacter(charId) {
+        setCharacters((prev) => prev.filter((c) => c.id !== charId));
+      }
+
+      function updateCharacter(updated) {
+        setCharacters((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+      }
+
+      function healCharacter(charId, amount) {
+        setCharacters((prev) =>
+          prev.map((c) => (c.id === charId ? { ...c, health: Math.min(c.maxHealth, c.health + amount) } : c))
+        );
+      }
+
+      function damageCharacter(charId, amount) {
+        setCharacters((prev) =>
+          prev.map((c) => (c.id === charId ? { ...c, health: Math.max(0, c.health - amount) } : c))
+        );
+      }
+
+      function removeStatus(charId, idx) {
+        setCharacters((prev) =>
+          prev.map((c) => {
+            if (c.id === charId) {
+              const updated = [...c.status];
+              updated.splice(idx, 1);
+              return { ...c, status: updated };
+            }
+            return c;
+          })
+        );
+      }
+
+      function removeEffect(charId, idx) {
+        setCharacters((prev) =>
+          prev.map((c) => {
+            if (c.id === charId) {
+              const updated = [...c.effects];
+              updated.splice(idx, 1);
+              return { ...c, effects: updated };
+            }
+            return c;
+          })
+        );
+      }
+
+      function removeItem(charId, idx) {
+        setCharacters((prev) =>
+          prev.map((c) => {
+            if (c.id === charId) {
+              const updated = [...c.inventory];
+              updated.splice(idx, 1);
+              return { ...c, inventory: updated };
+            }
+            return c;
+          })
+        );
+      }
+
+      function removeAbility(charId, idx) {
+        setCharacters((prev) =>
+          prev.map((c) => {
+            if (c.id === charId) {
+              const updated = [...c.specialAbilities];
+              updated.splice(idx, 1);
+              return { ...c, specialAbilities: updated };
+            }
+            return c;
+          })
+        );
+      }
+
+      function removeSpell(charId, idx) {
+        setCharacters((prev) =>
+          prev.map((c) => {
+            if (c.id === charId) {
+              const updated = [...c.spellsMagic];
+              updated.splice(idx, 1);
+              return { ...c, spellsMagic: updated };
+            }
+            return c;
+          })
+        );
+      }
+
+      function addEnemy() {
+        setEnemies((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            name: `Enemy ${prev.length + 1}`,
+            health: 50,
+            maxHealth: 50,
+          },
+        ]);
+      }
+
+      function removeEnemy(enemyId) {
+        setEnemies((prev) => prev.filter((e) => e.id !== enemyId));
+      }
+
+      function healEnemy(enemyId, amount) {
+        setEnemies((prev) =>
+          prev.map((e) => (e.id === enemyId ? { ...e, health: Math.min(e.maxHealth, e.health + amount) } : e))
+        );
+      }
+
+      function damageEnemy(enemyId, amount) {
+        setEnemies((prev) =>
+          prev.map((e) => (e.id === enemyId ? { ...e, health: Math.max(0, e.health - amount) } : e))
+        );
+      }
+
+      function updateEnemy(updated) {
+        setEnemies((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+      }
+
+      return (
+        <div className="container mx-auto p-4">
+          <div className="mb-4">
+            <CopyButton characters={characters} enemies={enemies} />
+          </div>
+          <div className="grid gap-4">
+            {/* Party Status */}
+            <div className="bg-gray-100 p-4 rounded-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Party Status</h2>
+                <button
+                  className="px-3 py-1 bg-green-500 text-white rounded"
+                  onClick={addCharacter}
+                >
+                  Add Character
+                </button>
+              </div>
+              <div className="grid gap-4">
+                {characters.map((char) => (
+                  <CharacterCard
+                    key={char.id}
+                    char={char}
+                    onRemoveChar={removeCharacter}
+                    onUpdateChar={updateCharacter}
+                    onHeal={healCharacter}
+                    onDamage={damageCharacter}
+                    onRemoveStatus={removeStatus}
+                    onRemoveEffect={removeEffect}
+                    onRemoveItem={removeItem}
+                    onRemoveAbility={removeAbility}
+                    onRemoveSpell={removeSpell}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Party Images Section */}
+            <PartyImages characters={characters} />
+
+            {/* Stats Section */}
+            <StatsSection statRows={statRows} setStatRows={setStatRows} />
+
+            {/* Enemy Section */}
+            <div className="bg-gray-100 p-4 rounded-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Enemies</h2>
+                <button
+                  className="px-3 py-1 bg-purple-500 text-white rounded"
+                  onClick={addEnemy}
+                >
+                  Add Enemy
+                </button>
+              </div>
+              <div className="grid gap-4">
+                {enemies.map((enemy) => (
+                  <EnemyCard
+                    key={enemy.id}
+                    enemy={enemy}
+                    onRemoveEnemy={removeEnemy}
+                    onHealEnemy={healEnemy}
+                    onDamageEnemy={damageEnemy}
+                    onUpdateEnemy={updateEnemy}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Map Section */}
+            <MapSection
+              mapImage={mapImage}
+              setMapImage={setMapImage}
+              dotPosition={dotPosition}
+              setDotPosition={setDotPosition}
+            />
+
+            {/* Dice Roller */}
+            <DiceRoller />
+
+            {/* Classes Section */}
+            <ClassesSection />
+
+            {/* Races Section */}
+            <RacesSection />
+          </div>
+        </div>
+      );
+    }
+
+    // Render the main tracker
+    ReactDOM.render(<DnDTracker />, document.getElementById("root"));
+  </script>
+</body>
+</html>
