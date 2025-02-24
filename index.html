@@ -32,10 +32,10 @@
      * 2) EnemyCard Component
      * 3) StatsSection (Multi-Row Stat Calculator)
      * 4) DiceRoller (d20, d10, d2, d4, d6, d8, d12, d15)
-     * 5) MapSection (Image Upload + Red Dot)
+     * 5) MapSection (Image Upload + Red Dot, Fixed and Enhanced)
      * 6) PartyImages (Dynamic Character Images)
-     * 7) ClassesSection (NEW: D&D 5e Classes with Links)
-     * 8) RacesSection (NEW: D&D 5e Races with Links)
+     * 7) ClassesSection (Updated: D&D 5e Classes with New Descriptions)
+     * 8) RacesSection (D&D 5e Races with Links)
      * 9) Main DnDTracker
      ************************************************/
 
@@ -852,24 +852,32 @@
 
     /* ---------------------------
        MapSection
-       - Allows uploading an image and placing a red dot
+       - Fixed: Allows uploading an image, placing a red dot, with upload and delete buttons
     ---------------------------- */
     function MapSection({ mapImage, setMapImage, dotPosition, setDotPosition }) {
       const [isDragging, setIsDragging] = React.useState(false);
       const containerRef = React.useRef(null);
 
+      // Handle image upload
       const handleImageUpload = (event) => {
         const file = event.target.files[0];
         if (file) {
           const reader = new FileReader();
           reader.onload = (e) => {
             setMapImage(e.target.result);
-            setDotPosition({ x: 50, y: 50 });
+            setDotPosition({ x: 50, y: 50 }); // Reset dot to center
           };
           reader.readAsDataURL(file);
         }
       };
 
+      // Handle image deletion
+      const handleDeleteImage = () => {
+        setMapImage(null);
+        setDotPosition({ x: 50, y: 50 }); // Reset dot position
+      };
+
+      // Handle dot movement
       const handleMouseDown = (e) => {
         setIsDragging(true);
         moveDot(e);
@@ -886,7 +894,7 @@
       };
 
       const moveDot = (e) => {
-        if (containerRef.current) {
+        if (containerRef.current && mapImage) {
           const rect = containerRef.current.getBoundingClientRect();
           const x = ((e.clientX - rect.left) / rect.width) * 100;
           const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -898,26 +906,48 @@
         <div className="bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-2">Party Location Map</h2>
           {mapImage ? (
-            <div
-              ref={containerRef}
-              className="relative cursor-pointer"
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-            >
-              <img src={mapImage} alt="Map" className="w-full" />
+            <div className="relative">
               <div
-                className="absolute w-4 h-4 bg-red-500 rounded-full"
-                style={{
-                  left: `${dotPosition.x}%`,
-                  top: `${dotPosition.y}%`,
-                  transform: "translate(-50%, -50%)",
-                  cursor: "grab",
-                }}
-                onMouseDown={handleMouseDown}
-              ></div>
+                ref={containerRef}
+                className="relative cursor-pointer"
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp} // Ensure dragging stops if mouse leaves
+              >
+                <img src={mapImage} alt="Map" className="w-full" />
+                <div
+                  className="absolute w-4 h-4 bg-red-500 rounded-full"
+                  style={{
+                    left: `${dotPosition.x}%`,
+                    top: `${dotPosition.y}%`,
+                    transform: "translate(-50%, -50%)",
+                    cursor: "grab",
+                  }}
+                  onMouseDown={handleMouseDown}
+                ></div>
+              </div>
+              <div className="mt-2 flex gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="border p-1 rounded"
+                />
+                <button
+                  className="px-2 py-1 bg-red-500 text-white rounded"
+                  onClick={handleDeleteImage}
+                >
+                  Delete Map
+                </button>
+              </div>
             </div>
           ) : (
-            <input type="file" accept="image/*" onChange={handleImageUpload} />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="border p-1 rounded"
+            />
           )}
         </div>
       );
@@ -955,23 +985,23 @@
 
     /* ---------------------------
        NEW: ClassesSection
-       - Lists D&D 5e classes with links to RPGBot guides
+       - Updated: Lists D&D 5e classes with new descriptions and link to RPGBot
     ---------------------------- */
     function ClassesSection() {
       const classes = [
-        { name: "Artificer", url: "https://rpgbot.net/dnd5/characters/artificer/" },
-        { name: "Barbarian", url: "https://rpgbot.net/dnd5/characters/barbarian/" },
-        { name: "Bard", url: "https://rpgbot.net/dnd5/characters/bard/" },
-        { name: "Cleric", url: "https://rpgbot.net/dnd5/characters/cleric/" },
-        { name: "Druid", url: "https://rpgbot.net/dnd5/characters/druid/" },
-        { name: "Fighter", url: "https://rpgbot.net/dnd5/characters/fighter/" },
-        { name: "Monk", url: "https://rpgbot.net/dnd5/characters/monk/" },
-        { name: "Paladin", url: "https://rpgbot.net/dnd5/characters/paladin/" },
-        { name: "Ranger", url: "https://rpgbot.net/dnd5/characters/ranger/" },
-        { name: "Rogue", url: "https://rpgbot.net/dnd5/characters/rogue/" },
-        { name: "Sorcerer", url: "https://rpgbot.net/dnd5/characters/sorcerer/" },
-        { name: "Warlock", url: "https://rpgbot.net/dnd5/characters/warlock/" },
-        { name: "Wizard", url: "https://rpgbot.net/dnd5/characters/wizard/" },
+        { name: "Artificer (Tinkerers & Inventors)", desc: "Artificers thrive on intelligence, crafting, and magical engineering. Gnomes are natural inventors with minor illusions and magic resistance, while Autognomes are durable constructs with mechanical resilience. Vedalken excel in logic and mental resistance, and Warforged are living constructs immune to many conditions. Artificers specialize in infusions, magical tinkering, and intelligence-based spellcasting, making these races ideal for their class." },
+        { name: "Barbarian (Unstoppable Warriors)", desc: "Barbarians rely on raw strength, endurance, and primal fury. Goliaths reduce incoming damage and excel in athletics, while Orcs gain extra movement and resilience in combat. Minotaurs are melee-focused chargers, and Half-Orcs can survive near-fatal blows while delivering devastating crits. Lizardfolk add natural armor and self-healing through bites. Barbarians excel in rage-fueled combat, unarmored defense, and brutal critical hits." },
+        { name: "Bard (Charming Performers & Spellcasters)", desc: "Bards blend charisma, magic, and storytelling. Half-Elves gain extra skills and social flexibility, while Satyrs resist magic and enhance musical abilities. Fairies provide flight and innate spells, and Tabaxi have agility and charm, making them excellent performers. Kenku mimic sounds perfectly, ideal for deception and intrigue. Bards specialize in inspiring allies, versatile spellcasting, and performance-based magic." },
+        { name: "Cleric (Divine Warriors & Healers)", desc: "Clerics channel divine magic for healing and battle. Aasimar have celestial energy and radiant resistance, while Dwarves provide durability and divine weapon proficiencies. Tritons control water and communicate with sea creatures, and Firbolgs possess nature magic and invisibility. Owlin offer wisdom-based spellcasting with natural flight. Clerics excel in divine magic, healing, and powerful protective spells." },
+        { name: "Druid (Nature’s Guardians & Shapeshifters)", desc: "Druids command nature and transform into beasts. Firbolgs excel with plant communication and stealth, while Tortles provide natural armor for defense. Lizardfolk have primal instincts and self-healing, and Shifters channel lycanthropic abilities. Wood Elves thrive in forests with heightened agility. Druids master wild shape, nature magic, and elemental control." },
+        { name: "Fighter (Master Combatants & Strategists)", desc: "Fighters dominate the battlefield with weapons and tactics. Half-Orcs hit hard and endure, while Goliaths resist damage and excel in athletics. Hobgoblins enhance teamwork and tactical advantage, and Warforged provide durability with built-in armor. Leonin use powerful roars to intimidate foes. Fighters specialize in multiple attacks, weapon mastery, and versatile combat styles." },
+        { name: "Monk (Masters of Martial Arts & Speed)", desc: "Monks rely on speed, agility, and spiritual focus. Tabaxi are nimble and fast, while Harengon have quick reflexes and high jumps. Kenku are stealthy and precise, and Githzerai have psionic defenses. Lizardfolk enhance their unarmed strikes with natural weapons. Monks excel in unarmed combat, mobility, and ki-powered abilities." },
+        { name: "Paladin (Holy Warriors & Protectors)", desc: "Paladins wield divine magic alongside martial prowess. Aasimar gain celestial blessings and radiant abilities, while Dragonborn channel draconic power with elemental breath weapons. Dwarves bring durability and divine weapon skills, and Tritons harness oceanic magic. Leonin have natural authority and powerful combat presence. Paladins specialize in divine smites, healing, and protective auras." },
+        { name: "Ranger (Wilderness Scouts & Hunters)", desc: "Rangers track, hunt, and wield nature magic. Wood Elves have superior stealth and speed, while Tabaxi move swiftly and excel in scouting. Goliaths are rugged survivalists with cold resistance, and Firbolgs use magic to blend into nature. Kenku thrive in ambush tactics. Rangers excel in tracking, ranged combat, and natural exploration." },
+        { name: "Rogue (Stealthy Assassins & Tricksters)", desc: "Rogues rely on cunning, speed, and precision. Halflings avoid misfortune with their luck trait, while Tabaxi use agility and speed for quick getaways. Kobolds have pack tactics for deadly strikes, and Kenku mimic voices for deception. Goblin rogues use their nimbleness and quick escapes. Rogues specialize in sneak attacks, evasive movement, and deception." },
+        { name: "Sorcerer (Innate Spellcasters & Magical Prodigies)", desc: "Sorcerers wield raw, untamed magic. Dragonborn inherit draconic power with elemental resistances, while Tieflings draw strength from infernal ancestry. Aasimar harness celestial energy, and Genasi wield elemental magic. Fairies bring flight and innate spellcasting. Sorcerers specialize in metamagic, spontaneous casting, and magical surges." },
+        { name: "Warlock (Pact-Bound Spellcasters & Eldritch Wielders)", desc: "Warlocks make pacts with powerful entities for magic. Tieflings tap into fiendish energy, while Hexbloods have hag-like magic. Reborn warlocks possess undead resilience, and Githyanki wield psionic gifts. Drow Elves enhance darkness magic. Warlocks excel in eldritch invocations, powerful cantrips, and supernatural pacts." },
+        { name: "Wizard (Scholars of Magic & Arcane Masters)", desc: "Wizards master magic through study and knowledge. Gnomes have magical resistance and keen intellect, while Elves bring heightened senses and arcane heritage. Hobgoblins store magical energy for later use, and Vedalken provide logic-based spellcasting. Warforged offer a unique take on magical constructs. Wizards specialize in ritual magic, vast spell knowledge, and arcane mastery." },
       ];
 
       return (
@@ -988,17 +1018,10 @@
               RPGBot Classes
             </a>
           </p>
-          <ul className="list-disc list-inside">
+          <ul className="list-disc list-inside space-y-2">
             {classes.map((cls) => (
               <li key={cls.name}>
-                <a
-                  href={cls.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-blue-500 hover:underline"
-                >
-                  {cls.name}
-                </a>
+                <span className="font-semibold">{cls.name}</span>: {cls.desc}
               </li>
             ))}
           </ul>
@@ -1092,7 +1115,7 @@
 
     /* ---------------------------
        Main DnDTracker
-       - Includes all sections with new classes and races sections
+       - Includes all sections with fixed map and updated classes
     ---------------------------- */
     function DnDTracker() {
       const [characters, setCharacters] = React.useState(() => {
@@ -1363,10 +1386,10 @@
             {/* Dice Roller */}
             <DiceRoller />
 
-            {/* NEW: Classes Section */}
+            {/* Classes Section */}
             <ClassesSection />
 
-            {/* NEW: Races Section */}
+            {/* Races Section */}
             <RacesSection />
           </div>
         </div>
