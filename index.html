@@ -173,7 +173,7 @@
     }
 
     /*********************************
-     * 4) CharacterCard
+     * 4) CharacterCard (Maintaining Large Images)
      *********************************/
     function CharacterCard({
       char,
@@ -190,7 +190,6 @@
       onRemoveChar,
     }) {
       const [isEditing, setIsEditing] = React.useState(false);
-
       const [editName, setEditName] = React.useState(char.name);
       const [editClass, setEditClass] = React.useState(char.class);
       const [editMaxHealth, setEditMaxHealth] = React.useState(String(char.maxHealth));
@@ -198,13 +197,11 @@
       const [editXP, setEditXP] = React.useState(String(char.xp || 0));
       const [editInitiative, setEditInitiative] = React.useState(String(char.initiative || 0));
       const [editNotes, setEditNotes] = React.useState(char.notes || "");
-
       const [newStatus, setNewStatus] = React.useState("");
       const [newEffect, setNewEffect] = React.useState("");
       const [newItem, setNewItem] = React.useState("");
       const [newAbility, setNewAbility] = React.useState("");
       const [newSpell, setNewSpell] = React.useState("");
-
       const [healInput, setHealInput] = React.useState("0");
       const [dmgInput, setDmgInput] = React.useState("0");
 
@@ -232,7 +229,6 @@
       function handleSave() {
         const parsedMax = parseInt(editMaxHealth, 10) || 0;
         const clippedHealth = Math.min(char.health, parsedMax);
-
         onUpdateChar({
           ...char,
           name: editName,
@@ -284,10 +280,7 @@
         if (char.deathSaves.success < 3) {
           onUpdateChar({
             ...char,
-            deathSaves: {
-              ...char.deathSaves,
-              success: char.deathSaves.success + 1,
-            },
+            deathSaves: { ...char.deathSaves, success: char.deathSaves.success + 1 },
           });
         }
       }
@@ -295,23 +288,15 @@
         if (char.deathSaves.fail < 3) {
           onUpdateChar({
             ...char,
-            deathSaves: {
-              ...char.deathSaves,
-              fail: char.deathSaves.fail + 1,
-            },
+            deathSaves: { ...char.deathSaves, fail: char.deathSaves.fail + 1 },
           });
         }
       }
       function resetDeathSaves() {
-        onUpdateChar({
-          ...char,
-          deathSaves: { success: 0, fail: 0 },
-        });
+        onUpdateChar({ ...char, deathSaves: { success: 0, fail: 0 } });
       }
 
-      const mainContentStyle = collapsed
-        ? { maxHeight: 0, padding: 0 }
-        : { maxHeight: "9999px" };
+      const mainContentStyle = collapsed ? { maxHeight: 0, padding: 0 } : { maxHeight: "9999px" };
 
       if (isEditing) {
         return (
@@ -319,332 +304,145 @@
             <div className="flex justify-between items-center">
               <h3 className="font-bold">Editing {char.name}</h3>
               <button
-                className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900"
+                className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                 onClick={() => onRemoveChar(char.id)}
               >
                 Remove
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <input
-                className="border p-1 rounded"
-                placeholder="Name"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-              />
-              <input
-                className="border p-1 rounded"
-                placeholder="Class"
-                value={editClass}
-                onChange={(e) => setEditClass(e.target.value)}
-              />
-              <input
-                type="number"
-                className="border p-1 rounded"
-                placeholder="Max Health"
-                value={editMaxHealth}
-                onChange={(e) => setEditMaxHealth(e.target.value)}
-              />
-              <input
-                type="number"
-                className="border p-1 rounded"
-                placeholder="Level"
-                value={editLevel}
-                onChange={(e) => setEditLevel(e.target.value)}
-              />
-              <input
-                type="number"
-                className="border p-1 rounded"
-                placeholder="XP"
-                value={editXP}
-                onChange={(e) => setEditXP(e.target.value)}
-              />
-              <input
-                type="number"
-                className="border p-1 rounded"
-                placeholder="Initiative"
-                value={editInitiative}
-                onChange={(e) => setEditInitiative(e.target.value)}
-              />
+              <input className="border p-1 rounded" placeholder="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+              <input className="border p-1 rounded" placeholder="Class" value={editClass} onChange={(e) => setEditClass(e.target.value)} />
+              <input type="number" className="border p-1 rounded" placeholder="Max Health" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} />
+              <input type="number" className="border p-1 rounded" placeholder="Level" value={editLevel} onChange={(e) => setEditLevel(e.target.value)} />
+              <input type="number" className="border p-1 rounded" placeholder="XP" value={editXP} onChange={(e) => setEditXP(e.target.value)} />
+              <input type="number" className="border p-1 rounded" placeholder="Initiative" value={editInitiative} onChange={(e) => setEditInitiative(e.target.value)} />
             </div>
-            <textarea
-              className="border p-1 rounded w-full"
-              rows={3}
-              placeholder="Notes / Bio / Extra Info"
-              value={editNotes}
-              onChange={(e) => setEditNotes(e.target.value)}
-            />
+            <textarea className="border p-1 rounded w-full" rows={3} placeholder="Notes / Bio / Extra Info" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} />
             <div className="flex gap-2">
-              <button
-                className="px-3 py-1 bg-green-800 text-white rounded hover:bg-green-900"
-                onClick={handleSave}
-              >
-                Save
-              </button>
-              <button
-                className="px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
-                onClick={() => setIsEditing(false)}
-              >
-                Cancel
-              </button>
+              <button className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700" onClick={handleSave}>Save</button>
+              <button className="px-2 py-1 bg-gray-400 text-white rounded hover:bg-gray-500" onClick={() => setIsEditing(false)}>Cancel</button>
             </div>
           </div>
         );
       }
 
       return (
-        <div
-          className={`bg-white p-4 rounded-lg shadow mb-4 ${
-            collapsed ? "collapsed" : ""
-          }`}
-        >
+        <div className={`bg-white p-4 rounded-lg shadow mb-4 ${collapsed ? "collapsed" : ""}`}>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => onToggleCollapse(char.id)}
-                className="collapse-button text-sm font-bold"
-              >
-                {char.name}
-              </button>
+              <button onClick={() => onToggleCollapse(char.id)} className="collapse-button text-sm font-bold">{char.name}</button>
               <span className="text-sm text-gray-600">({char.class})</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm">
-                Init: {char.initiative || 0} | Lvl: {char.level || 1}
-              </span>
-              <button
-                className="px-2 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 text-sm"
-                onClick={() => setIsEditing(true)}
-              >
-                Edit
-              </button>
-              <button
-                className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
-                onClick={() => onRemoveChar(char.id)}
-              >
-                Remove
-              </button>
+              <span className="text-sm">Init: {char.initiative || 0} | Lvl: {char.level || 1}</span>
+              <button className="px-2 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 text-sm" onClick={() => setIsEditing(true)}>Edit</button>
+              <button className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm" onClick={() => onRemoveChar(char.id)}>Remove</button>
             </div>
           </div>
 
-          <div
-            className="collapsible-content transition-all duration-300 ease-in-out"
-            style={mainContentStyle}
-          >
+          <div className="collapsible-content transition-all duration-300 ease-in-out" style={mainContentStyle}>
             <div className={collapsed ? "hidden" : "block"}>
               <div className="text-sm mb-1 mt-2">XP: {char.xp || 0}</div>
-              <label className="block text-sm font-medium text-gray-700">
-                Character Image
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Character Image</label>
               {char.image ? (
                 <div className="flex items-center gap-2 mt-1">
-                  <img
-                    src={char.image}
-                    alt={char.name}
-                    className="w-16 h-16 object-cover rounded-full"
-                  />
-                  <button
-                    className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
-                    onClick={() => onUpdateChar({ ...char, image: null })}
-                  >
+                  <img src={char.image} alt={char.name} className="w-16 h-16 object-cover rounded-full" />
+                  <button className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm" onClick={() => onUpdateChar({ ...char, image: null })}>
                     Remove Image
                   </button>
                 </div>
               ) : (
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="mt-1 text-sm"
-                />
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="mt-1 text-sm" />
               )}
 
               <div className="mt-2">
                 <div className="flex items-center gap-2">
                   <span className="text-red-600 font-bold">♥</span>
                   <div className="w-full bg-gray-200 rounded-full h-4">
-                    <div
-                      className="bg-red-600 rounded-full h-4"
-                      style={{
-                        width: (char.health / char.maxHealth) * 100 + "%",
-                      }}
-                    ></div>
+                    <div className="bg-red-600 rounded-full h-4" style={{ width: (char.health / char.maxHealth) * 100 + "%" }}></div>
                   </div>
-                  <span className="text-sm">
-                    {char.health}/{char.maxHealth}
-                  </span>
+                  <span className="text-sm">{char.health}/{char.maxHealth}</span>
                 </div>
               </div>
 
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Status Conditions:</h4>
-                <div className="flex flex-wrap gap-1 mt-1">
+                <ul className="list-disc list-inside space-y-2 mt-1">
                   {char.status.map((stat, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-1 text-sm bg-red-100 text-red-800 rounded-full flex items-center gap-1"
-                    >
+                    <li key={idx} className="flex items-center justify-between bg-red-100 p-2 rounded">
                       {stat}
-                      <button
-                        className="hover:text-red-500"
-                        onClick={() => onRemoveStatus(char.id, idx)}
-                      >
-                        [X]
-                      </button>
-                    </span>
+                      <button className="text-red-600 hover:text-red-800" onClick={() => onRemoveStatus(char.id, idx)}>[X]</button>
+                    </li>
                   ))}
-                </div>
-                <div className="flex gap-2 mt-1">
-                  <input
-                    className="border p-1 rounded text-sm"
-                    value={newStatus}
-                    onChange={(e) => setNewStatus(e.target.value)}
-                    placeholder="Add status"
-                  />
-                  <button
-                    className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
-                    onClick={handleAddStatus}
-                  >
-                    Add
-                  </button>
+                </ul>
+                <div className="flex gap-2 mt-2">
+                  <input className="border p-1 rounded text-sm" value={newStatus} onChange={(e) => setNewStatus(e.target.value)} placeholder="Add status" />
+                  <button className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm" onClick={handleAddStatus}>Add</button>
                 </div>
               </div>
 
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Effects:</h4>
-                <div className="flex flex-wrap gap-1 mt-1">
+                <ul className="list-disc list-inside space-y-2 mt-1">
                   {char.effects.map((eff, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-1 text-sm bg-blue-100 text-blue-800 rounded-full flex items-center gap-1"
-                    >
+                    <li key={idx} className="flex items-center justify-between bg-blue-100 p-2 rounded">
                       {eff}
-                      <button
-                        className="hover:text-red-500"
-                        onClick={() => onRemoveEffect(char.id, idx)}
-                      >
-                        [X]
-                      </button>
-                    </span>
+                      <button className="text-red-600 hover:text-red-800" onClick={() => onRemoveEffect(char.id, idx)}>[X]</button>
+                    </li>
                   ))}
-                </div>
-                <div className="flex gap-2 mt-1">
-                  <input
-                    className="border p-1 rounded text-sm"
-                    value={newEffect}
-                    onChange={(e) => setNewEffect(e.target.value)}
-                    placeholder="Add effect"
-                  />
-                  <button
-                    className="px-2 py-1 bg-blue-800 text-white rounded hover:bg-blue-900 text-sm"
-                    onClick={handleAddEffect}
-                  >
-                    Add
-                  </button>
+                </ul>
+                <div className="flex gap-2 mt-2">
+                  <input className="border p-1 rounded text-sm" value={newEffect} onChange={(e) => setNewEffect(e.target.value)} placeholder="Add effect" />
+                  <button className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm" onClick={handleAddEffect}>Add</button>
                 </div>
               </div>
 
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Inventory:</h4>
-                <div
-                  className="flex flex-wrap gap-1 mt-1 whitespace-pre-wrap break-words"
-                >
+                <ul className="list-disc list-inside space-y-2 mt-1">
                   {char.inventory.map((item, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-1 text-sm bg-gray-100 rounded-full flex items-center gap-1"
-                    >
+                    <li key={idx} className="flex items-center justify-between bg-gray-100 p-2 rounded">
                       {item}
-                      <button
-                        className="hover:text-red-500"
-                        onClick={() => onRemoveItem(char.id, idx)}
-                      >
-                        [X]
-                      </button>
-                    </span>
+                      <button className="text-red-600 hover:text-red-800" onClick={() => onRemoveItem(char.id, idx)}>[X]</button>
+                    </li>
                   ))}
-                </div>
-                <div className="flex gap-2 mt-1">
-                  <input
-                    className="border p-1 rounded text-sm"
-                    value={newItem}
-                    onChange={(e) => setNewItem(e.target.value)}
-                    placeholder="New item"
-                  />
-                  <button
-                    className="px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-800 text-sm"
-                    onClick={handleAddItem}
-                  >
-                    Add
-                  </button>
+                </ul>
+                <div className="flex gap-2 mt-2">
+                  <input className="border p-1 rounded text-sm" value={newItem} onChange={(e) => setNewItem(e.target.value)} placeholder="New item" />
+                  <button className="px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm" onClick={handleAddItem}>Add</button>
                 </div>
               </div>
 
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Special Abilities:</h4>
-                <div className="flex flex-wrap gap-1 mt-1">
+                <ul className="list-disc list-inside space-y-2 mt-1">
                   {char.specialAbilities.map((ability, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-1 text-sm bg-green-100 text-green-800 rounded-full flex items-center gap-1"
-                    >
+                    <li key={idx} className="flex items-center justify-between bg-green-100 p-2 rounded">
                       {ability}
-                      <button
-                        className="hover:text-red-500"
-                        onClick={() => onRemoveAbility(char.id, idx)}
-                      >
-                        [X]
-                      </button>
-                    </span>
+                      <button className="text-red-600 hover:text-red-800" onClick={() => onRemoveAbility(char.id, idx)}>[X]</button>
+                    </li>
                   ))}
-                </div>
-                <div className="flex gap-2 mt-1">
-                  <input
-                    className="border p-1 rounded text-sm"
-                    value={newAbility}
-                    onChange={(e) => setNewAbility(e.target.value)}
-                    placeholder="Add ability"
-                  />
-                  <button
-                    className="px-2 py-1 bg-green-800 text-white rounded hover:bg-green-900 text-sm"
-                    onClick={handleAddAbility}
-                  >
-                    Add
-                  </button>
+                </ul>
+                <div className="flex gap-2 mt-2">
+                  <input className="border p-1 rounded text-sm" value={newAbility} onChange={(e) => setNewAbility(e.target.value)} placeholder="Add ability" />
+                  <button className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm" onClick={handleAddAbility}>Add</button>
                 </div>
               </div>
 
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Spells/Magic:</h4>
-                <div className="flex flex-wrap gap-1 mt-1">
+                <ul className="list-disc list-inside space-y-2 mt-1">
                   {char.spellsMagic.map((spell, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-1 text-sm bg-purple-100 text-purple-800 rounded-full flex items-center gap-1"
-                    >
+                    <li key={idx} className="flex items-center justify-between bg-purple-100 p-2 rounded">
                       {spell}
-                      <button
-                        className="hover:text-purple-500"
-                        onClick={() => onRemoveSpell(char.id, idx)}
-                      >
-                        [X]
-                      </button>
-                    </span>
+                      <button className="text-purple-600 hover:text-purple-800" onClick={() => onRemoveSpell(char.id, idx)}>[X]</button>
+                    </li>
                   ))}
-                </div>
-                <div className="flex gap-2 mt-1">
-                  <input
-                    className="border p-1 rounded text-sm"
-                    value={newSpell}
-                    onChange={(e) => setNewSpell(e.target.value)}
-                    placeholder="Add spell"
-                  />
-                  <button
-                    className="px-2 py-1 bg-purple-800 text-white rounded hover:bg-purple-900 text-sm"
-                    onClick={handleAddSpell}
-                  >
-                    Add
-                  </button>
+                </ul>
+                <div className="flex gap-2 mt-2">
+                  <input className="border p-1 rounded text-sm" value={newSpell} onChange={(e) => setNewSpell(e.target.value)} placeholder="Add spell" />
+                  <button className="px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm" onClick={handleAddSpell}>Add</button>
                 </div>
               </div>
 
@@ -652,35 +450,15 @@
                 <div>
                   <label className="text-sm block">Heal #</label>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      className="w-16 border rounded p-1 text-sm"
-                      value={healInput}
-                      onChange={(e) => setHealInput(e.target.value)}
-                    />
-                    <button
-                      className="px-3 py-1 bg-green-800 text-white rounded hover:bg-green-900 text-sm"
-                      onClick={applyHeal}
-                    >
-                      Heal
-                    </button>
+                    <input type="number" className="w-16 border rounded p-1 text-sm" value={healInput} onChange={(e) => setHealInput(e.target.value)} />
+                    <button className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm" onClick={applyHeal}>Heal</button>
                   </div>
                 </div>
                 <div>
                   <label className="text-sm block">Damage #</label>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      className="w-16 border rounded p-1 text-sm"
-                      value={dmgInput}
-                      onChange={(e) => setDmgInput(e.target.value)}
-                    />
-                    <button
-                      className="px-3 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
-                      onClick={applyDamage}
-                    >
-                      Damage
-                    </button>
+                    <input type="number" className="w-16 border rounded p-1 text-sm" value={dmgInput} onChange={(e) => setDmgInput(e.target.value)} />
+                    <button className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm" onClick={applyDamage}>Damage</button>
                   </div>
                 </div>
               </div>
@@ -688,30 +466,23 @@
               {char.health <= 0 && (
                 <div className="mt-4">
                   <h4 className="font-semibold text-sm">Death Saves</h4>
-                  <p className="text-xs text-gray-600">
-                    Successes: {char.deathSaves.success} / Failures: {char.deathSaves.fail}
-                  </p>
+                  <p className="text-xs text-gray-600">Successes: {char.deathSaves.success} / Failures: {char.deathSaves.fail}</p>
                   <div className="flex gap-2 mt-1">
                     <button
-                      className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                      className="px-2 py-1 bg-green-400 text-white rounded hover:bg-green-500 text-sm"
                       onClick={toggleDeathSaveSuccess}
                       disabled={char.deathSaves.success >= 3}
                     >
                       + Success
                     </button>
                     <button
-                      className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                      className="px-2 py-1 bg-red-400 text-white rounded hover:bg-red-500 text-sm"
                       onClick={toggleDeathSaveFail}
                       disabled={char.deathSaves.fail >= 3}
                     >
                       + Fail
                     </button>
-                    <button
-                      className="px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
-                      onClick={resetDeathSaves}
-                    >
-                      Reset
-                    </button>
+                    <button className="px-2 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 text-sm" onClick={resetDeathSaves}>Reset</button>
                   </div>
                 </div>
               )}
@@ -729,17 +500,9 @@
     }
 
     /*********************************
-     * 5) EnemyCard
+     * 5) EnemyCard (Integrated from Provided Code)
      *********************************/
-    function EnemyCard({
-      enemy,
-      collapsed,
-      onToggleCollapse,
-      onHealEnemy,
-      onDamageEnemy,
-      onRemoveEnemy,
-      onUpdateEnemy,
-    }) {
+    function EnemyCard({ enemy, collapsed, onToggleCollapse, onHealEnemy, onDamageEnemy, onRemoveEnemy, onUpdateEnemy }) {
       const [isEditing, setIsEditing] = React.useState(false);
       const [editName, setEditName] = React.useState(enemy.name);
       const [editMaxHealth, setEditMaxHealth] = React.useState(String(enemy.maxHealth));
@@ -757,12 +520,7 @@
         const parsedMax = parseInt(editMaxHealth, 10) || 0;
         const parsedHealth = parseInt(editHealth, 10) || 0;
         const clippedHealth = Math.min(parsedHealth, parsedMax);
-        onUpdateEnemy({
-          ...enemy,
-          name: editName,
-          maxHealth: parsedMax,
-          health: clippedHealth,
-        });
+        onUpdateEnemy({ ...enemy, name: editName, maxHealth: parsedMax, health: clippedHealth });
         setIsEditing(false);
       }
 
@@ -773,9 +531,7 @@
         onDamageEnemy(enemy.id, parseInt(dmgInput, 10) || 0);
       }
 
-      const mainContentStyle = collapsed
-        ? { maxHeight: 0, padding: 0 }
-        : { maxHeight: "9999px" };
+      const mainContentStyle = collapsed ? { maxHeight: 0, padding: 0 } : { maxHeight: "9999px" };
 
       if (isEditing) {
         return (
@@ -783,46 +539,19 @@
             <div className="flex justify-between items-center">
               <h3 className="font-bold">Editing Enemy</h3>
               <button
-                className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900"
+                className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                 onClick={() => onRemoveEnemy(enemy.id)}
               >
                 Defeat
               </button>
             </div>
             <div className="flex flex-col gap-2">
-              <input
-                className="border p-1 rounded"
-                placeholder="Name"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-              />
-              <input
-                type="number"
-                className="border p-1 rounded"
-                placeholder="Max Health"
-                value={editMaxHealth}
-                onChange={(e) => setEditMaxHealth(e.target.value)}
-              />
-              <input
-                type="number"
-                className="border p-1 rounded"
-                placeholder="Current Health"
-                value={editHealth}
-                onChange={(e) => setEditHealth(e.target.value)}
-              />
+              <input className="border p-1 rounded" placeholder="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+              <input type="number" className="border p-1 rounded" placeholder="Max Health" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} />
+              <input type="number" className="border p-1 rounded" placeholder="Current Health" value={editHealth} onChange={(e) => setEditHealth(e.target.value)} />
               <div className="flex gap-2">
-                <button
-                  className="px-3 py-1 bg-green-800 text-white rounded hover:bg-green-900"
-                  onClick={handleSave}
-                >
-                  Save
-                </button>
-                <button
-                  className="px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
-                  onClick={() => setIsEditing(false)}
-                >
-                  Cancel
-                </button>
+                <button className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700" onClick={handleSave}>Save</button>
+                <button className="px-2 py-1 bg-gray-400 text-white rounded hover:bg-gray-500" onClick={() => setIsEditing(false)}>Cancel</button>
               </div>
             </div>
           </div>
@@ -830,87 +559,38 @@
       }
 
       return (
-        <div
-          className={`bg-white p-4 rounded-lg shadow mb-4 ${
-            collapsed ? "collapsed" : ""
-          }`}
-        >
+        <div className={`bg-white p-4 rounded-lg shadow mb-4 ${collapsed ? "collapsed" : ""}`}>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => onToggleCollapse(enemy.id)}
-                className="collapse-button text-sm font-bold"
-              >
-                {enemy.name}
-              </button>
+              <button onClick={() => onToggleCollapse(enemy.id)} className="collapse-button text-sm font-bold">{enemy.name}</button>
             </div>
             <div className="flex gap-2 items-center">
-              <button
-                className="px-2 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 text-sm"
-                onClick={() => setIsEditing(true)}
-              >
-                Edit
-              </button>
-              <button
-                className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
-                onClick={() => onRemoveEnemy(enemy.id)}
-              >
-                Defeat
-              </button>
+              <button className="px-2 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 text-sm" onClick={() => setIsEditing(true)}>Edit</button>
+              <button className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm" onClick={() => onRemoveEnemy(enemy.id)}>Defeat</button>
             </div>
           </div>
-          <div
-            className="collapsible-content transition-all duration-300 ease-in-out"
-            style={mainContentStyle}
-          >
+          <div className="collapsible-content transition-all duration-300 ease-in-out" style={mainContentStyle}>
             <div className={collapsed ? "hidden" : "block"}>
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-red-600 font-bold">♥</span>
                 <div className="w-full bg-gray-200 rounded-full h-4">
-                  <div
-                    className="bg-red-600 rounded-full h-4"
-                    style={{
-                      width: (enemy.health / enemy.maxHealth) * 100 + "%",
-                    }}
-                  ></div>
+                  <div className="bg-red-600 rounded-full h-4" style={{ width: (enemy.health / enemy.maxHealth) * 100 + "%" }}></div>
                 </div>
-                <span className="text-sm">
-                  {enemy.health}/{enemy.maxHealth}
-                </span>
+                <span className="text-sm">{enemy.health}/{enemy.maxHealth}</span>
               </div>
               <div className="mt-4 flex gap-4 flex-wrap">
                 <div>
                   <label className="text-sm block">Heal #</label>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      className="w-16 border rounded p-1 text-sm"
-                      value={healInput}
-                      onChange={(e) => setHealInput(e.target.value)}
-                    />
-                    <button
-                      className="px-3 py-1 bg-green-800 text-white rounded hover:bg-green-900 text-sm"
-                      onClick={applyHeal}
-                    >
-                      Heal
-                    </button>
+                    <input type="number" className="w-16 border rounded p-1 text-sm" value={healInput} onChange={(e) => setHealInput(e.target.value)} />
+                    <button className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm" onClick={applyHeal}>Heal</button>
                   </div>
                 </div>
                 <div>
                   <label className="text-sm block">Damage #</label>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      className="w-16 border rounded p-1 text-sm"
-                      value={dmgInput}
-                      onChange={(e) => setDmgInput(e.target.value)}
-                    />
-                    <button
-                      className="px-3 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
-                      onClick={applyDamage}
-                    >
-                      Damage
-                    </button>
+                    <input type="number" className="w-16 border rounded p-1 text-sm" value={dmgInput} onChange={(e) => setDmgInput(e.target.value)} />
+                    <button className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm" onClick={applyDamage}>Damage</button>
                   </div>
                 </div>
               </div>
@@ -921,26 +601,15 @@
     }
 
     /*********************************
-     * 6) StatsSection
+     * 6) StatsSection (Integrated from Provided Code)
      *********************************/
     function StatsSection({ statRows, setStatRows }) {
-      const [nextId, setNextId] = React.useState(
-        statRows.length ? Math.max(...statRows.map((r) => r.id)) + 1 : 2
-      );
+      const [nextId, setNextId] = React.useState(statRows.length ? Math.max(...statRows.map((r) => r.id)) + 1 : 2);
 
       function addStatRow() {
         setStatRows((prev) => [
           ...prev,
-          {
-            id: nextId,
-            label: `Character #${nextId}`,
-            str: 10,
-            dex: 10,
-            con: 10,
-            int: 10,
-            wis: 10,
-            cha: 10,
-          },
+          { id: nextId, label: `Character #${nextId}`, str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
         ]);
         setNextId(nextId + 1);
       }
@@ -950,14 +619,12 @@
       }
 
       function updateStatRow(rowId, updated) {
-        setStatRows((prev) =>
-          prev.map((row) => (row.id === rowId ? updated : row))
-        );
+        setStatRows((prev) => prev.map((row) => (row.id === rowId ? updated : row)));
       }
 
       function clampScore(val) {
         if (val < 6) return 6;
-        if (val > 30) return 30;
+        if (val > 20) return 20;
         return val;
       }
 
@@ -966,62 +633,13 @@
         return mod >= 0 ? "+" + mod : "" + mod;
       }
 
-      function sortByAbility(ability) {
-        setStatRows((prev) => [...prev].sort((a, b) => b[ability] - a[ability]));
-      }
-
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-2xl font-bold">Stat Calculator</h2>
-            <button
-              className="px-2 py-1 bg-blue-800 text-white rounded hover:bg-blue-900"
-              onClick={addStatRow}
-            >
-              Add Stat Row
-            </button>
+            <button className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" onClick={addStatRow}>Add Stat Row</button>
           </div>
-          <p className="text-sm text-gray-700 mb-4">
-            Enter scores (6–30) to see modifiers. Each row can represent a different character.
-          </p>
-          <div className="mb-2 flex gap-2 flex-wrap">
-            <button
-              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-              onClick={() => sortByAbility("str")}
-            >
-              Sort by STR
-            </button>
-            <button
-              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-              onClick={() => sortByAbility("dex")}
-            >
-              Sort by DEX
-            </button>
-            <button
-              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-              onClick={() => sortByAbility("con")}
-            >
-              Sort by CON
-            </button>
-            <button
-              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-              onClick={() => sortByAbility("int")}
-            >
-              Sort by INT
-            </button>
-            <button
-              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-              onClick={() => sortByAbility("wis")}
-            >
-              Sort by WIS
-            </button>
-            <button
-              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-              onClick={() => sortByAbility("cha")}
-            >
-              Sort by CHA
-            </button>
-          </div>
+          <p className="text-sm text-gray-700 mb-4">Enter scores (6–20) to see modifiers. Each row can represent a different character.</p>
           {statRows.map((row) => {
             const modSTR = computeMod(row.str);
             const modDEX = computeMod(row.dex);
@@ -1036,16 +654,9 @@
                   <input
                     className="border rounded p-1 text-sm"
                     value={row.label}
-                    onChange={(e) =>
-                      updateStatRow(row.id, { ...row, label: e.target.value })
-                    }
+                    onChange={(e) => updateStatRow(row.id, { ...row, label: e.target.value })}
                   />
-                  <button
-                    className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
-                    onClick={() => removeStatRow(row.id)}
-                  >
-                    Remove Row
-                  </button>
+                  <button className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm" onClick={() => removeStatRow(row.id)}>Remove Row</button>
                 </div>
                 <div className="grid grid-cols-6 gap-4 mt-2">
                   <div className="flex flex-col">
@@ -1059,9 +670,7 @@
                         updateStatRow(row.id, { ...row, str: val });
                       }}
                     />
-                    <span className="text-center text-blue-600 mt-1">
-                      {modSTR}
-                    </span>
+                    <span className="text-center text-blue-600 mt-1">{modSTR}</span>
                   </div>
                   <div className="flex flex-col">
                     <label className="font-semibold">DEX</label>
@@ -1074,9 +683,7 @@
                         updateStatRow(row.id, { ...row, dex: val });
                       }}
                     />
-                    <span className="text-center text-blue-600 mt-1">
-                      {modDEX}
-                    </span>
+                    <span className="text-center text-blue-600 mt-1">{modDEX}</span>
                   </div>
                   <div className="flex flex-col">
                     <label className="font-semibold">CON</label>
@@ -1089,9 +696,7 @@
                         updateStatRow(row.id, { ...row, con: val });
                       }}
                     />
-                    <span className="text-center text-blue-600 mt-1">
-                      {modCON}
-                    </span>
+                    <span className="text-center text-blue-600 mt-1">{modCON}</span>
                   </div>
                   <div className="flex flex-col">
                     <label className="font-semibold">INT</label>
@@ -1104,9 +709,7 @@
                         updateStatRow(row.id, { ...row, int: val });
                       }}
                     />
-                    <span className="text-center text-blue-600 mt-1">
-                      {modINT}
-                    </span>
+                    <span className="text-center text-blue-600 mt-1">{modINT}</span>
                   </div>
                   <div className="flex flex-col">
                     <label className="font-semibold">WIS</label>
@@ -1119,9 +722,7 @@
                         updateStatRow(row.id, { ...row, wis: val });
                       }}
                     />
-                    <span className="text-center text-blue-600 mt-1">
-                      {modWIS}
-                    </span>
+                    <span className="text-center text-blue-600 mt-1">{modWIS}</span>
                   </div>
                   <div className="flex flex-col">
                     <label className="font-semibold">CHA</label>
@@ -1134,9 +735,7 @@
                         updateStatRow(row.id, { ...row, cha: val });
                       }}
                     />
-                    <span className="text-center text-blue-600 mt-1">
-                      {modCHA}
-                    </span>
+                    <span className="text-center text-blue-600 mt-1">{modCHA}</span>
                   </div>
                 </div>
               </div>
@@ -1171,11 +770,7 @@
           <audio ref={audioRef} src="https://www.soundjay.com/misc/sounds/dice-1.mp3" />
           <div className="flex flex-wrap gap-2 mb-2">
             {[2, 4, 6, 8, 10, 12, 15, 20].map((sides) => (
-              <button
-                key={sides}
-                onClick={() => rollD(sides)}
-                className="px-3 py-1 bg-blue-800 text-white rounded hover:bg-blue-900"
-              >
+              <button key={sides} onClick={() => rollD(sides)} className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
                 d{sides}
               </button>
             ))}
@@ -1194,11 +789,11 @@
     }
 
     /*********************************
-     * 8) MapSection (Fixed)
+     * 8) MapSection (Integrated from Provided Code)
      *********************************/
     function MapSection({ mapImage, setMapImage, dotPositions, setDotPositions }) {
       const [isDragging, setIsDragging] = React.useState(null);
-      const mapRef = React.useRef(null);
+      const containerRef = React.useRef(null);
 
       function handleImageUpload(event) {
         const file = event.target.files[0];
@@ -1206,7 +801,12 @@
           const reader = new FileReader();
           reader.onload = (e) => {
             setMapImage(e.target.result);
-            setDotPositions([]);
+            setDotPositions([
+              { x: 25, y: 25, color: "red" },
+              { x: 75, y: 25, color: "blue" },
+              { x: 25, y: 75, color: "green" },
+              { x: 75, y: 75, color: "purple" },
+            ]);
           };
           reader.readAsDataURL(file);
         }
@@ -1221,26 +821,13 @@
         return (e) => {
           e.preventDefault();
           setIsDragging(index);
+          moveDot(index, e);
         };
       }
 
       function handleMouseMove(e) {
-        if (isDragging !== null && mapRef.current) {
-          const rect = mapRef.current.getBoundingClientRect();
-          const x = ((e.clientX - rect.left) / rect.width) * 100;
-          const y = ((e.clientY - rect.top) / rect.height) * 100;
-          
-          setDotPositions((prev) =>
-            prev.map((dot, i) =>
-              i === isDragging
-                ? {
-                    ...dot,
-                    x: Math.max(0, Math.min(100, x)),
-                    y: Math.max(0, Math.min(100, y)),
-                  }
-                : dot
-            )
-          );
+        if (isDragging !== null && containerRef.current && mapImage) {
+          moveDot(isDragging, e);
         }
       }
 
@@ -1248,31 +835,16 @@
         setIsDragging(null);
       }
 
-      function addDot() {
-        setDotPositions((prev) => [
-          ...prev,
-          { 
-            x: 50, 
-            y: 50, 
-            color: "red", 
-            label: `Marker ${prev.length + 1}` 
-          },
-        ]);
-      }
-
-      function removeDot(index) {
-        setDotPositions((prev) => prev.filter((_, i) => i !== index));
-      }
-
-      function updateDotLabel(index, value) {
+      function moveDot(index, e) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
         setDotPositions((prev) =>
-          prev.map((dot, i) => (i === index ? { ...dot, label: value } : dot))
-        );
-      }
-
-      function updateDotColor(index, value) {
-        setDotPositions((prev) =>
-          prev.map((dot, i) => (i === index ? { ...dot, color: value } : dot))
+          prev.map((dot, i) =>
+            i === index
+              ? { ...dot, x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) }
+              : dot
+          )
         );
       }
 
@@ -1282,128 +854,61 @@
           {mapImage ? (
             <div>
               <div
-                ref={mapRef}
-                className="relative border-2 border-gray-400 overflow-hidden bg-white"
-                style={{ width: "100%", height: "500px", position: "relative" }}
+                ref={containerRef}
+                className="relative border-2 border-gray-300 overflow-hidden"
+                style={{ width: "100%", height: "500px" }}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
               >
-                <img
-                  src={mapImage}
-                  alt="Map"
-                  className="w-full h-full object-contain"
-                  draggable="false"
-                  onDragStart={(e) => e.preventDefault()}
-                />
+                <img src={mapImage} alt="Map" className="w-full h-full object-contain" draggable="false" onDragStart={(e) => e.preventDefault()} />
                 {dotPositions.map((dot, index) => (
                   <div
                     key={index}
-                    className="absolute rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white select-none"
+                    className="absolute w-4 h-4 rounded-full border-2 border-white"
                     style={{
-                      width: "24px",
-                      height: "24px",
                       left: `${dot.x}%`,
                       top: `${dot.y}%`,
                       transform: "translate(-50%, -50%)",
                       backgroundColor: dot.color,
                       cursor: isDragging === index ? "grabbing" : "grab",
-                      zIndex: 10,
                     }}
                     onMouseDown={handleMouseDown(index)}
-                  >
-                    {dot.label.charAt(0)}
-                  </div>
+                  ></div>
                 ))}
               </div>
               <div className="mt-2">
-                <div className="flex gap-2 flex-wrap mb-2">
-                  <button
-                    className="px-2 py-1 bg-green-800 text-white rounded hover:bg-green-900"
-                    onClick={addDot}
-                  >
-                    Add Marker
-                  </button>
-                  <button
-                    className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900"
-                    onClick={handleDeleteImage}
-                  >
-                    Delete Map
-                  </button>
-                </div>
-                {dotPositions.length > 0 && (
-                  <div className="bg-white p-2 rounded shadow text-sm">
-                    <h4 className="font-bold">Markers:</h4>
-                    {dotPositions.map((dot, index) => (
-                      <div key={index} className="flex items-center gap-2 my-1">
-                        <input
-                          type="text"
-                          className="border p-1 rounded w-24"
-                          value={dot.label}
-                          onChange={(e) => updateDotLabel(index, e.target.value)}
-                        />
-                        <select
-                          className="border p-1 rounded"
-                          value={dot.color}
-                          onChange={(e) => updateDotColor(index, e.target.value)}
-                        >
-                          <option value="red">Red</option>
-                          <option value="blue">Blue</option>
-                          <option value="green">Green</option>
-                          <option value="purple">Purple</option>
-                          <option value="orange">Orange</option>
-                          <option value="yellow">Yellow</option>
-                          <option value="black">Black</option>
-                          <option value="pink">Pink</option>
-                        </select>
-                        <button
-                          className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900"
-                          onClick={() => removeDot(index)}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <p className="text-sm text-gray-700 mb-2">Red: Party 1 | Blue: Party 2 | Green: Party 3 | Purple: Enemies</p>
+                <button className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" onClick={handleDeleteImage}>
+                  Delete Map
+                </button>
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="border p-1 rounded"
-              />
-            </div>
+            <input type="file" accept="image/*" onChange={handleImageUpload} className="border p-1 rounded" />
           )}
         </div>
       );
     }
 
     /*********************************
-     * 9) PartyImages (Fixed)
+     * 9) PartyImages (Integrated with Large Images)
      *********************************/
     function PartyImages({ characters }) {
       return (
         <div className="bg-gray-100 p-4 rounded-lg mb-8">
           <h2 className="text-xl font-bold mb-2">Party Member Images</h2>
-          <div className="flex flex-wrap gap-4 justify-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {characters.map((char) => (
               <div key={char.id} className="text-center">
                 {char.image ? (
-                  <img
-                    src={char.image}
-                    alt={char.name}
-                    className="w-12 h-12 object-cover rounded-full mx-auto"
-                  />
+                  <img src={char.image} alt={char.name} className="w-16 h-16 object-cover rounded-full mx-auto" />
                 ) : (
-                  <div className="w-12 h-12 bg-gray-300 rounded-full mx-auto flex items-center justify-center">
+                  <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto flex items-center justify-center">
                     <span className="text-gray-500 text-xs">No Image</span>
                   </div>
                 )}
-                <p className="mt-1 text-xs truncate w-12">{char.name}</p>
+                <p className="mt-2 text-sm">{char.name}</p>
               </div>
             ))}
           </div>
@@ -1438,10 +943,7 @@
           "",
           "### Enemies",
           ...enemies.map((e) => {
-            return (
-              "Enemy: " + e.name +
-              "\nHealth: " + e.health + "/" + e.maxHealth
-            );
+            return ("Enemy: " + e.name + "\nHealth: " + e.health + "/" + e.maxHealth);
           }),
         ].join("\n\n");
 
@@ -1454,10 +956,7 @@
       }
 
       return (
-        <button
-          className="px-4 py-2 bg-blue-800 text-white rounded hover:bg-blue-900 mb-2"
-          onClick={handleCopy}
-        >
+        <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mb-2" onClick={handleCopy}>
           Copy for Prompt
         </button>
       );
@@ -1468,22 +967,10 @@
      *********************************/
     function ClassesSection() {
       return (
-        <div className="bg-gray-100 p-4 rounded-lg mb-8">
+        <div className="bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-2">D&D 5th Edition Classes</h2>
-          <p className="text-sm mb-2">
-            Source:{" "}
-            <a
-              href="https://rpgbot.net/dnd5/characters/classes/"
-              target="_blank"
-              rel="noreferrer"
-              className="text-blue-500 hover:underline"
-            >
-              RPGBot Classes
-            </a>
-          </p>
-          <p className="text-sm text-gray-700">
-            (Add your class details here as needed...)
-          </p>
+          <p className="text-sm mb-2">Source: <a href="https://rpgbot.net/dnd5/characters/classes/" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">RPGBot Classes</a></p>
+          <p className="text-sm text-gray-700">(Add your class details here as needed...)</p>
         </div>
       );
     }
@@ -1493,22 +980,10 @@
      *********************************/
     function RacesSection() {
       return (
-        <div className="bg-gray-100 p-4 rounded-lg mb-8">
+        <div className="bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-2">D&D 5th Edition Races</h2>
-          <p className="text-sm mb-2">
-            Source:{" "}
-            <a
-              href="https://rpgbot.net/dnd5/characters/races/"
-              target="_blank"
-              rel="noreferrer"
-              className="text-blue-500 hover:underline"
-            >
-              RPGBot Races
-            </a>
-          </p>
-          <p className="text-sm text-gray-700">
-            (Add your race details here as needed...)
-          </p>
+          <p className="text-sm mb-2">Source: <a href="https://rpgbot.net/dnd5/characters/races/" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">RPGBot Races</a></p>
+          <p className="text-sm text-gray-700">(Add your race details here as needed...)</p>
         </div>
       );
     }
@@ -1518,19 +993,10 @@
      *********************************/
     function MonsterCreatureList() {
       return (
-        <div className="bg-gray-100 p-4 rounded-lg mb-8">
+        <div className="bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-2">Monster/Creature List</h2>
-          <p className="mb-2 text-sm">
-            Access a comprehensive database of D&D monsters and creatures at:
-          </p>
-          <a
-            href="https://www.aidedd.org/dnd-filters/monsters.php"
-            target="_blank"
-            rel="noreferrer"
-            className="text-blue-500 hover:underline"
-          >
-            AIDEDD Monster Database
-          </a>
+          <p className="mb-2 text-sm">Access a comprehensive database of D&D monsters and creatures at:</p>
+          <a href="https://www.aidedd.org/dnd-filters/monsters.php" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">AIDEDD Monster Database</a>
         </div>
       );
     }
@@ -1539,23 +1005,16 @@
      * 14) SessionNotes
      *********************************/
     function SessionNotes() {
-      const [notes, setNotes] = React.useState(() => {
-        return localStorage.getItem("sessionNotes") || "";
-      });
+      const [notes, setNotes] = React.useState(() => localStorage.getItem("sessionNotes") || "");
 
       React.useEffect(() => {
         localStorage.setItem("sessionNotes", notes);
       }, [notes]);
 
       return (
-        <div className="bg-gray-100 p-4 rounded-lg mb-8">
+        <div className="bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-2">Session Notes</h2>
-          <textarea
-            className="border p-2 rounded w-full h-32 text-sm"
-            placeholder="DM's notes, story hooks, etc."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
+          <textarea className="border p-2 rounded w-full h-32 text-sm" placeholder="DM's notes, story hooks, etc." value={notes} onChange={(e) => setNotes(e.target.value)} />
         </div>
       );
     }
@@ -1577,42 +1036,23 @@
       }
 
       return (
-        <div className="bg-gray-100 p-4 rounded-lg mb-8">
+        <div className="bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-2">Bulk Heal/Damage</h2>
           <div className="flex flex-wrap items-end gap-2">
             <div>
               <label className="block text-sm font-medium mb-1">Amount</label>
-              <input
-                type="number"
-                className="border rounded p-1 text-sm w-24"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
+              <input type="number" className="border rounded p-1 text-sm w-24" value={amount} onChange={(e) => setAmount(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Target</label>
-              <select
-                className="border rounded p-1 text-sm"
-                value={targetType}
-                onChange={(e) => setTargetType(e.target.value)}
-              >
+              <select className="border rounded p-1 text-sm" value={targetType} onChange={(e) => setTargetType(e.target.value)}>
                 <option value="characters">All Characters</option>
                 <option value="enemies">All Enemies</option>
               </select>
             </div>
             <div className="flex gap-2">
-              <button
-                className="px-2 py-1 bg-green-800 text-white rounded hover:bg-green-900 text-sm"
-                onClick={handleHeal}
-              >
-                Bulk Heal
-              </button>
-              <button
-                className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
-                onClick={handleDamage}
-              >
-                Bulk Damage
-              </button>
+              <button className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm" onClick={handleHeal}>Bulk Heal</button>
+              <button className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm" onClick={handleDamage}>Bulk Damage</button>
             </div>
           </div>
         </div>
@@ -1630,26 +1070,24 @@
         const saved = localStorage.getItem("characters");
         let loaded = saved
           ? JSON.parse(saved)
-          : [
-              {
-                id: 1,
-                name: "Jory",
-                class: "Druid",
-                health: 80,
-                maxHealth: 80,
-                status: [],
-                effects: [],
-                inventory: ["Leather Armor", "Staff"],
-                specialAbilities: [],
-                spellsMagic: [],
-                image: null,
-                level: 3,
-                xp: 300,
-                initiative: 2,
-                notes: "",
-                deathSaves: { success: 0, fail: 0 },
-              },
-            ];
+          : [{
+              id: 1,
+              name: "Jory",
+              class: "Druid",
+              health: 80,
+              maxHealth: 80,
+              status: [],
+              effects: [],
+              inventory: ["Leather Armor", "Staff"],
+              specialAbilities: [],
+              spellsMagic: [],
+              image: null,
+              level: 3,
+              xp: 300,
+              initiative: 2,
+              notes: "",
+              deathSaves: { success: 0, fail: 0 },
+            }];
         return loaded.map((c) => ({
           ...c,
           level: c.level || 1,
@@ -1667,9 +1105,7 @@
 
       const [statRows, setStatRows] = React.useState(() => {
         const saved = localStorage.getItem("statRows");
-        return saved
-          ? JSON.parse(saved)
-          : [{ id: 1, label: "Jory", str: 11, dex: 11, con: 13, int: 13, wis: 11, cha: 15 }];
+        return saved ? JSON.parse(saved) : [{ id: 1, label: "Jory", str: 11, dex: 11, con: 13, int: 13, wis: 11, cha: 15 }];
       });
 
       const [mapImage, setMapImage] = React.useState(() => localStorage.getItem("mapImage") || null);
@@ -1723,103 +1159,76 @@
         setCharacters((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
       }
       function healCharacter(charId, amt) {
-        setCharacters((prev) =>
-          prev.map((c) =>
-            c.id === charId ? { ...c, health: Math.min(c.maxHealth, c.health + amt) } : c
-          )
-        );
+        setCharacters((prev) => prev.map((c) => (c.id === charId ? { ...c, health: Math.min(c.maxHealth, c.health + amt) } : c)));
       }
       function damageCharacter(charId, amt) {
-        setCharacters((prev) =>
-          prev.map((c) =>
-            c.id === charId ? { ...c, health: Math.max(0, c.health - amt) } : c
-          )
-        );
+        setCharacters((prev) => prev.map((c) => (c.id === charId ? { ...c, health: Math.max(0, c.health - amt) } : c)));
       }
       function removeStatus(charId, idx) {
-        setCharacters((prev) =>
-          prev.map((c) => {
-            if (c.id === charId) {
-              const updated = [...c.status];
-              updated.splice(idx, 1);
-              return { ...c, status: updated };
-            }
-            return c;
-          })
-        );
+        setCharacters((prev) => prev.map((c) => {
+          if (c.id === charId) {
+            const updated = [...c.status];
+            updated.splice(idx, 1);
+            return { ...c, status: updated };
+          }
+          return c;
+        }));
       }
       function removeEffect(charId, idx) {
-        setCharacters((prev) =>
-          prev.map((c) => {
-            if (c.id === charId) {
-              const updated = [...c.effects];
-              updated.splice(idx, 1);
-              return { ...c, effects: updated };
-            }
-            return c;
-          })
-        );
+        setCharacters((prev) => prev.map((c) => {
+          if (c.id === charId) {
+            const updated = [...c.effects];
+            updated.splice(idx, 1);
+            return { ...c, effects: updated };
+          }
+          return c;
+        }));
       }
       function removeItem(charId, idx) {
-        setCharacters((prev) =>
-          prev.map((c) => {
-            if (c.id === charId) {
-              const updated = [...c.inventory];
-              updated.splice(idx, 1);
-              return { ...c, inventory: updated };
-            }
-            return c;
-          })
-        );
+        setCharacters((prev) => prev.map((c) => {
+          if (c.id === charId) {
+            const updated = [...c.inventory];
+            updated.splice(idx, 1);
+            return { ...c, inventory: updated };
+          }
+          return c;
+        }));
       }
       function removeAbility(charId, idx) {
-        setCharacters((prev) =>
-          prev.map((c) => {
-            if (c.id === charId) {
-              const updated = [...c.specialAbilities];
-              updated.splice(idx, 1);
-              return { ...c, specialAbilities: updated };
-            }
-            return c;
-          })
-        );
+        setCharacters((prev) => prev.map((c) => {
+          if (c.id === charId) {
+            const updated = [...c.specialAbilities];
+            updated.splice(idx, 1);
+            return { ...c, specialAbilities: updated };
+          }
+          return c;
+        }));
       }
       function removeSpell(charId, idx) {
-        setCharacters((prev) =>
-          prev.map((c) => {
-            if (c.id === charId) {
-              const updated = [...c.spellsMagic];
-              updated.splice(idx, 1);
-              return { ...c, spellsMagic: updated };
-            }
-            return c;
-          })
-        );
+        setCharacters((prev) => prev.map((c) => {
+          if (c.id === charId) {
+            const updated = [...c.spellsMagic];
+            updated.splice(idx, 1);
+            return { ...c, spellsMagic: updated };
+          }
+          return c;
+        }));
       }
 
       function addEnemy() {
         setEnemies((prev) => [
           ...prev,
-          {
-            id: Date.now(),
-            name: "Enemy " + (prev.length + 1),
-            health: 50,
-            maxHealth: 50,
-          },
+          { id: Date.now(), name: "Enemy " + (prev.length + 1), health: 50, maxHealth: 50 },
         ]);
       }
       function removeEnemy(enemyId) {
         setEnemies((prev) => prev.filter((e) => e.id !== enemyId));
       }
       function healEnemy(enemyId, amt) {
-        setEnemies((prev) =>
-          prev.map((e) => (e.id === enemyId ? { ...e, health: Math.min(e.maxHealth, e.health + amt) } : e))
-        );
+        setEnemies((prev) => prev.map((e) => (e.id === enemyId ? { ...e, health: Math.min(e.maxHealth, e.health + amt) } : e)));
       }
       function damageEnemy(enemyId, amt) {
-        setEnemies((prev) =>
-          prev.map((e) => (e.id === enemyId ? { ...e, health: Math.max(0, e.health - amt) } : e))
-        );
+        setEnemies((prev) => prev.map((e) => (e.id === enemyId ? { ...e, health: Math.max(0, e.health - amt) } : e)));
       }
       function updateEnemy(updated) {
         setEnemies((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
@@ -1827,24 +1236,16 @@
 
       function handleBulkHeal(target, amt) {
         if (target === "characters") {
-          setCharacters((prev) =>
-            prev.map((c) => ({ ...c, health: Math.min(c.maxHealth, c.health + amt) }))
-          );
+          setCharacters((prev) => prev.map((c) => ({ ...c, health: Math.min(c.maxHealth, c.health + amt) })));
         } else {
-          setEnemies((prev) =>
-            prev.map((e) => ({ ...e, health: Math.min(e.maxHealth, e.health + amt) }))
-          );
+          setEnemies((prev) => prev.map((e) => ({ ...e, health: Math.min(e.maxHealth, e.health + amt) })));
         }
       }
       function handleBulkDamage(target, amt) {
         if (target === "characters") {
-          setCharacters((prev) =>
-            prev.map((c) => ({ ...c, health: Math.max(0, c.health - amt) }))
-          );
+          setCharacters((prev) => prev.map((c) => ({ ...c, health: Math.max(0, c.health - amt) })));
         } else {
-          setEnemies((prev) =>
-            prev.map((e) => ({ ...e, health: Math.max(0, e.health - amt) }))
-          );
+          setEnemies((prev) => prev.map((e) => ({ ...e, health: Math.max(0, e.health - amt) })));
         }
       }
 
@@ -1856,20 +1257,10 @@
               <DarkModeToggle />
             </div>
             <div className="flex gap-2">
-              <button
-                className="px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-800"
-                onClick={backupLocalStorage}
-              >
-                Backup Data
-              </button>
+              <button className="px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-800" onClick={backupLocalStorage}>Backup Data</button>
               <label className="px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-800 cursor-pointer">
                 Restore
-                <input
-                  type="file"
-                  className="hidden"
-                  accept=".json"
-                  onChange={(e) => restoreLocalStorage(e.target.files)}
-                />
+                <input type="file" className="hidden" accept=".json" onChange={(e) => restoreLocalStorage(e.target.files)} />
               </label>
             </div>
           </div>
@@ -1879,12 +1270,7 @@
           <div className="bg-gray-100 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Party Status</h2>
-              <button
-                className="px-3 py-1 bg-green-800 text-white rounded hover:bg-green-900"
-                onClick={addCharacter}
-              >
-                Add Character
-              </button>
+              <button className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700" onClick={addCharacter}>Add Character</button>
             </div>
             <div className="grid gap-4">
               {characters.map((char) => (
@@ -1914,12 +1300,7 @@
           <div className="bg-gray-100 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Enemies</h2>
-              <button
-                className="px-3 py-1 bg-purple-800 text-white rounded hover:bg-purple-900"
-                onClick={addEnemy}
-              >
-                Add Enemy
-              </button>
+              <button className="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700" onClick={addEnemy}>Add Enemy</button>
             </div>
             <div className="grid gap-4">
               {enemies.map((enemy) => (
@@ -1937,21 +1318,12 @@
             </div>
           </div>
 
-          <MapSection
-            mapImage={mapImage}
-            setMapImage={setMapImage}
-            dotPositions={dotPositions}
-            setDotPositions={setDotPositions}
-          />
+          <MapSection mapImage={mapImage} setMapImage={setMapImage} dotPositions={dotPositions} setDotPositions={setDotPositions} />
 
           <DiceRoller />
-
           <SessionNotes />
-
           <ClassesSection />
-
           <RacesSection />
-
           <MonsterCreatureList />
         </div>
       );
