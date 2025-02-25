@@ -14,7 +14,7 @@
   <div id="root" class="p-4"></div>
 
   <script type="text/babel">
-    /* CharacterCard - Updated with Initiative */
+    /* CharacterCard Component - Manages individual character details */
     function CharacterCard({
       char,
       onUpdateChar,
@@ -165,7 +165,6 @@
             </div>
           </div>
 
-          {/* Status Conditions, Effects, Inventory, Abilities, Spells - Unchanged */}
           <div className="mt-2">
             <h4 className="font-semibold text-sm">Status Conditions:</h4>
             <div className="flex flex-wrap gap-1 mt-1">
@@ -260,7 +259,7 @@
       );
     }
 
-    /* EnemyCard - Updated with Initiative */
+    /* EnemyCard Component - Manages individual enemy details */
     function EnemyCard({ enemy, onHealEnemy, onDamageEnemy, onRemoveEnemy, onUpdateEnemy }) {
       const [isEditing, setIsEditing] = React.useState(false);
       const [editName, setEditName] = React.useState(enemy.name);
@@ -354,7 +353,7 @@
       );
     }
 
-    /* StatsSection - Unchanged */
+    /* StatsSection Component - Stat calculator for characters */
     function StatsSection({ statRows, setStatRows }) {
       const [nextId, setNextId] = React.useState(statRows.length ? Math.max(...statRows.map((r) => r.id)) + 1 : 2);
 
@@ -417,7 +416,7 @@
       );
     }
 
-    /* DiceRoller - Unchanged */
+    /* DiceRoller Component - Simple dice rolling utility */
     function DiceRoller() {
       const [roll, setRoll] = React.useState(null);
       function rollD(sides) {
@@ -442,7 +441,7 @@
       );
     }
 
-    /* MapSection - Unchanged */
+    /* MapSection Component - Party and enemy location tracker */
     function MapSection({ mapImage, setMapImage, dotPositions, setDotPositions }) {
       const [isDragging, setIsDragging] = React.useState(null);
       const containerRef = React.useRef(null);
@@ -510,7 +509,7 @@
       );
     }
 
-    /* PartyImages - Unchanged */
+    /* PartyImages Component - Displays character images */
     function PartyImages({ characters }) {
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
@@ -527,7 +526,7 @@
       );
     }
 
-    /* CopyButton - Unchanged */
+    /* CopyButton Component - Copies character and enemy data to clipboard */
     function CopyButton({ characters, enemies }) {
       const handleCopy = () => {
         const text = [
@@ -554,7 +553,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
       return <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mb-4" onClick={handleCopy}>Copy for Prompt</button>;
     }
 
-    /* ClassesSection - Unchanged */
+    /* ClassesSection Component - Lists D&D classes */
     function ClassesSection() {
       const classes = [
         { name: "Artificer (Tinkerers & Inventors)", desc: "Artificers thrive on intelligence, crafting, and magical engineering..." },
@@ -580,12 +579,11 @@ Health: ${enemy.health}/${enemy.maxHealth}
       );
     }
 
-    /* RacesSection - Unchanged */
+    /* RacesSection Component - Lists D&D races */
     function RacesSection() {
       const races = [
         { name: "Aarakocra", desc: "Bird-like humanoids with the ability to fly and sharp talons..." },
         { name: "Aasimar", desc: "Celestial-touched beings with divine power..." },
-        // ... (rest of races unchanged)
         { name: "Yuan-Ti", desc: "Snake-like humanoids with resistance to poison and magic..." },
       ];
       return (
@@ -597,7 +595,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
       );
     }
 
-    /* MonsterCreatureList - Unchanged */
+    /* MonsterCreatureList Component - Links to monster database */
     function MonsterCreatureList() {
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
@@ -609,7 +607,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
       );
     }
 
-    /* NEW: InitiativeTracker */
+    /* InitiativeTracker Component - Displays combat order */
     function InitiativeTracker({ characters, enemies }) {
       const allCombatants = [
         ...characters.map((char) => ({ ...char, type: "character" })),
@@ -634,7 +632,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
       );
     }
 
-    /* NEW: NotesSection */
+    /* NotesSection Component - Campaign notes storage */
     function NotesSection() {
       const [notes, setNotes] = React.useState(() => localStorage.getItem("notes") || "");
       React.useEffect(() => {
@@ -653,7 +651,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
       );
     }
 
-    /* DnDTracker - Updated with New Features */
+    /* DnDTracker Component - Main application */
     function DnDTracker() {
       const [characters, setCharacters] = React.useState(() => {
         const saved = localStorage.getItem("characters");
@@ -671,13 +669,13 @@ Health: ${enemy.health}/${enemy.maxHealth}
           image: null,
           initiative: 0,
         }];
-        return loaded.map((char) => ({ ...char, initiative: char.initiative ?? 0 }));
+        return loaded.map((char) => ({ ...char, initiative: char.initiative !== undefined ? char.initiative : 0 }));
       });
 
       const [enemies, setEnemies] = React.useState(() => {
         const saved = localStorage.getItem("enemies");
         const loaded = saved ? JSON.parse(saved) : [];
-        return loaded.map((enemy) => ({ ...enemy, initiative: enemy.initiative ?? 0 }));
+        return loaded.map((enemy) => ({ ...enemy, initiative: enemy.initiative !== undefined ? enemy.initiative : 0 }));
       });
 
       const [statRows, setStatRows] = React.useState(() => {
