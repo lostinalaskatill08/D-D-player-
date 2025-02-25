@@ -6,51 +6,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="mobile-web-app-capable" content="yes" />
 
-  <!-- Tailwind CSS from unpkg -->
+  <!-- Tailwind CSS (unpkg) -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/tailwindcss@3.3.2/dist/tailwind.min.css"
   />
 
-  <!-- React + ReactDOM 17 from unpkg -->
+  <!-- React + ReactDOM 17 (unpkg) -->
   <script
     src="https://unpkg.com/react@17/umd/react.development.js"
-    type="text/javascript"
     crossorigin="anonymous"
   ></script>
   <script
     src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
-    type="text/javascript"
     crossorigin="anonymous"
   ></script>
 
-  <!-- Babel for inline JSX (development usage) -->
+  <!-- Babel (in-browser JSX transform) -->
   <script
     src="https://unpkg.com/babel-standalone@6/babel.min.js"
     type="text/javascript"
   ></script>
 
-  <!-- Google font (optional for a D&D vibe) -->
+  <!-- D&D-inspired font (optional) -->
   <link
     href="https://fonts.googleapis.com/css2?family=Cinzel&display=swap"
     rel="stylesheet"
   />
 
   <style>
-    /* Example D&D-ish font and some transitions */
+    /* D&D-ish font and transitions */
     body {
-      font-family: "Cinzel", serif;
+      font-family: 'Cinzel', serif;
       transition: background-color 0.3s, color 0.3s;
     }
     .dark {
       background-color: #1a1a1a;
       color: #fafafa;
     }
-    /* Simple parchment-like background if desired */
+    /* Optional parchment background */
     .parchment-bg {
       background: url("https://www.transparenttextures.com/patterns/aged-paper.png");
     }
-    /* Expand/collapse icons */
+    /* Collapsible icons */
     .collapse-button::after {
       content: "▼";
       display: inline-block;
@@ -63,22 +61,33 @@
       transition: max-height 0.3s ease;
       overflow: hidden;
     }
+    /* Custom tan scrollbar (WebKit browsers) */
+    ::-webkit-scrollbar {
+      width: 12px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f5f0e6; /* a light tan */
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #d2b48c; /* tan */
+      border-radius: 20px;
+      border: 3px solid #f5f0e6;
+    }
   </style>
 </head>
 
 <body class="bg-gray-50 text-gray-800">
   <div id="root" class="p-4"></div>
 
-  <!-- Main Script with type="text/babel" so Babel will transform JSX in-browser -->
+  <!-- Main Script -->
   <script type="text/babel">
     /**************************************************
-     * Single-File D&D Tracker (React + Tailwind + Babel)
-     * Make sure to serve over HTTP (not file://).
+     * Minimal D&D Tracker with requested enhancements
      **************************************************/
 
-    /********************************************
-     * 1) UTILS: LocalStorage Backup/Restore
-     ********************************************/
+    /***************
+     * 1) Utility
+     ***************/
     function backupLocalStorage() {
       const data = {
         characters: localStorage.getItem("characters"),
@@ -121,9 +130,25 @@
       reader.readAsText(file);
     }
 
-    /********************************************
-     * 2) DarkModeToggle
-     ********************************************/
+    function useCollapseState(storageKey) {
+      const [collapseState, setCollapseState] = React.useState(() => {
+        const saved = localStorage.getItem(storageKey);
+        return saved ? JSON.parse(saved) : {};
+      });
+
+      function toggleCollapse(id) {
+        setCollapseState((prev) => {
+          const newVal = { ...prev, [id]: !prev[id] };
+          localStorage.setItem(storageKey, JSON.stringify(newVal));
+          return newVal;
+        });
+      }
+      return [collapseState, toggleCollapse];
+    }
+
+    /***************
+     * 2) Dark Mode
+     ***************/
     function DarkModeToggle() {
       const [darkMode, setDarkMode] = React.useState(() => {
         return localStorage.getItem("darkMode") === "true";
@@ -148,50 +173,24 @@
       );
     }
 
-    /********************************************
-     * 3) Collapse Logic Hook
-     ********************************************/
-    // A hook that returns [collapseState, toggleFunc].
-    // collapseState is an object keyed by ID with boolean values.
-    function useCollapseState(storageKey) {
-      const [collapseState, setCollapseState] = React.useState(() => {
-        const saved = localStorage.getItem(storageKey);
-        return saved ? JSON.parse(saved) : {};
-      });
-
-      function toggleCollapse(id) {
-        setCollapseState((prev) => {
-          const newVal = { ...prev, [id]: !prev[id] };
-          localStorage.setItem(storageKey, JSON.stringify(newVal));
-          return newVal;
-        });
-      }
-
-      return [collapseState, toggleCollapse];
-    }
-
-    /********************************************
-     * 4) CharacterCard
-     ********************************************/
-    function CharacterCard(props) {
-      const {
-        char,
-        collapsed,
-        onToggleCollapse,
-        onUpdateChar,
-        onHeal,
-        onDamage,
-        onRemoveStatus,
-        onRemoveEffect,
-        onRemoveItem,
-        onRemoveAbility,
-        onRemoveSpell,
-        onRemoveChar,
-      } = props;
-
+    /***************
+     * 3) CharacterCard
+     ***************/
+    function CharacterCard({
+      char,
+      collapsed,
+      onToggleCollapse,
+      onUpdateChar,
+      onHeal,
+      onDamage,
+      onRemoveStatus,
+      onRemoveEffect,
+      onRemoveItem,
+      onRemoveAbility,
+      onRemoveSpell,
+      onRemoveChar,
+    }) {
       const [isEditing, setIsEditing] = React.useState(false);
-
-      // Extended fields
       const [editName, setEditName] = React.useState(char.name);
       const [editClass, setEditClass] = React.useState(char.class);
       const [editMaxHealth, setEditMaxHealth] = React.useState(String(char.maxHealth));
@@ -233,7 +232,6 @@
       function handleSave() {
         const parsedMax = parseInt(editMaxHealth, 10) || 0;
         const clippedHealth = Math.min(char.health, parsedMax);
-
         onUpdateChar({
           ...char,
           name: editName,
@@ -280,35 +278,30 @@
       }
 
       function applyHeal() {
-        const amt = parseInt(healInput, 10) || 0;
-        onHeal(char.id, amt);
+        onHeal(char.id, parseInt(healInput, 10) || 0);
       }
       function applyDamage() {
-        const amt = parseInt(dmgInput, 10) || 0;
-        onDamage(char.id, amt);
+        onDamage(char.id, parseInt(dmgInput, 10) || 0);
       }
 
-      // Death Saves
       function toggleDeathSaveSuccess() {
-        const successCount = char.deathSaves.success;
-        if (successCount < 3) {
+        if (char.deathSaves.success < 3) {
           onUpdateChar({
             ...char,
             deathSaves: {
               ...char.deathSaves,
-              success: successCount + 1,
+              success: char.deathSaves.success + 1,
             },
           });
         }
       }
       function toggleDeathSaveFail() {
-        const failCount = char.deathSaves.fail;
-        if (failCount < 3) {
+        if (char.deathSaves.fail < 3) {
           onUpdateChar({
             ...char,
             deathSaves: {
               ...char.deathSaves,
-              fail: failCount + 1,
+              fail: char.deathSaves.fail + 1,
             },
           });
         }
@@ -320,7 +313,6 @@
         });
       }
 
-      // Collapsible content
       const mainContentStyle = collapsed
         ? { maxHeight: 0, padding: 0 }
         : { maxHeight: "9999px" };
@@ -337,7 +329,7 @@
                 Remove
               </button>
             </div>
-            <div className="grid md:grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <input
                 className="border p-1 rounded"
                 placeholder="Name"
@@ -388,13 +380,13 @@
             />
             <div className="flex gap-2">
               <button
-                className="px-3 py-1 bg-green-500 text-white rounded"
+                className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
                 onClick={handleSave}
               >
                 Save
               </button>
               <button
-                className="px-2 py-1 bg-gray-400 text-white rounded"
+                className="px-2 py-1 bg-gray-400 text-white rounded hover:bg-gray-500"
                 onClick={() => setIsEditing(false)}
               >
                 Cancel
@@ -422,7 +414,7 @@
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm">
-                Init: {(char.initiative || 0)} | Lvl: {(char.level || 1)}
+                Init: {char.initiative || 0} | Lvl: {char.level || 1}
               </span>
               <button
                 className="p-1 text-gray-500 hover:text-gray-700"
@@ -431,22 +423,20 @@
                 [EDIT]
               </button>
               <button
-                className="px-2 py-1 bg-red-500 text-white rounded"
+                className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                 onClick={() => onRemoveChar(char.id)}
               >
                 Remove
               </button>
             </div>
           </div>
-
           <div
             className="collapsible-content transition-all duration-300 ease-in-out"
             style={mainContentStyle}
           >
             <div className={collapsed ? "hidden" : "block"}>
-              {/* XP */}
-              <div className="text-sm mb-1 mt-2">XP: {(char.xp || 0)}</div>
-              {/* Image */}
+              <div className="text-sm mb-1 mt-2">XP: {char.xp || 0}</div>
+              {/* Character Image */}
               <label className="block text-sm font-medium text-gray-700">
                 Character Image
               </label>
@@ -458,7 +448,7 @@
                     className="w-16 h-16 object-cover rounded-full"
                   />
                   <button
-                    className="px-2 py-1 bg-red-500 text-white rounded text-sm"
+                    className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
                     onClick={() => onUpdateChar({ ...char, image: null })}
                   >
                     Remove Image
@@ -472,7 +462,7 @@
                   className="mt-1 text-sm"
                 />
               )}
-              {/* Health Bar */}
+              {/* Health */}
               <div className="mt-2">
                 <div className="flex items-center gap-2">
                   <span className="text-red-500">❤️</span>
@@ -480,7 +470,7 @@
                     <div
                       className="bg-red-500 rounded-full h-4"
                       style={{
-                        width: `${(char.health / char.maxHealth) * 100}%`,
+                        width: (char.health / char.maxHealth) * 100 + "%",
                       }}
                     ></div>
                   </div>
@@ -516,7 +506,7 @@
                     placeholder="Add status"
                   />
                   <button
-                    className="px-2 py-1 bg-red-500 text-white rounded text-sm"
+                    className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
                     onClick={handleAddStatus}
                   >
                     Add
@@ -550,7 +540,7 @@
                     placeholder="Add effect"
                   />
                   <button
-                    className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
+                    className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
                     onClick={handleAddEffect}
                   >
                     Add
@@ -560,7 +550,9 @@
               {/* Inventory */}
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Inventory:</h4>
-                <div className="flex flex-wrap gap-1 mt-1">
+                <div
+                  className="flex flex-wrap gap-1 mt-1 whitespace-pre-wrap break-words"
+                >
                   {char.inventory.map((item, idx) => (
                     <span
                       key={idx}
@@ -584,14 +576,14 @@
                     placeholder="New item"
                   />
                   <button
-                    className="px-2 py-1 bg-gray-500 text-white rounded text-sm"
+                    className="px-2 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
                     onClick={handleAddItem}
                   >
                     Add
                   </button>
                 </div>
               </div>
-              {/* Special Abilities */}
+              {/* Abilities */}
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Special Abilities:</h4>
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -615,10 +607,10 @@
                     className="border p-1 rounded text-sm"
                     value={newAbility}
                     onChange={(e) => setNewAbility(e.target.value)}
-                    placeholder="Add ability/move"
+                    placeholder="Add ability"
                   />
                   <button
-                    className="px-2 py-1 bg-green-600 text-white rounded text-sm"
+                    className="px-2 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
                     onClick={handleAddAbility}
                   >
                     Add
@@ -652,7 +644,7 @@
                     placeholder="Add spell"
                   />
                   <button
-                    className="px-2 py-1 bg-purple-600 text-white rounded text-sm"
+                    className="px-2 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700"
                     onClick={handleAddSpell}
                   >
                     Add
@@ -671,7 +663,7 @@
                       onChange={(e) => setHealInput(e.target.value)}
                     />
                     <button
-                      className="px-3 py-1 bg-green-500 text-white rounded text-sm"
+                      className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
                       onClick={applyHeal}
                     >
                       Heal
@@ -688,7 +680,7 @@
                       onChange={(e) => setDmgInput(e.target.value)}
                     />
                     <button
-                      className="px-3 py-1 bg-red-500 text-white rounded text-sm"
+                      className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
                       onClick={applyDamage}
                     >
                       Damage
@@ -696,7 +688,7 @@
                   </div>
                 </div>
               </div>
-              {/* Death Saves (if HP <= 0) */}
+              {/* Death Saves */}
               {char.health <= 0 && (
                 <div className="mt-4">
                   <h4 className="font-semibold text-sm">Death Saves</h4>
@@ -740,20 +732,18 @@
       );
     }
 
-    /********************************************
-     * 5) EnemyCard
-     ********************************************/
-    function EnemyCard(props) {
-      const {
-        enemy,
-        collapsed,
-        onToggleCollapse,
-        onHealEnemy,
-        onDamageEnemy,
-        onRemoveEnemy,
-        onUpdateEnemy,
-      } = props;
-
+    /***************
+     * 4) EnemyCard
+     ***************/
+    function EnemyCard({
+      enemy,
+      collapsed,
+      onToggleCollapse,
+      onHealEnemy,
+      onDamageEnemy,
+      onRemoveEnemy,
+      onUpdateEnemy,
+    }) {
       const [isEditing, setIsEditing] = React.useState(false);
       const [editName, setEditName] = React.useState(enemy.name);
       const [editMaxHealth, setEditMaxHealth] = React.useState(String(enemy.maxHealth));
@@ -781,12 +771,10 @@
       }
 
       function applyHeal() {
-        const amt = parseInt(healInput, 10) || 0;
-        onHealEnemy(enemy.id, amt);
+        onHealEnemy(enemy.id, parseInt(healInput, 10) || 0);
       }
       function applyDamage() {
-        const amt = parseInt(dmgInput, 10) || 0;
-        onDamageEnemy(enemy.id, amt);
+        onDamageEnemy(enemy.id, parseInt(dmgInput, 10) || 0);
       }
 
       const mainContentStyle = collapsed
@@ -799,7 +787,7 @@
             <div className="flex justify-between items-center">
               <h3 className="font-bold">Editing Enemy</h3>
               <button
-                className="px-2 py-1 bg-red-500 text-white rounded"
+                className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                 onClick={() => onRemoveEnemy(enemy.id)}
               >
                 Defeat
@@ -828,13 +816,13 @@
               />
               <div className="flex gap-2">
                 <button
-                  className="px-3 py-1 bg-green-500 text-white rounded"
+                  className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
                   onClick={handleSave}
                 >
                   Save
                 </button>
                 <button
-                  className="px-2 py-1 bg-gray-400 text-white rounded"
+                  className="px-2 py-1 bg-gray-400 text-white rounded hover:bg-gray-500"
                   onClick={() => setIsEditing(false)}
                 >
                   Cancel
@@ -868,7 +856,7 @@
                 [EDIT]
               </button>
               <button
-                className="px-2 py-1 bg-red-500 text-white rounded"
+                className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                 onClick={() => onRemoveEnemy(enemy.id)}
               >
                 Defeat
@@ -886,7 +874,7 @@
                   <div
                     className="bg-red-500 rounded-full h-4"
                     style={{
-                      width: `${(enemy.health / enemy.maxHealth) * 100}%`,
+                      width: (enemy.health / enemy.maxHealth) * 100 + "%",
                     }}
                   ></div>
                 </div>
@@ -905,7 +893,7 @@
                       onChange={(e) => setHealInput(e.target.value)}
                     />
                     <button
-                      className="px-3 py-1 bg-green-500 text-white rounded text-sm"
+                      className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
                       onClick={applyHeal}
                     >
                       Heal
@@ -922,7 +910,7 @@
                       onChange={(e) => setDmgInput(e.target.value)}
                     />
                     <button
-                      className="px-3 py-1 bg-red-500 text-white rounded text-sm"
+                      className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
                       onClick={applyDamage}
                     >
                       Damage
@@ -936,9 +924,9 @@
       );
     }
 
-    /********************************************
-     * 6) StatsSection
-     ********************************************/
+    /***************
+     * 5) StatsSection
+     ***************/
     function StatsSection({ statRows, setStatRows }) {
       const [nextId, setNextId] = React.useState(
         statRows.length ? Math.max(...statRows.map((r) => r.id)) + 1 : 2
@@ -958,7 +946,7 @@
             cha: 10,
           },
         ]);
-        setNextId((n) => n + 1);
+        setNextId(nextId + 1);
       }
 
       function removeStatRow(rowId) {
@@ -991,9 +979,9 @@
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-bold">Stat Calculator</h2>
+            <h2 className="text-2xl font-bold">Stat Calculator</h2>
             <button
-              className="px-2 py-1 bg-blue-500 text-white rounded"
+              className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
               onClick={addStatRow}
             >
               Add Stat Row
@@ -1002,45 +990,44 @@
           <p className="text-sm text-gray-700 mb-4">
             Enter scores (6–30) to see modifiers. Each row can represent a different character.
           </p>
-          <div className="mb-2 flex gap-2">
+          <div className="mb-2 flex gap-2 flex-wrap">
             <button
-              className="px-2 py-1 bg-blue-400 text-white rounded text-sm"
+              className="px-2 py-1 bg-blue-400 text-white rounded text-sm hover:bg-blue-500"
               onClick={() => sortByAbility("str")}
             >
               Sort by STR
             </button>
             <button
-              className="px-2 py-1 bg-blue-400 text-white rounded text-sm"
+              className="px-2 py-1 bg-blue-400 text-white rounded text-sm hover:bg-blue-500"
               onClick={() => sortByAbility("dex")}
             >
               Sort by DEX
             </button>
             <button
-              className="px-2 py-1 bg-blue-400 text-white rounded text-sm"
+              className="px-2 py-1 bg-blue-400 text-white rounded text-sm hover:bg-blue-500"
               onClick={() => sortByAbility("con")}
             >
               Sort by CON
             </button>
             <button
-              className="px-2 py-1 bg-blue-400 text-white rounded text-sm"
+              className="px-2 py-1 bg-blue-400 text-white rounded text-sm hover:bg-blue-500"
               onClick={() => sortByAbility("int")}
             >
               Sort by INT
             </button>
             <button
-              className="px-2 py-1 bg-blue-400 text-white rounded text-sm"
+              className="px-2 py-1 bg-blue-400 text-white rounded text-sm hover:bg-blue-500"
               onClick={() => sortByAbility("wis")}
             >
               Sort by WIS
             </button>
             <button
-              className="px-2 py-1 bg-blue-400 text-white rounded text-sm"
+              className="px-2 py-1 bg-blue-400 text-white rounded text-sm hover:bg-blue-500"
               onClick={() => sortByAbility("cha")}
             >
               Sort by CHA
             </button>
           </div>
-
           {statRows.map((row) => {
             const modSTR = computeMod(row.str);
             const modDEX = computeMod(row.dex);
@@ -1060,13 +1047,13 @@
                     }
                   />
                   <button
-                    className="px-2 py-1 bg-red-500 text-white rounded text-sm"
+                    className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
                     onClick={() => removeStatRow(row.id)}
                   >
                     Remove Row
                   </button>
                 </div>
-                <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2">
+                <div className="grid grid-cols-6 gap-4 mt-2">
                   {/* STR */}
                   <div className="flex flex-col">
                     <label className="font-semibold">STR</label>
@@ -1171,9 +1158,9 @@
       );
     }
 
-    /********************************************
-     * 7) DiceRoller
-     ********************************************/
+    /***************
+     * 6) DiceRoller
+     ***************/
     function DiceRoller() {
       const [rollHistory, setRollHistory] = React.useState([]);
       const audioRef = React.useRef(null);
@@ -1184,8 +1171,10 @@
           audioRef.current.play().catch(() => {});
         }
         const result = Math.floor(Math.random() * sides) + 1;
-        const newEntry = "d" + sides + " → " + result;
-        setRollHistory((prev) => [newEntry].concat(prev.slice(0, 9)));
+        setRollHistory((prev) => {
+          const newEntry = `d${sides} → ${result}`;
+          return [newEntry, ...prev.slice(0, 9)];
+        });
       }
 
       return (
@@ -1197,7 +1186,7 @@
               <button
                 key={sides}
                 onClick={() => rollD(sides)}
-                className="px-3 py-1 bg-blue-500 text-white rounded"
+                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 d{sides}
               </button>
@@ -1216,11 +1205,10 @@
       );
     }
 
-    /********************************************
-     * 8) MapSection with Zoom + Pan + Markers
-     ********************************************/
-    function MapSection(props) {
-      const { mapImage, setMapImage, dotPositions, setDotPositions } = props;
+    /***************
+     * 7) MapSection (No Mouse-Wheel Zoom)
+     ***************/
+    function MapSection({ mapImage, setMapImage, dotPositions, setDotPositions }) {
       const [isDragging, setIsDragging] = React.useState(null);
       const containerRef = React.useRef(null);
 
@@ -1229,12 +1217,12 @@
       const [isPanning, setIsPanning] = React.useState(false);
       const [panStart, setPanStart] = React.useState({ x: 0, y: 0 });
 
-      function handleImageUpload(e) {
-        const file = e.target.files[0];
+      function handleImageUpload(event) {
+        const file = event.target.files[0];
         if (file) {
           const reader = new FileReader();
-          reader.onload = (evt) => {
-            setMapImage(evt.target.result);
+          reader.onload = (e) => {
+            setMapImage(e.target.result);
             setDotPositions([]);
             setScale(1);
             setOffset({ x: 0, y: 0 });
@@ -1250,7 +1238,7 @@
 
       function handleMouseDown(index) {
         return (e) => {
-          e.stopPropagation(); // so we don't start panning
+          e.stopPropagation(); 
           setIsDragging(index);
           moveDot(index, e);
         };
@@ -1275,8 +1263,14 @@
       function moveDot(index, e) {
         if (!containerRef.current || !mapImage) return;
         const rect = containerRef.current.getBoundingClientRect();
-        const xPercent = ((e.clientX - rect.left - offset.x) / (rect.width * scale)) * 100;
-        const yPercent = ((e.clientY - rect.top - offset.y) / (rect.height * scale)) * 100;
+        // Convert from pixels to percentages, factoring in offset & scale
+        const x = e.clientX - rect.left - offset.x;
+        const y = e.clientY - rect.top - offset.y;
+        const mapW = rect.width * scale;
+        const mapH = rect.height * scale;
+        // convert to percent
+        const xPercent = (x / mapW) * 100;
+        const yPercent = (y / mapH) * 100;
 
         setDotPositions((prev) =>
           prev.map((dot, i) =>
@@ -1291,14 +1285,7 @@
         );
       }
 
-      function handleWheel(e) {
-        if (!mapImage) return;
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.1 : 0.1;
-        const newScale = Math.min(Math.max(0.5, scale + delta), 3);
-        setScale(newScale);
-      }
-
+      // Removed onWheel to prevent scroll-based zoom
       function handlePanStart(e) {
         setIsPanning(true);
         setPanStart({ x: e.clientX, y: e.clientY });
@@ -1318,29 +1305,26 @@
       function addDot() {
         setDotPositions((prev) => [
           ...prev,
-          { x: 50, y: 50, color: getRandomColor(), label: "New Marker" },
+          {
+            x: 50,
+            y: 50,
+            color: "red",
+            label: "Marker",
+          },
         ]);
       }
-
-      function removeDot(idx) {
-        setDotPositions((prev) => prev.filter((_, i) => i !== idx));
+      function removeDot(index) {
+        setDotPositions((prev) => prev.filter((_, i) => i !== index));
       }
-
-      function updateDotLabel(idx, value) {
+      function updateDotLabel(index, value) {
         setDotPositions((prev) =>
-          prev.map((dot, i) => (i === idx ? { ...dot, label: value } : dot))
+          prev.map((dot, i) => (i === index ? { ...dot, label: value } : dot))
         );
       }
-
-      function updateDotColor(idx, value) {
+      function updateDotColor(index, value) {
         setDotPositions((prev) =>
-          prev.map((dot, i) => (i === idx ? { ...dot, color: value } : dot))
+          prev.map((dot, i) => (i === index ? { ...dot, color: value } : dot))
         );
-      }
-
-      function getRandomColor() {
-        const colors = ["red", "blue", "green", "purple", "orange", "yellow", "black", "pink"];
-        return colors[Math.floor(Math.random() * colors.length)];
       }
 
       return (
@@ -1355,11 +1339,10 @@
                   height: "500px",
                   cursor: isPanning ? "grabbing" : "grab",
                 }}
+                ref={containerRef}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
-                onWheel={handleWheel}
-                ref={containerRef}
                 onMouseDown={handlePanStart}
               >
                 <img
@@ -1389,23 +1372,35 @@
               </div>
               <div className="mt-2">
                 <p className="text-sm text-gray-700 mb-2">
-                  Scroll wheel to zoom. Drag to pan. Drag dots to move them.
+                  Use the buttons below to zoom or add markers. Drag inside the map to pan (move).
                 </p>
                 <div className="flex gap-2 flex-wrap mb-2">
-                  <button onClick={zoomIn} className="px-2 py-1 bg-blue-400 text-white rounded">
+                  <button
+                    className="px-2 py-1 bg-blue-400 text-white rounded hover:bg-blue-500"
+                    onClick={zoomIn}
+                  >
                     Zoom In
                   </button>
-                  <button onClick={zoomOut} className="px-2 py-1 bg-blue-400 text-white rounded">
+                  <button
+                    className="px-2 py-1 bg-blue-400 text-white rounded hover:bg-blue-500"
+                    onClick={zoomOut}
+                  >
                     Zoom Out
                   </button>
-                  <button onClick={resetView} className="px-2 py-1 bg-blue-400 text-white rounded">
+                  <button
+                    className="px-2 py-1 bg-blue-400 text-white rounded hover:bg-blue-500"
+                    onClick={resetView}
+                  >
                     Reset View
                   </button>
-                  <button onClick={addDot} className="px-2 py-1 bg-green-400 text-white rounded">
+                  <button
+                    className="px-2 py-1 bg-green-400 text-white rounded hover:bg-green-500"
+                    onClick={addDot}
+                  >
                     Add Marker
                   </button>
                   <button
-                    className="px-2 py-1 bg-red-500 text-white rounded"
+                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                     onClick={handleDeleteImage}
                   >
                     Delete Map
@@ -1414,32 +1409,31 @@
                 {dotPositions.length > 0 && (
                   <div className="bg-white p-2 rounded shadow text-sm">
                     <h4 className="font-bold">Markers:</h4>
-                    {dotPositions.map((dot, idx) => (
-                      <div key={idx} className="flex items-center gap-2 my-1">
+                    {dotPositions.map((dot, index) => (
+                      <div key={index} className="flex items-center gap-2 my-1">
                         <input
                           type="text"
                           className="border p-1 rounded"
                           value={dot.label}
-                          onChange={(e) => updateDotLabel(idx, e.target.value)}
-                          placeholder="Marker Label"
+                          onChange={(e) => updateDotLabel(index, e.target.value)}
                         />
                         <select
                           className="border p-1 rounded"
                           value={dot.color}
-                          onChange={(e) => updateDotColor(idx, e.target.value)}
+                          onChange={(e) => updateDotColor(index, e.target.value)}
                         >
-                          <option value="red">Red</option>
-                          <option value="blue">Blue</option>
-                          <option value="green">Green</option>
-                          <option value="purple">Purple</option>
-                          <option value="orange">Orange</option>
-                          <option value="yellow">Yellow</option>
-                          <option value="black">Black</option>
-                          <option value="pink">Pink</option>
+                          <option>red</option>
+                          <option>blue</option>
+                          <option>green</option>
+                          <option>purple</option>
+                          <option>orange</option>
+                          <option>yellow</option>
+                          <option>black</option>
+                          <option>pink</option>
                         </select>
                         <button
-                          className="px-2 py-1 bg-red-400 text-white rounded"
-                          onClick={() => removeDot(idx)}
+                          className="px-2 py-1 bg-red-400 text-white rounded hover:bg-red-500"
+                          onClick={() => removeDot(index)}
                         >
                           Remove
                         </button>
@@ -1463,9 +1457,9 @@
       );
     }
 
-    /********************************************
-     * 9) PartyImages
-     ********************************************/
+    /***************
+     * 8) PartyImages
+     ***************/
     function PartyImages({ characters }) {
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
@@ -1492,9 +1486,9 @@
       );
     }
 
-    /********************************************
-     * 10) CopyButton
-     ********************************************/
+    /***************
+     * 9) CopyButton
+     ***************/
     function CopyButton({ characters, enemies }) {
       function handleCopy() {
         const text = [
@@ -1516,7 +1510,8 @@
               "\nImage: " + (c.image ? "Yes" : "No")
             );
           }),
-          "\n### Enemies",
+          "",
+          "### Enemies",
           ...enemies.map((e) => {
             return (
               "Enemy: " + e.name +
@@ -1543,23 +1538,14 @@
       );
     }
 
-    /********************************************
-     * 11) ClassesSection
-     ********************************************/
+    /***************
+     * 10) ClassesSection (Short)
+     ***************/
     function ClassesSection() {
-      const classes = [
-        { name: "Artificer (Tinkerers & Inventors)", desc: "Artificers..." },
-        { name: "Barbarian (Unstoppable Warriors)", desc: "Barbarians..." },
-        { name: "Bard (Charming Performers & Spellcasters)", desc: "Bards..." },
-        { name: "Cleric (Divine Warriors & Healers)", desc: "Clerics..." },
-        { name: "Druid (Nature’s Guardians & Shapeshifters)", desc: "Druids..." },
-        // etc. Add all your class descriptions
-      ];
-
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-2">D&D 5th Edition Classes</h2>
-          <p className="mb-2 text-sm">
+          <p className="text-sm mb-2">
             Source:{" "}
             <a
               href="https://rpgbot.net/dnd5/characters/classes/"
@@ -1570,31 +1556,22 @@
               RPGBot Classes
             </a>
           </p>
-          <ul className="list-disc list-inside space-y-2 text-sm">
-            {classes.map((cls) => (
-              <li key={cls.name}>
-                <span className="font-semibold">{cls.name}</span>: {cls.desc}
-              </li>
-            ))}
-          </ul>
+          {/* Just leave placeholders for your own text */}
+          <p className="text-sm text-gray-700">
+            (Add your class descriptions here as needed)
+          </p>
         </div>
       );
     }
 
-    /********************************************
-     * 12) RacesSection
-     ********************************************/
+    /***************
+     * 11) RacesSection (Short)
+     ***************/
     function RacesSection() {
-      const races = [
-        { name: "Aarakocra", desc: "Bird-like humanoids..." },
-        { name: "Aasimar", desc: "Celestial-touched beings..." },
-        // etc. Add more races
-      ];
-
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-2">D&D 5th Edition Races</h2>
-          <p className="mb-2 text-sm">
+          <p className="text-sm mb-2">
             Source:{" "}
             <a
               href="https://rpgbot.net/dnd5/characters/races/"
@@ -1605,20 +1582,17 @@
               RPGBot Races
             </a>
           </p>
-          <ul className="list-disc list-inside space-y-1 text-sm">
-            {races.map((race) => (
-              <li key={race.name}>
-                <span className="font-semibold">{race.name}</span>: {race.desc}
-              </li>
-            ))}
-          </ul>
+          {/* Placeholder for your own race descriptions */}
+          <p className="text-sm text-gray-700">
+            (Add your race descriptions here as needed)
+          </p>
         </div>
       );
     }
 
-    /********************************************
-     * 13) MonsterCreatureList
-     ********************************************/
+    /***************
+     * 12) MonsterCreatureList
+     ***************/
     function MonsterCreatureList() {
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
@@ -1634,16 +1608,13 @@
           >
             AIDEDD Monster Database
           </a>
-          <p className="mt-2 text-sm text-gray-700">
-            Use this resource to find detailed stats for monsters in your campaign.
-          </p>
         </div>
       );
     }
 
-    /********************************************
-     * 14) SessionNotes
-     ********************************************/
+    /***************
+     * 13) Session Notes
+     ***************/
     function SessionNotes() {
       const [notes, setNotes] = React.useState(() => {
         return localStorage.getItem("sessionNotes") || "";
@@ -1666,9 +1637,9 @@
       );
     }
 
-    /********************************************
-     * 15) BulkActions
-     ********************************************/
+    /***************
+     * 14) BulkActions
+     ***************/
     function BulkActions({ onBulkHeal, onBulkDamage }) {
       const [amount, setAmount] = React.useState("0");
       const [targetType, setTargetType] = React.useState("characters");
@@ -1708,13 +1679,13 @@
             </div>
             <div className="flex gap-2">
               <button
-                className="px-2 py-1 bg-green-500 text-white rounded text-sm"
+                className="px-2 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
                 onClick={handleHeal}
               >
                 Heal
               </button>
               <button
-                className="px-2 py-1 bg-red-500 text-white rounded text-sm"
+                className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
                 onClick={handleDamage}
               >
                 Damage
@@ -1725,9 +1696,9 @@
       );
     }
 
-    /********************************************
+    /***************
      * Main DnDTracker
-     ********************************************/
+     ***************/
     function DnDTracker() {
       const [collapsedCharacters, toggleCharacterCollapse] = useCollapseState("collapsedCharacters");
       const [collapsedEnemies, toggleEnemyCollapse] = useCollapseState("collapsedEnemies");
@@ -1741,18 +1712,22 @@
               {
                 id: 1,
                 name: "Jory",
-                class: "Cleric",
-                health: 100,
-                maxHealth: 100,
+                class: "Druid",
+                health: 80,
+                maxHealth: 80,
                 status: [],
                 effects: [],
-                inventory: ["Mace", "Shield"],
-                specialAbilities: ["Turn Undead"],
-                spellsMagic: ["Cure Wounds"],
+                inventory: ["Leather Armor", "Staff"],
+                specialAbilities: [],
+                spellsMagic: [],
                 image: null,
+                level: 3,
+                xp: 300,
+                initiative: 2,
+                notes: "",
+                deathSaves: { success: 0, fail: 0 },
               },
             ];
-        // Add missing fields
         return loaded.map((c) => ({
           ...c,
           level: c.level || 1,
@@ -1774,7 +1749,7 @@
         const saved = localStorage.getItem("statRows");
         return saved
           ? JSON.parse(saved)
-          : [{ id: 1, label: "Character #1", str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }];
+          : [{ id: 1, label: "Jory", str: 11, dex: 11, con: 13, int: 13, wis: 11, cha: 15 }];
       });
 
       // Map
@@ -1784,19 +1759,16 @@
         return saved ? JSON.parse(saved) : [];
       });
 
-      // Sync changes to localStorage
+      // Save to localStorage when data changes
       React.useEffect(() => {
         localStorage.setItem("characters", JSON.stringify(characters));
       }, [characters]);
-
       React.useEffect(() => {
         localStorage.setItem("enemies", JSON.stringify(enemies));
       }, [enemies]);
-
       React.useEffect(() => {
         localStorage.setItem("statRows", JSON.stringify(statRows));
       }, [statRows]);
-
       React.useEffect(() => {
         localStorage.setItem("mapImage", mapImage);
         localStorage.setItem("dotPositions", JSON.stringify(dotPositions));
@@ -1833,21 +1805,19 @@
       function updateCharacter(updated) {
         setCharacters((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
       }
-      function healCharacter(charId, amount) {
+      function healCharacter(charId, amt) {
         setCharacters((prev) =>
           prev.map((c) =>
             c.id === charId
-              ? { ...c, health: Math.min(c.maxHealth, c.health + amount) }
+              ? { ...c, health: Math.min(c.maxHealth, c.health + amt) }
               : c
           )
         );
       }
-      function damageCharacter(charId, amount) {
+      function damageCharacter(charId, amt) {
         setCharacters((prev) =>
           prev.map((c) =>
-            c.id === charId
-              ? { ...c, health: Math.max(0, c.health - amount) }
-              : c
+            c.id === charId ? { ...c, health: Math.max(0, c.health - amt) } : c
           )
         );
       }
@@ -1927,21 +1897,19 @@
       function removeEnemy(enemyId) {
         setEnemies((prev) => prev.filter((e) => e.id !== enemyId));
       }
-      function healEnemy(enemyId, amount) {
+      function healEnemy(enemyId, amt) {
         setEnemies((prev) =>
           prev.map((e) =>
             e.id === enemyId
-              ? { ...e, health: Math.min(e.maxHealth, e.health + amount) }
+              ? { ...e, health: Math.min(e.maxHealth, e.health + amt) }
               : e
           )
         );
       }
-      function damageEnemy(enemyId, amount) {
+      function damageEnemy(enemyId, amt) {
         setEnemies((prev) =>
           prev.map((e) =>
-            e.id === enemyId
-              ? { ...e, health: Math.max(0, e.health - amount) }
-              : e
+            e.id === enemyId ? { ...e, health: Math.max(0, e.health - amt) } : e
           )
         );
       }
@@ -1949,7 +1917,7 @@
         setEnemies((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
       }
 
-      // Bulk Heal/Damage
+      // Bulk
       function handleBulkHeal(target, amt) {
         if (target === "characters") {
           setCharacters((prev) =>
@@ -1959,7 +1927,7 @@
             }))
           );
         } else {
-          // enemies
+          // Enemies
           setEnemies((prev) =>
             prev.map((e) => ({
               ...e,
@@ -1977,6 +1945,7 @@
             }))
           );
         } else {
+          // Enemies
           setEnemies((prev) =>
             prev.map((e) => ({
               ...e,
@@ -1988,7 +1957,6 @@
 
       return (
         <div className="container mx-auto p-4 space-y-4 parchment-bg">
-          {/* Top Controls: Copy, Dark Mode, Backup/Restore */}
           <div className="flex flex-wrap justify-between items-center mb-2">
             <div className="flex gap-2">
               <CopyButton characters={characters} enemies={enemies} />
@@ -1996,12 +1964,12 @@
             </div>
             <div className="flex gap-2">
               <button
-                className="px-2 py-1 bg-gray-500 text-white rounded"
+                className="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
                 onClick={backupLocalStorage}
               >
                 Backup Data
               </button>
-              <label className="px-2 py-1 bg-gray-500 text-white rounded cursor-pointer">
+              <label className="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer">
                 Restore
                 <input
                   type="file"
@@ -2016,12 +1984,12 @@
           {/* Bulk Heal/Damage */}
           <BulkActions onBulkHeal={handleBulkHeal} onBulkDamage={handleBulkDamage} />
 
-          {/* Party (Characters) */}
+          {/* Characters */}
           <div className="bg-gray-100 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Party Status</h2>
               <button
-                className="px-3 py-1 bg-green-500 text-white rounded"
+                className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
                 onClick={addCharacter}
               >
                 Add Character
@@ -2059,7 +2027,7 @@
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Enemies</h2>
               <button
-                className="px-3 py-1 bg-purple-500 text-white rounded"
+                className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600"
                 onClick={addEnemy}
               >
                 Add Enemy
@@ -2089,25 +2057,25 @@
             setDotPositions={setDotPositions}
           />
 
-          {/* Dice */}
+          {/* Dice Roller */}
           <DiceRoller />
 
-          {/* Notes */}
+          {/* Session Notes */}
           <SessionNotes />
 
-          {/* Classes */}
+          {/* Classes (Short) */}
           <ClassesSection />
 
-          {/* Races */}
+          {/* Races (Short) */}
           <RacesSection />
 
-          {/* Monsters */}
+          {/* Monster List */}
           <MonsterCreatureList />
         </div>
       );
     }
 
-    // Finally, render the main component:
+    // Render
     ReactDOM.render(<DnDTracker />, document.getElementById("root"));
   </script>
 </body>
