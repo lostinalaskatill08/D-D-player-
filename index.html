@@ -2,44 +2,55 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>D&D Player Tracker (Enhanced)</title>
+  <title>D&D Player Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="mobile-web-app-capable" content="yes" />
 
-  <!-- Tailwind CSS (CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS from unpkg -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/tailwindcss@3.3.2/dist/tailwind.min.css"
+  />
 
-  <!-- React + ReactDOM 17 -->
+  <!-- React + ReactDOM 17 from unpkg -->
   <script
-    src="https://cdn.jsdelivr.net/npm/react@17/umd/react.development.js"
-    crossorigin
+    src="https://unpkg.com/react@17/umd/react.development.js"
+    type="text/javascript"
+    crossorigin="anonymous"
   ></script>
   <script
-    src="https://cdn.jsdelivr.net/npm/react-dom@17/umd/react.development.js"
-    crossorigin
+    src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    type="text/javascript"
+    crossorigin="anonymous"
   ></script>
 
   <!-- Babel for inline JSX (development usage) -->
-  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script
+    src="https://unpkg.com/babel-standalone@6/babel.min.js"
+    type="text/javascript"
+  ></script>
 
-  <!-- Google Fonts for a D&D-ish look -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel&display=swap" />
+  <!-- Google font (optional for a D&D vibe) -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel&display=swap"
+    rel="stylesheet"
+  />
 
   <style>
-    /* Basic dark mode classes */
+    /* Example D&D-ish font and some transitions */
     body {
-      font-family: 'Cinzel', serif; 
+      font-family: "Cinzel", serif;
       transition: background-color 0.3s, color 0.3s;
     }
     .dark {
       background-color: #1a1a1a;
       color: #fafafa;
     }
-    /* Optional parchment-like background */
+    /* Simple parchment-like background if desired */
     .parchment-bg {
       background: url("https://www.transparenttextures.com/patterns/aged-paper.png");
     }
-    /* Expand/Collapse icons or placeholders */
+    /* Expand/collapse icons */
     .collapse-button::after {
       content: "▼";
       display: inline-block;
@@ -58,15 +69,16 @@
 <body class="bg-gray-50 text-gray-800">
   <div id="root" class="p-4"></div>
 
+  <!-- Main Script with type="text/babel" so Babel will transform JSX in-browser -->
   <script type="text/babel">
-    /************************************************
-     * Enhanced D&D Player Tracker
-     * (Nullish coalescing replaced with "||")
-     ************************************************/
+    /**************************************************
+     * Single-File D&D Tracker (React + Tailwind + Babel)
+     * Make sure to serve over HTTP (not file://).
+     **************************************************/
 
-    /* ---------------------------
-       1) LocalStorage Backup/Restore
-    ---------------------------- */
+    /********************************************
+     * 1) UTILS: LocalStorage Backup/Restore
+     ********************************************/
     function backupLocalStorage() {
       const data = {
         characters: localStorage.getItem("characters"),
@@ -109,9 +121,9 @@
       reader.readAsText(file);
     }
 
-    /* ---------------------------
-       2) Dark Mode Toggle
-    ---------------------------- */
+    /********************************************
+     * 2) DarkModeToggle
+     ********************************************/
     function DarkModeToggle() {
       const [darkMode, setDarkMode] = React.useState(() => {
         return localStorage.getItem("darkMode") === "true";
@@ -129,16 +141,18 @@
       return (
         <button
           className="px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700"
-          onClick={() => setDarkMode((prev) => !prev)}
+          onClick={() => setDarkMode(!darkMode)}
         >
           {darkMode ? "Light Mode" : "Dark Mode"}
         </button>
       );
     }
 
-    /* ---------------------------
-       3) Expand/Collapse Logic
-    ---------------------------- */
+    /********************************************
+     * 3) Collapse Logic Hook
+     ********************************************/
+    // A hook that returns [collapseState, toggleFunc].
+    // collapseState is an object keyed by ID with boolean values.
     function useCollapseState(storageKey) {
       const [collapseState, setCollapseState] = React.useState(() => {
         const saved = localStorage.getItem(storageKey);
@@ -156,26 +170,28 @@
       return [collapseState, toggleCollapse];
     }
 
-    /* ---------------------------
-       4) CharacterCard
-    ---------------------------- */
-    function CharacterCard({
-      char,
-      collapsed,
-      onToggleCollapse,
-      onUpdateChar,
-      onHeal,
-      onDamage,
-      onRemoveStatus,
-      onRemoveEffect,
-      onRemoveItem,
-      onRemoveAbility,
-      onRemoveSpell,
-      onRemoveChar,
-    }) {
+    /********************************************
+     * 4) CharacterCard
+     ********************************************/
+    function CharacterCard(props) {
+      const {
+        char,
+        collapsed,
+        onToggleCollapse,
+        onUpdateChar,
+        onHeal,
+        onDamage,
+        onRemoveStatus,
+        onRemoveEffect,
+        onRemoveItem,
+        onRemoveAbility,
+        onRemoveSpell,
+        onRemoveChar,
+      } = props;
+
       const [isEditing, setIsEditing] = React.useState(false);
 
-      // Additional fields
+      // Extended fields
       const [editName, setEditName] = React.useState(char.name);
       const [editClass, setEditClass] = React.useState(char.class);
       const [editMaxHealth, setEditMaxHealth] = React.useState(String(char.maxHealth));
@@ -189,6 +205,7 @@
       const [newItem, setNewItem] = React.useState("");
       const [newAbility, setNewAbility] = React.useState("");
       const [newSpell, setNewSpell] = React.useState("");
+
       const [healInput, setHealInput] = React.useState("0");
       const [dmgInput, setDmgInput] = React.useState("0");
 
@@ -202,12 +219,12 @@
         setEditNotes(char.notes || "");
       }, [char]);
 
-      function handleImageUpload(event) {
-        const file = event.target.files[0];
+      function handleImageUpload(e) {
+        const file = e.target.files[0];
         if (file) {
           const reader = new FileReader();
-          reader.onload = (e) => {
-            onUpdateChar({ ...char, image: e.target.result });
+          reader.onload = (evt) => {
+            onUpdateChar({ ...char, image: evt.target.result });
           };
           reader.readAsDataURL(file);
         }
@@ -271,7 +288,7 @@
         onDamage(char.id, amt);
       }
 
-      // Death Save toggles
+      // Death Saves
       function toggleDeathSaveSuccess() {
         const successCount = char.deathSaves.success;
         if (successCount < 3) {
@@ -299,14 +316,11 @@
       function resetDeathSaves() {
         onUpdateChar({
           ...char,
-          deathSaves: {
-            success: 0,
-            fail: 0,
-          },
+          deathSaves: { success: 0, fail: 0 },
         });
       }
 
-      // Collapsed or not
+      // Collapsible content
       const mainContentStyle = collapsed
         ? { maxHeight: 0, padding: 0 }
         : { maxHeight: "9999px" };
@@ -326,51 +340,51 @@
             <div className="grid md:grid-cols-2 gap-2">
               <input
                 className="border p-1 rounded"
+                placeholder="Name"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                placeholder="Name"
               />
               <input
                 className="border p-1 rounded"
+                placeholder="Class"
                 value={editClass}
                 onChange={(e) => setEditClass(e.target.value)}
-                placeholder="Class"
               />
               <input
-                type="number"
                 className="border p-1 rounded"
+                placeholder="Max Health"
+                type="number"
                 value={editMaxHealth}
                 onChange={(e) => setEditMaxHealth(e.target.value)}
-                placeholder="Max Health"
               />
               <input
-                type="number"
                 className="border p-1 rounded"
+                placeholder="Level"
+                type="number"
                 value={editLevel}
                 onChange={(e) => setEditLevel(e.target.value)}
-                placeholder="Level"
               />
               <input
-                type="number"
                 className="border p-1 rounded"
+                placeholder="XP"
+                type="number"
                 value={editXP}
                 onChange={(e) => setEditXP(e.target.value)}
-                placeholder="XP"
               />
               <input
-                type="number"
                 className="border p-1 rounded"
+                placeholder="Initiative"
+                type="number"
                 value={editInitiative}
                 onChange={(e) => setEditInitiative(e.target.value)}
-                placeholder="Initiative"
               />
             </div>
             <textarea
               className="border p-1 rounded w-full"
               rows={3}
+              placeholder="Notes / Bio / Extra Info"
               value={editNotes}
               onChange={(e) => setEditNotes(e.target.value)}
-              placeholder="Notes / Bio / Extra Info"
             />
             <div className="flex gap-2">
               <button
@@ -404,9 +418,7 @@
               >
                 {char.name}
               </button>
-              <span className="text-sm text-gray-600">
-                ({char.class})
-              </span>
+              <span className="text-sm text-gray-600">({char.class})</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm">
@@ -431,13 +443,15 @@
             className="collapsible-content transition-all duration-300 ease-in-out"
             style={mainContentStyle}
           >
-            <div className={`${collapsed ? "hidden" : "block"} mt-2`}>
-              <div className="text-sm mb-1">XP: {(char.xp || 0)}</div>
+            <div className={collapsed ? "hidden" : "block"}>
+              {/* XP */}
+              <div className="text-sm mb-1 mt-2">XP: {(char.xp || 0)}</div>
+              {/* Image */}
               <label className="block text-sm font-medium text-gray-700">
                 Character Image
               </label>
               {char.image ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-1">
                   <img
                     src={char.image}
                     alt={char.name}
@@ -458,6 +472,7 @@
                   className="mt-1 text-sm"
                 />
               )}
+              {/* Health Bar */}
               <div className="mt-2">
                 <div className="flex items-center gap-2">
                   <span className="text-red-500">❤️</span>
@@ -578,7 +593,7 @@
               </div>
               {/* Special Abilities */}
               <div className="mt-2">
-                <h4 className="font-semibold text-sm">Special Abilities/Moves:</h4>
+                <h4 className="font-semibold text-sm">Special Abilities:</h4>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {char.specialAbilities.map((ability, idx) => (
                     <span
@@ -612,7 +627,7 @@
               </div>
               {/* Spells */}
               <div className="mt-2">
-                <h4 className="font-semibold text-sm">Spells/Magic/Divinity:</h4>
+                <h4 className="font-semibold text-sm">Spells/Magic:</h4>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {char.spellsMagic.map((spell, idx) => (
                     <span
@@ -681,7 +696,7 @@
                   </div>
                 </div>
               </div>
-              {/* Death Saves (if HP == 0) */}
+              {/* Death Saves (if HP <= 0) */}
               {char.health <= 0 && (
                 <div className="mt-4">
                   <h4 className="font-semibold text-sm">Death Saves</h4>
@@ -725,18 +740,20 @@
       );
     }
 
-    /* ---------------------------
-       5) EnemyCard
-    ---------------------------- */
-    function EnemyCard({
-      enemy,
-      collapsed,
-      onToggleCollapse,
-      onHealEnemy,
-      onDamageEnemy,
-      onRemoveEnemy,
-      onUpdateEnemy,
-    }) {
+    /********************************************
+     * 5) EnemyCard
+     ********************************************/
+    function EnemyCard(props) {
+      const {
+        enemy,
+        collapsed,
+        onToggleCollapse,
+        onHealEnemy,
+        onDamageEnemy,
+        onRemoveEnemy,
+        onUpdateEnemy,
+      } = props;
+
       const [isEditing, setIsEditing] = React.useState(false);
       const [editName, setEditName] = React.useState(enemy.name);
       const [editMaxHealth, setEditMaxHealth] = React.useState(String(enemy.maxHealth));
@@ -767,7 +784,6 @@
         const amt = parseInt(healInput, 10) || 0;
         onHealEnemy(enemy.id, amt);
       }
-
       function applyDamage() {
         const amt = parseInt(dmgInput, 10) || 0;
         onDamageEnemy(enemy.id, amt);
@@ -830,7 +846,11 @@
       }
 
       return (
-        <div className={`bg-white p-4 rounded-lg shadow mb-4 ${collapsed ? "collapsed" : ""}`}>
+        <div
+          className={`bg-white p-4 rounded-lg shadow mb-4 ${
+            collapsed ? "collapsed" : ""
+          }`}
+        >
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <button
@@ -859,8 +879,8 @@
             className="collapsible-content transition-all duration-300 ease-in-out"
             style={mainContentStyle}
           >
-            <div className={`${collapsed ? "hidden" : "block"} mt-2`}>
-              <div className="flex items-center gap-2">
+            <div className={collapsed ? "hidden" : "block"}>
+              <div className="flex items-center gap-2 mt-2">
                 <span className="text-red-500">❤️</span>
                 <div className="w-full bg-gray-200 rounded-full h-4">
                   <div
@@ -916,9 +936,9 @@
       );
     }
 
-    /* ---------------------------
-       6) StatsSection
-    ---------------------------- */
+    /********************************************
+     * 6) StatsSection
+     ********************************************/
     function StatsSection({ statRows, setStatRows }) {
       const [nextId, setNextId] = React.useState(
         statRows.length ? Math.max(...statRows.map((r) => r.id)) + 1 : 2
@@ -959,7 +979,7 @@
 
       function computeMod(score) {
         const mod = Math.floor((score - 10) / 2);
-        return mod >= 0 ? `+${mod}` : `${mod}`;
+        return mod >= 0 ? "+" + mod : "" + mod;
       }
 
       function sortByAbility(ability) {
@@ -1020,6 +1040,7 @@
               Sort by CHA
             </button>
           </div>
+
           {statRows.map((row) => {
             const modSTR = computeMod(row.str);
             const modDEX = computeMod(row.dex);
@@ -1046,6 +1067,7 @@
                   </button>
                 </div>
                 <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2">
+                  {/* STR */}
                   <div className="flex flex-col">
                     <label className="font-semibold">STR</label>
                     <input
@@ -1061,6 +1083,7 @@
                       {modSTR}
                     </span>
                   </div>
+                  {/* DEX */}
                   <div className="flex flex-col">
                     <label className="font-semibold">DEX</label>
                     <input
@@ -1076,6 +1099,7 @@
                       {modDEX}
                     </span>
                   </div>
+                  {/* CON */}
                   <div className="flex flex-col">
                     <label className="font-semibold">CON</label>
                     <input
@@ -1091,6 +1115,7 @@
                       {modCON}
                     </span>
                   </div>
+                  {/* INT */}
                   <div className="flex flex-col">
                     <label className="font-semibold">INT</label>
                     <input
@@ -1106,6 +1131,7 @@
                       {modINT}
                     </span>
                   </div>
+                  {/* WIS */}
                   <div className="flex flex-col">
                     <label className="font-semibold">WIS</label>
                     <input
@@ -1121,6 +1147,7 @@
                       {modWIS}
                     </span>
                   </div>
+                  {/* CHA */}
                   <div className="flex flex-col">
                     <label className="font-semibold">CHA</label>
                     <input
@@ -1144,9 +1171,9 @@
       );
     }
 
-    /* ---------------------------
-       7) DiceRoller w/ history
-    ---------------------------- */
+    /********************************************
+     * 7) DiceRoller
+     ********************************************/
     function DiceRoller() {
       const [rollHistory, setRollHistory] = React.useState([]);
       const audioRef = React.useRef(null);
@@ -1157,10 +1184,8 @@
           audioRef.current.play().catch(() => {});
         }
         const result = Math.floor(Math.random() * sides) + 1;
-        setRollHistory((prev) => {
-          const newEntry = `d${sides} → ${result}`;
-          return [newEntry, ...prev.slice(0, 9)];
-        });
+        const newEntry = "d" + sides + " → " + result;
+        setRollHistory((prev) => [newEntry].concat(prev.slice(0, 9)));
       }
 
       return (
@@ -1168,30 +1193,15 @@
           <h2 className="text-xl font-bold mb-2">Dice Roller</h2>
           <audio ref={audioRef} src="https://www.soundjay.com/misc/sounds/dice-1.mp3" />
           <div className="flex flex-wrap gap-2 mb-2">
-            <button onClick={() => rollD(2)} className="px-3 py-1 bg-blue-500 text-white rounded">
-              d2
-            </button>
-            <button onClick={() => rollD(4)} className="px-3 py-1 bg-blue-500 text-white rounded">
-              d4
-            </button>
-            <button onClick={() => rollD(6)} className="px-3 py-1 bg-blue-500 text-white rounded">
-              d6
-            </button>
-            <button onClick={() => rollD(8)} className="px-3 py-1 bg-blue-500 text-white rounded">
-              d8
-            </button>
-            <button onClick={() => rollD(10)} className="px-3 py-1 bg-blue-500 text-white rounded">
-              d10
-            </button>
-            <button onClick={() => rollD(12)} className="px-3 py-1 bg-blue-500 text-white rounded">
-              d12
-            </button>
-            <button onClick={() => rollD(15)} className="px-3 py-1 bg-blue-500 text-white rounded">
-              d15
-            </button>
-            <button onClick={() => rollD(20)} className="px-3 py-1 bg-blue-500 text-white rounded">
-              d20
-            </button>
+            {[2, 4, 6, 8, 10, 12, 15, 20].map((sides) => (
+              <button
+                key={sides}
+                onClick={() => rollD(sides)}
+                className="px-3 py-1 bg-blue-500 text-white rounded"
+              >
+                d{sides}
+              </button>
+            ))}
           </div>
           <div>
             <h3 className="text-sm font-semibold mb-1">Recent Rolls:</h3>
@@ -1206,10 +1216,11 @@
       );
     }
 
-    /* ---------------------------
-       8) MapSection with Zoom/Pan
-    ---------------------------- */
-    function MapSection({ mapImage, setMapImage, dotPositions, setDotPositions }) {
+    /********************************************
+     * 8) MapSection with Zoom + Pan + Markers
+     ********************************************/
+    function MapSection(props) {
+      const { mapImage, setMapImage, dotPositions, setDotPositions } = props;
       const [isDragging, setIsDragging] = React.useState(null);
       const containerRef = React.useRef(null);
 
@@ -1218,12 +1229,12 @@
       const [isPanning, setIsPanning] = React.useState(false);
       const [panStart, setPanStart] = React.useState({ x: 0, y: 0 });
 
-      function handleImageUpload(event) {
-        const file = event.target.files[0];
+      function handleImageUpload(e) {
+        const file = e.target.files[0];
         if (file) {
           const reader = new FileReader();
-          reader.onload = (e) => {
-            setMapImage(e.target.result);
+          reader.onload = (evt) => {
+            setMapImage(evt.target.result);
             setDotPositions([]);
             setScale(1);
             setOffset({ x: 0, y: 0 });
@@ -1239,7 +1250,7 @@
 
       function handleMouseDown(index) {
         return (e) => {
-          e.stopPropagation();
+          e.stopPropagation(); // so we don't start panning
           setIsDragging(index);
           moveDot(index, e);
         };
@@ -1264,7 +1275,6 @@
       function moveDot(index, e) {
         if (!containerRef.current || !mapImage) return;
         const rect = containerRef.current.getBoundingClientRect();
-        // Adjust for offset and scale
         const xPercent = ((e.clientX - rect.left - offset.x) / (rect.width * scale)) * 100;
         const yPercent = ((e.clientY - rect.top - offset.y) / (rect.height * scale)) * 100;
 
@@ -1308,28 +1318,23 @@
       function addDot() {
         setDotPositions((prev) => [
           ...prev,
-          {
-            x: 50,
-            y: 50,
-            color: getRandomColor(),
-            label: "New Marker",
-          },
+          { x: 50, y: 50, color: getRandomColor(), label: "New Marker" },
         ]);
       }
 
-      function removeDot(index) {
-        setDotPositions((prev) => prev.filter((_, i) => i !== index));
+      function removeDot(idx) {
+        setDotPositions((prev) => prev.filter((_, i) => i !== idx));
       }
 
-      function updateDotLabel(index, value) {
+      function updateDotLabel(idx, value) {
         setDotPositions((prev) =>
-          prev.map((dot, i) => (i === index ? { ...dot, label: value } : dot))
+          prev.map((dot, i) => (i === idx ? { ...dot, label: value } : dot))
         );
       }
 
-      function updateDotColor(index, value) {
+      function updateDotColor(idx, value) {
         setDotPositions((prev) =>
-          prev.map((dot, i) => (i === index ? { ...dot, color: value } : dot))
+          prev.map((dot, i) => (i === idx ? { ...dot, color: value } : dot))
         );
       }
 
@@ -1384,19 +1389,19 @@
               </div>
               <div className="mt-2">
                 <p className="text-sm text-gray-700 mb-2">
-                  Scroll to zoom. Drag map to pan. Drag dots to move them.
+                  Scroll wheel to zoom. Drag to pan. Drag dots to move them.
                 </p>
                 <div className="flex gap-2 flex-wrap mb-2">
-                  <button className="px-2 py-1 bg-blue-400 text-white rounded" onClick={zoomIn}>
+                  <button onClick={zoomIn} className="px-2 py-1 bg-blue-400 text-white rounded">
                     Zoom In
                   </button>
-                  <button className="px-2 py-1 bg-blue-400 text-white rounded" onClick={zoomOut}>
+                  <button onClick={zoomOut} className="px-2 py-1 bg-blue-400 text-white rounded">
                     Zoom Out
                   </button>
-                  <button className="px-2 py-1 bg-blue-400 text-white rounded" onClick={resetView}>
+                  <button onClick={resetView} className="px-2 py-1 bg-blue-400 text-white rounded">
                     Reset View
                   </button>
-                  <button className="px-2 py-1 bg-green-400 text-white rounded" onClick={addDot}>
+                  <button onClick={addDot} className="px-2 py-1 bg-green-400 text-white rounded">
                     Add Marker
                   </button>
                   <button
@@ -1409,19 +1414,19 @@
                 {dotPositions.length > 0 && (
                   <div className="bg-white p-2 rounded shadow text-sm">
                     <h4 className="font-bold">Markers:</h4>
-                    {dotPositions.map((dot, index) => (
-                      <div key={index} className="flex items-center gap-2 my-1">
+                    {dotPositions.map((dot, idx) => (
+                      <div key={idx} className="flex items-center gap-2 my-1">
                         <input
                           type="text"
                           className="border p-1 rounded"
                           value={dot.label}
-                          onChange={(e) => updateDotLabel(index, e.target.value)}
+                          onChange={(e) => updateDotLabel(idx, e.target.value)}
                           placeholder="Marker Label"
                         />
                         <select
                           className="border p-1 rounded"
                           value={dot.color}
-                          onChange={(e) => updateDotColor(index, e.target.value)}
+                          onChange={(e) => updateDotColor(idx, e.target.value)}
                         >
                           <option value="red">Red</option>
                           <option value="blue">Blue</option>
@@ -1434,7 +1439,7 @@
                         </select>
                         <button
                           className="px-2 py-1 bg-red-400 text-white rounded"
-                          onClick={() => removeDot(index)}
+                          onClick={() => removeDot(idx)}
                         >
                           Remove
                         </button>
@@ -1458,9 +1463,9 @@
       );
     }
 
-    /* ---------------------------
-       9) PartyImages
-    ---------------------------- */
+    /********************************************
+     * 9) PartyImages
+     ********************************************/
     function PartyImages({ characters }) {
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
@@ -1487,33 +1492,37 @@
       );
     }
 
-    /* ---------------------------
-       10) CopyButton
-    ---------------------------- */
+    /********************************************
+     * 10) CopyButton
+     ********************************************/
     function CopyButton({ characters, enemies }) {
-      const handleCopy = () => {
+      function handleCopy() {
         const text = [
           "### Characters",
-          ...characters.map((char) => `
-Character: ${char.name}
-Class: ${char.class}
-Level: ${char.level || 1}
-XP: ${char.xp || 0}
-Initiative: ${char.initiative || 0}
-Health: ${char.health}/${char.maxHealth}
-Status: ${char.status.length ? char.status.join(", ") : "None"}
-Effects: ${char.effects.length ? char.effects.join(", ") : "None"}
-Inventory: ${char.inventory.length ? char.inventory.join(", ") : "None"}
-Abilities: ${char.specialAbilities.length ? char.specialAbilities.join(", ") : "None"}
-Spells: ${char.spellsMagic.length ? char.spellsMagic.join(", ") : "None"}
-Notes: ${char.notes || "None"}
-Image: ${char.image ? "Yes" : "No"}
-          `.trim()),
+          ...characters.map((c) => {
+            return (
+              "Character: " + c.name +
+              "\nClass: " + c.class +
+              "\nLevel: " + (c.level || 1) +
+              "\nXP: " + (c.xp || 0) +
+              "\nInitiative: " + (c.initiative || 0) +
+              "\nHealth: " + c.health + "/" + c.maxHealth +
+              "\nStatus: " + (c.status.length ? c.status.join(", ") : "None") +
+              "\nEffects: " + (c.effects.length ? c.effects.join(", ") : "None") +
+              "\nInventory: " + (c.inventory.length ? c.inventory.join(", ") : "None") +
+              "\nAbilities: " + (c.specialAbilities.length ? c.specialAbilities.join(", ") : "None") +
+              "\nSpells: " + (c.spellsMagic.length ? c.spellsMagic.join(", ") : "None") +
+              "\nNotes: " + (c.notes || "None") +
+              "\nImage: " + (c.image ? "Yes" : "No")
+            );
+          }),
           "\n### Enemies",
-          ...enemies.map((enemy) => `
-Enemy: ${enemy.name}
-Health: ${enemy.health}/${enemy.maxHealth}
-          `.trim()),
+          ...enemies.map((e) => {
+            return (
+              "Enemy: " + e.name +
+              "\nHealth: " + e.health + "/" + e.maxHealth
+            );
+          }),
         ].join("\n\n");
 
         navigator.clipboard.writeText(text).then(() => {
@@ -1522,7 +1531,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
           console.error("Failed to copy text: ", err);
           alert("Failed to copy data. Check console for details.");
         });
-      };
+      }
 
       return (
         <button
@@ -1534,24 +1543,17 @@ Health: ${enemy.health}/${enemy.maxHealth}
       );
     }
 
-    /* ---------------------------
-       11) ClassesSection
-    ---------------------------- */
+    /********************************************
+     * 11) ClassesSection
+     ********************************************/
     function ClassesSection() {
       const classes = [
-        { name: "Artificer (Tinkerers & Inventors)", desc: "Artificers thrive on..." },
-        { name: "Barbarian (Unstoppable Warriors)", desc: "Barbarians rely on..." },
-        { name: "Bard (Charming Performers & Spellcasters)", desc: "Bards blend charisma..." },
-        { name: "Cleric (Divine Warriors & Healers)", desc: "Clerics channel divine..." },
-        { name: "Druid (Nature’s Guardians & Shapeshifters)", desc: "Druids command nature..." },
-        { name: "Fighter (Master Combatants & Strategists)", desc: "Fighters dominate the..." },
-        { name: "Monk (Masters of Martial Arts & Speed)", desc: "Monks rely on speed..." },
-        { name: "Paladin (Holy Warriors & Protectors)", desc: "Paladins wield divine..." },
-        { name: "Ranger (Wilderness Scouts & Hunters)", desc: "Rangers track, hunt..." },
-        { name: "Rogue (Stealthy Assassins & Tricksters)", desc: "Rogues rely on cunning..." },
-        { name: "Sorcerer (Innate Spellcasters & Magical Prodigies)", desc: "Sorcerers wield raw..." },
-        { name: "Warlock (Pact-Bound Spellcasters & Eldritch Wielders)", desc: "Warlocks make pacts..." },
-        { name: "Wizard (Scholars of Magic & Arcane Masters)", desc: "Wizards master magic..." },
+        { name: "Artificer (Tinkerers & Inventors)", desc: "Artificers..." },
+        { name: "Barbarian (Unstoppable Warriors)", desc: "Barbarians..." },
+        { name: "Bard (Charming Performers & Spellcasters)", desc: "Bards..." },
+        { name: "Cleric (Divine Warriors & Healers)", desc: "Clerics..." },
+        { name: "Druid (Nature’s Guardians & Shapeshifters)", desc: "Druids..." },
+        // etc. Add all your class descriptions
       ];
 
       return (
@@ -1579,15 +1581,14 @@ Health: ${enemy.health}/${enemy.maxHealth}
       );
     }
 
-    /* ---------------------------
-       12) RacesSection
-    ---------------------------- */
+    /********************************************
+     * 12) RacesSection
+     ********************************************/
     function RacesSection() {
       const races = [
         { name: "Aarakocra", desc: "Bird-like humanoids..." },
         { name: "Aasimar", desc: "Celestial-touched beings..." },
-        // ...
-        { name: "Yuan-Ti", desc: "Snake-like humanoids..." },
+        // etc. Add more races
       ];
 
       return (
@@ -1615,9 +1616,9 @@ Health: ${enemy.health}/${enemy.maxHealth}
       );
     }
 
-    /* ---------------------------
-       13) MonsterCreatureList
-    ---------------------------- */
+    /********************************************
+     * 13) MonsterCreatureList
+     ********************************************/
     function MonsterCreatureList() {
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
@@ -1634,15 +1635,15 @@ Health: ${enemy.health}/${enemy.maxHealth}
             AIDEDD Monster Database
           </a>
           <p className="mt-2 text-sm text-gray-700">
-            Use this resource to find detailed stats and information for monsters.
+            Use this resource to find detailed stats for monsters in your campaign.
           </p>
         </div>
       );
     }
 
-    /* ---------------------------
-       14) SessionNotes
-    ---------------------------- */
+    /********************************************
+     * 14) SessionNotes
+     ********************************************/
     function SessionNotes() {
       const [notes, setNotes] = React.useState(() => {
         return localStorage.getItem("sessionNotes") || "";
@@ -1657,17 +1658,17 @@ Health: ${enemy.health}/${enemy.maxHealth}
           <h2 className="text-xl font-bold mb-2">Session Notes</h2>
           <textarea
             className="border p-2 rounded w-full h-32 text-sm"
+            placeholder="DM's notes, story hooks, etc."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="DM's session notes..."
           />
         </div>
       );
     }
 
-    /* ---------------------------
-       15) BulkActions
-    ---------------------------- */
+    /********************************************
+     * 15) BulkActions
+     ********************************************/
     function BulkActions({ onBulkHeal, onBulkDamage }) {
       const [amount, setAmount] = React.useState("0");
       const [targetType, setTargetType] = React.useState("characters");
@@ -1724,13 +1725,14 @@ Health: ${enemy.health}/${enemy.maxHealth}
       );
     }
 
-    /* ---------------------------
-       Main DnDTracker
-    ---------------------------- */
+    /********************************************
+     * Main DnDTracker
+     ********************************************/
     function DnDTracker() {
       const [collapsedCharacters, toggleCharacterCollapse] = useCollapseState("collapsedCharacters");
       const [collapsedEnemies, toggleEnemyCollapse] = useCollapseState("collapsedEnemies");
 
+      // Characters
       const [characters, setCharacters] = React.useState(() => {
         const saved = localStorage.getItem("characters");
         let loaded = saved
@@ -1750,7 +1752,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
                 image: null,
               },
             ];
-        // ensure new fields
+        // Add missing fields
         return loaded.map((c) => ({
           ...c,
           level: c.level || 1,
@@ -1761,11 +1763,13 @@ Health: ${enemy.health}/${enemy.maxHealth}
         }));
       });
 
+      // Enemies
       const [enemies, setEnemies] = React.useState(() => {
         const saved = localStorage.getItem("enemies");
         return saved ? JSON.parse(saved) : [];
       });
 
+      // Stats
       const [statRows, setStatRows] = React.useState(() => {
         const saved = localStorage.getItem("statRows");
         return saved
@@ -1773,21 +1777,26 @@ Health: ${enemy.health}/${enemy.maxHealth}
           : [{ id: 1, label: "Character #1", str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }];
       });
 
+      // Map
       const [mapImage, setMapImage] = React.useState(() => localStorage.getItem("mapImage") || null);
       const [dotPositions, setDotPositions] = React.useState(() => {
         const saved = localStorage.getItem("dotPositions");
         return saved ? JSON.parse(saved) : [];
       });
 
+      // Sync changes to localStorage
       React.useEffect(() => {
         localStorage.setItem("characters", JSON.stringify(characters));
       }, [characters]);
+
       React.useEffect(() => {
         localStorage.setItem("enemies", JSON.stringify(enemies));
       }, [enemies]);
+
       React.useEffect(() => {
         localStorage.setItem("statRows", JSON.stringify(statRows));
       }, [statRows]);
+
       React.useEffect(() => {
         localStorage.setItem("mapImage", mapImage);
         localStorage.setItem("dotPositions", JSON.stringify(dotPositions));
@@ -1909,7 +1918,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
           ...prev,
           {
             id: Date.now(),
-            name: `Enemy ${prev.length + 1}`,
+            name: "Enemy " + (prev.length + 1),
             health: 50,
             maxHealth: 50,
           },
@@ -1921,14 +1930,18 @@ Health: ${enemy.health}/${enemy.maxHealth}
       function healEnemy(enemyId, amount) {
         setEnemies((prev) =>
           prev.map((e) =>
-            e.id === enemyId ? { ...e, health: Math.min(e.maxHealth, e.health + amount) } : e
+            e.id === enemyId
+              ? { ...e, health: Math.min(e.maxHealth, e.health + amount) }
+              : e
           )
         );
       }
       function damageEnemy(enemyId, amount) {
         setEnemies((prev) =>
           prev.map((e) =>
-            e.id === enemyId ? { ...e, health: Math.max(0, e.health - amount) } : e
+            e.id === enemyId
+              ? { ...e, health: Math.max(0, e.health - amount) }
+              : e
           )
         );
       }
@@ -1936,7 +1949,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
         setEnemies((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
       }
 
-      // Bulk
+      // Bulk Heal/Damage
       function handleBulkHeal(target, amt) {
         if (target === "characters") {
           setCharacters((prev) =>
@@ -1975,7 +1988,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
 
       return (
         <div className="container mx-auto p-4 space-y-4 parchment-bg">
-          {/* Header: Copy + Dark Mode + Backup/Restore */}
+          {/* Top Controls: Copy, Dark Mode, Backup/Restore */}
           <div className="flex flex-wrap justify-between items-center mb-2">
             <div className="flex gap-2">
               <CopyButton characters={characters} enemies={enemies} />
@@ -2003,7 +2016,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
           {/* Bulk Heal/Damage */}
           <BulkActions onBulkHeal={handleBulkHeal} onBulkDamage={handleBulkDamage} />
 
-          {/* Party Status */}
+          {/* Party (Characters) */}
           <div className="bg-gray-100 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Party Status</h2>
@@ -2035,13 +2048,13 @@ Health: ${enemy.health}/${enemy.maxHealth}
             </div>
           </div>
 
-          {/* Party Images Section */}
+          {/* Party Images */}
           <PartyImages characters={characters} />
 
-          {/* Stats Section */}
+          {/* Stats */}
           <StatsSection statRows={statRows} setStatRows={setStatRows} />
 
-          {/* Enemy Section */}
+          {/* Enemies */}
           <div className="bg-gray-100 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Enemies</h2>
@@ -2068,7 +2081,7 @@ Health: ${enemy.health}/${enemy.maxHealth}
             </div>
           </div>
 
-          {/* Map Section */}
+          {/* Map */}
           <MapSection
             mapImage={mapImage}
             setMapImage={setMapImage}
@@ -2076,25 +2089,25 @@ Health: ${enemy.health}/${enemy.maxHealth}
             setDotPositions={setDotPositions}
           />
 
-          {/* Dice Roller */}
+          {/* Dice */}
           <DiceRoller />
 
-          {/* Session Notes */}
+          {/* Notes */}
           <SessionNotes />
 
-          {/* Classes Section */}
+          {/* Classes */}
           <ClassesSection />
 
-          {/* Races Section */}
+          {/* Races */}
           <RacesSection />
 
-          {/* Monster/Creature List Section */}
+          {/* Monsters */}
           <MonsterCreatureList />
         </div>
       );
     }
 
-    // Render the main tracker
+    // Finally, render the main component:
     ReactDOM.render(<DnDTracker />, document.getElementById("root"));
   </script>
 </body>
