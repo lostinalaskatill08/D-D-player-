@@ -60,12 +60,12 @@
      * 5) EnemyCard
      * 6) StatsSection
      * 7) DiceRoller
-     * 8) MapSection (Fixed)
+     * 8) MapSection (Fixed to display as rectangle)
      * 9) PartyImages
      * 10) CopyButton
-     * 11) ClassesSection
-     * 12) RacesSection
-     * 13) MonsterCreatureList
+     * 11) ClassesSection (Restored with links)
+     * 12) RacesSection (Restored with links)
+     * 13) MonsterCreatureList (Restored with links)
      * 14) BulkActions
      * 15) Main DnDTracker
      ************************************************/
@@ -147,7 +147,7 @@
       );
     }
 
-    /** 4) CharacterCard (Enhanced with Background/Bio and Image) */
+    /** 4) CharacterCard (with Background/Bio and Image) */
     function CharacterCard({
       char,
       collapsed,
@@ -278,14 +278,14 @@
               <button className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" onClick={() => onRemoveChar(char.id)}>Remove</button>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <input className="border p-1 rounded" placeholder="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
-              <input className="border p-1 rounded" placeholder="Class" value={editClass} onChange={(e) => setEditClass(e.target.value)} />
-              <input type="number" className="border p-1 rounded" placeholder="Max Health" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} />
-              <input type="number" className="border p-1 rounded" placeholder="Level" value={editLevel} onChange={(e) => setEditLevel(e.target.value)} />
-              <input type="number" className="border p-1 rounded" placeholder="XP" value={editXP} onChange={(e) => setEditXP(e.target.value)} />
-              <input type="number" className="border p-1 rounded" placeholder="Initiative" value={editInitiative} onChange={(e) => setEditInitiative(e.target.value)} />
+              <input id={`edit-name-${char.id}`} className="border p-1 rounded" placeholder="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+              <input id={`edit-class-${char.id}`} className="border p-1 rounded" placeholder="Class" value={editClass} onChange={(e) => setEditClass(e.target.value)} />
+              <input id={`edit-maxhealth-${char.id}`} type="number" className="border p-1 rounded" placeholder="Max Health" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} />
+              <input id={`edit-level-${char.id}`} type="number" className="border p-1 rounded" placeholder="Level" value={editLevel} onChange={(e) => setEditLevel(e.target.value)} />
+              <input id={`edit-xp-${char.id}`} type="number" className="border p-1 rounded" placeholder="XP" value={editXP} onChange={(e) => setEditXP(e.target.value)} />
+              <input id={`edit-initiative-${char.id}`} type="number" className="border p-1 rounded" placeholder="Initiative" value={editInitiative} onChange={(e) => setEditInitiative(e.target.value)} />
             </div>
-            <textarea className="border p-1 rounded w-full" rows={3} placeholder="Notes / Bio / Extra Info" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} />
+            <textarea id={`edit-notes-${char.id}`} className="border p-1 rounded w-full" rows={3} placeholder="Notes / Bio / Extra Info" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} />
             <div className="flex gap-2">
               <button className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600" onClick={handleSave}>Save</button>
               <button className="px-2 py-1 bg-gray-400 text-white rounded hover:bg-gray-500" onClick={() => setIsEditing(false)}>Cancel</button>
@@ -298,7 +298,7 @@
         <div className={`bg-white p-4 rounded-lg shadow mb-4 ${collapsed ? "collapsed" : ""}`}>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <button onClick={() => onToggleCollapse(char.id)} className="text-sm font-bold">{char.name}</button>
+              <button onClick={() => onToggleCollapse(char.id)} className="collapse-button text-sm font-bold">{char.name}</button>
               <span className="text-sm text-gray-600">({char.class})</span>
             </div>
             <div className="flex items-center gap-2">
@@ -308,69 +308,153 @@
             </div>
           </div>
 
-          <div className="transition-all duration-300 ease-in-out" style={mainContentStyle}>
+          <div className="collapsible-content transition-all duration-300 ease-in-out" style={mainContentStyle}>
             <div className={collapsed ? "hidden" : "block"}>
               <div className="text-sm mb-1 mt-2">XP: {char.xp || 0}</div>
-              <div className="flex items-start gap-4 mt-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Character Image</label>
-                  <div className="flex items-center gap-2 mt-1">
-                    {char.image ? (
-                      <img src={char.image} alt={char.name} className="w-12 h-12 object-cover rounded-full" />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-gray-500 text-xs">No Image</div>
-                    )}
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="mt-1 text-sm" />
-                    {char.image && (
-                      <button className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm" onClick={() => onUpdateChar({ ...char, image: null })}>
-                        Remove Image
-                      </button>
-                    )}
+              <label className="block text-sm font-medium text-gray-700">Character Image</label>
+              <div className="flex items-center gap-2 mt-1">
+                {char.image ? (
+                  <img src={char.image} alt={char.name} className="w-12 h-12 object-cover rounded-full" />
+                ) : (
+                  <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-gray-500 text-xs">No Image</div>
+                )}
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="mt-1 text-sm" id={`image-upload-${char.id}`} />
+                {char.image && (
+                  <button className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm" onClick={() => onUpdateChar({ ...char, image: null })}>
+                    Remove Image
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-red-600 font-bold">♥</span>
+                  <div className="w-full bg-gray-200 rounded-full h-4">
+                    <div className="bg-red-600 rounded-full h-4" style={{ width: (char.health / char.maxHealth) * 100 + "%" }}></div>
                   </div>
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-sm">Background/Bio:</h4>
-                  <p className="text-sm whitespace-pre-line">{char.notes || "No background information available."}</p>
+                  <span className="text-sm">{char.health}/{char.maxHealth}</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 mt-2">
-                <span className="text-red-600 font-bold">♥</span>
-                <div className="w-full bg-gray-200 rounded-full h-4">
-                  <div className="bg-red-600 rounded-full h-4" style={{ width: (char.health / char.maxHealth) * 100 + "%" }}></div>
+              <div className="mt-2">
+                <h4 className="font-semibold text-sm">Status Conditions:</h4>
+                <ul className="list-disc list-inside space-y-1 mt-1">
+                  {char.status.map((stat, idx) => (
+                    <li key={idx} className="flex items-center justify-between bg-red-100 p-1 rounded">
+                      {stat}
+                      <button className="text-red-600 hover:text-red-800" onClick={() => onRemoveStatus(char.id, idx)}>[X]</button>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex gap-2 mt-1">
+                  <input id={`new-status-${char.id}`} className="border p-1 rounded text-sm" value={newStatus} onChange={(e) => setNewStatus(e.target.value)} placeholder="Add status" />
+                  <button className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm" onClick={handleAddStatus}>Add</button>
                 </div>
-                <span className="text-sm">{char.health}/{char.maxHealth}</span>
+              </div>
+
+              <div className="mt-2">
+                <h4 className="font-semibold text-sm">Effects:</h4>
+                <ul className="list-disc list-inside space-y-1 mt-1">
+                  {char.effects.map((eff, idx) => (
+                    <li key={idx} className="flex items-center justify-between bg-blue-100 p-1 rounded">
+                      {eff}
+                      <button className="text-red-600 hover:text-red-800" onClick={() => onRemoveEffect(char.id, idx)}>[X]</button>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex gap-2 mt-1">
+                  <input id={`new-effect-${char.id}`} className="border p-1 rounded text-sm" value={newEffect} onChange={(e) => setNewEffect(e.target.value)} placeholder="Add effect" />
+                  <button className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm" onClick={handleAddEffect}>Add</button>
+                </div>
+              </div>
+
+              <div className="mt-2">
+                <h4 className="font-semibold text-sm">Inventory:</h4>
+                <ul className="list-disc list-inside space-y-1 mt-1">
+                  {char.inventory.map((item, idx) => (
+                    <li key={idx} className="flex items-center justify-between bg-gray-100 p-1 rounded">
+                      {item}
+                      <button className="text-red-600 hover:text-red-800" onClick={() => onRemoveItem(char.id, idx)}>[X]</button>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex gap-2 mt-1">
+                  <input id={`new-item-${char.id}`} className="border p-1 rounded text-sm" value={newItem} onChange={(e) => setNewItem(e.target.value)} placeholder="New item" />
+                  <button className="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm" onClick={handleAddItem}>Add</button>
+                </div>
+              </div>
+
+              <div className="mt-2">
+                <h4 className="font-semibold text-sm">Special Abilities:</h4>
+                <ul className="list-disc list-inside space-y-1 mt-1">
+                  {char.specialAbilities.map((ability, idx) => (
+                    <li key={idx} className="flex items-center justify-between bg-green-100 p-1 rounded">
+                      {ability}
+                      <button className="text-red-600 hover:text-red-800" onClick={() => onRemoveAbility(char.id, idx)}>[X]</button>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex gap-2 mt-1">
+                  <input id={`new-ability-${char.id}`} className="border p-1 rounded text-sm" value={newAbility} onChange={(e) => setNewAbility(e.target.value)} placeholder="Add ability" />
+                  <button className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm" onClick={handleAddAbility}>Add</button>
+                </div>
+              </div>
+
+              <div className="mt-2">
+                <h4 className="font-semibold text-sm">Spells/Magic:</h4>
+                <ul className="list-disc list-inside space-y-1 mt-1">
+                  {char.spellsMagic.map((spell, idx) => (
+                    <li key={idx} className="flex items-center justify-between bg-purple-100 p-1 rounded">
+                      {spell}
+                      <button className="text-purple-600 hover:text-purple-800" onClick={() => onRemoveSpell(char.id, idx)}>[X]</button>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex gap-2 mt-1">
+                  <input id={`new-spell-${char.id}`} className="border p-1 rounded text-sm" value={newSpell} onChange={(e) => setNewSpell(e.target.value)} placeholder="Add spell" />
+                  <button className="px-2 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm" onClick={handleAddSpell}>Add</button>
+                </div>
               </div>
 
               <div className="mt-4 flex gap-4 flex-wrap">
                 <div>
                   <label className="text-sm block">Heal #</label>
                   <div className="flex items-center gap-2">
-                    <input type="number" className="w-16 border rounded p-1 text-sm" value={healInput} onChange={(e) => setHealInput(e.target.value)} />
+                    <input id={`heal-input-${char.id}`} type="number" className="w-16 border rounded p-1 text-sm" value={healInput} onChange={(e) => setHealInput(e.target.value)} />
                     <button className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm" onClick={applyHeal}>Heal</button>
                   </div>
                 </div>
                 <div>
                   <label className="text-sm block">Damage #</label>
                   <div className="flex items-center gap-2">
-                    <input type="number" className="w-16 border rounded p-1 text-sm" value={dmgInput} onChange={(e) => setDmgInput(e.target.value)} />
+                    <input id={`dmg-input-${char.id}`} type="number" className="w-16 border rounded p-1 text-sm" value={dmgInput} onChange={(e) => setDmgInput(e.target.value)} />
                     <button className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm" onClick={applyDamage}>Damage</button>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-2">
-                <label className="text-sm block">Status</label>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {char.status.map((s, idx) => (
-                    <span key={idx} className="inline-flex items-center px-2 py-1 bg-gray-200 rounded text-sm">
-                      {s} <button className="ml-1 text-red-500 hover:text-red-700" onClick={() => onRemoveStatus(char.id, idx)}>×</button>
-                    </span>
-                  ))}
-                  <input type="text" className="border rounded p-1 text-sm" value={newStatus} onChange={(e) => setNewStatus(e.target.value)} placeholder="Add status" onKeyPress={(e) => e.key === "Enter" && handleAddStatus()} />
-                  <button className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm" onClick={handleAddEffect}>Add</button>
+              {char.health <= 0 && (
+                <div className="mt-4">
+                  <h4 className="font-semibold text-sm">Death Saves</h4>
+                  <p className="text-xs text-gray-600">Successes: {char.deathSaves.success} / Failures: {char.deathSaves.fail}</p>
+                  <div className="flex gap-2 mt-1">
+                    <button className="px-2 py-1 bg-green-400 text-white rounded hover:bg-green-500 text-sm" onClick={toggleDeathSaveSuccess} disabled={char.deathSaves.success >= 3}>
+                      + Success
+                    </button>
+                    <button className="px-2 py-1 bg-red-400 text-white rounded hover:bg-red-500 text-sm" onClick={toggleDeathSaveFail} disabled={char.deathSaves.fail >= 3}>
+                      + Fail
+                    </button>
+                    <button className="px-2 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 text-sm" onClick={resetDeathSaves}>Reset</button>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {char.notes && (
+                <div className="mt-4">
+                  <h4 className="font-semibold text-sm">Notes/Bio:</h4>
+                  <p className="text-sm whitespace-pre-line">{char.notes}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -418,9 +502,9 @@
               <button className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" onClick={() => onRemoveEnemy(enemy.id)}>Defeat</button>
             </div>
             <div className="flex flex-col gap-2">
-              <input className="border p-1 rounded" placeholder="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
-              <input type="number" className="border p-1 rounded" placeholder="Max Health" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} />
-              <input type="number" className="border p-1 rounded" placeholder="Current Health" value={editHealth} onChange={(e) => setEditHealth(e.target.value)} />
+              <input id={`edit-enemy-name-${enemy.id}`} className="border p-1 rounded" placeholder="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+              <input id={`edit-enemy-maxhealth-${enemy.id}`} type="number" className="border p-1 rounded" placeholder="Max Health" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} />
+              <input id={`edit-enemy-health-${enemy.id}`} type="number" className="border p-1 rounded" placeholder="Current Health" value={editHealth} onChange={(e) => setEditHealth(e.target.value)} />
               <div className="flex gap-2">
                 <button className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600" onClick={handleSave}>Save</button>
                 <button className="px-2 py-1 bg-gray-400 text-white rounded hover:bg-gray-500" onClick={() => setIsEditing(false)}>Cancel</button>
@@ -433,13 +517,15 @@
       return (
         <div className={`bg-white p-4 rounded-lg shadow mb-4 ${collapsed ? "collapsed" : ""}`}>
           <div className="flex justify-between items-center">
-            <button onClick={() => onToggleCollapse(enemy.id)} className="text-sm font-bold">{enemy.name}</button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => onToggleCollapse(enemy.id)} className="collapse-button text-sm font-bold">{enemy.name}</button>
+            </div>
             <div className="flex gap-2 items-center">
               <button className="px-2 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 text-sm" onClick={() => setIsEditing(true)}>Edit</button>
               <button className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm" onClick={() => onRemoveEnemy(enemy.id)}>Defeat</button>
             </div>
           </div>
-          <div className="transition-all duration-300 ease-in-out" style={mainContentStyle}>
+          <div className="collapsible-content transition-all duration-300 ease-in-out" style={mainContentStyle}>
             <div className={collapsed ? "hidden" : "block"}>
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-red-600 font-bold">♥</span>
@@ -452,14 +538,14 @@
                 <div>
                   <label className="text-sm block">Heal #</label>
                   <div className="flex items-center gap-2">
-                    <input type="number" className="w-16 border rounded p-1 text-sm" value={healInput} onChange={(e) => setHealInput(e.target.value)} />
+                    <input id={`enemy-heal-input-${enemy.id}`} type="number" className="w-16 border rounded p-1 text-sm" value={healInput} onChange={(e) => setHealInput(e.target.value)} />
                     <button className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm" onClick={applyHeal}>Heal</button>
                   </div>
                 </div>
                 <div>
                   <label className="text-sm block">Damage #</label>
                   <div className="flex items-center gap-2">
-                    <input type="number" className="w-16 border rounded p-1 text-sm" value={dmgInput} onChange={(e) => setDmgInput(e.target.value)} />
+                    <input id={`enemy-dmg-input-${enemy.id}`} type="number" className="w-16 border rounded p-1 text-sm" value={dmgInput} onChange={(e) => setDmgInput(e.target.value)} />
                     <button className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm" onClick={applyDamage}>Damage</button>
                   </div>
                 </div>
@@ -491,7 +577,9 @@
       }
 
       function clampScore(val) {
-        return Math.max(6, Math.min(20, val));
+        if (val < 6) return 6;
+        if (val > 20) return 20;
+        return val;
       }
 
       function computeMod(score) {
@@ -519,6 +607,7 @@
                 <div key={row.id} className="bg-white p-4 rounded shadow mb-4 space-y-2">
                   <div className="flex justify-between items-center">
                     <input
+                      id={`stat-label-${row.id}`}
                       className="border rounded p-1 text-sm"
                       value={row.label}
                       onChange={(e) => updateStatRow(row.id, { ...row, label: e.target.value })}
@@ -526,18 +615,90 @@
                     <button className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm" onClick={() => removeStatRow(row.id)}>Remove</button>
                   </div>
                   <div className="grid grid-cols-6 gap-2 mt-2">
-                    {["str", "dex", "con", "int", "wis", "cha"].map((stat) => (
-                      <div key={stat} className="flex flex-col">
-                        <label className="font-semibold text-xs">{stat.toUpperCase()}</label>
-                        <input
-                          type="number"
-                          className="border p-1 rounded text-sm"
-                          value={row[stat]}
-                          onChange={(e) => updateStatRow(row.id, { ...row, [stat]: clampScore(parseInt(e.target.value) || 10) })}
-                        />
-                        <span className="text-center text-blue-600 text-xs mt-1">{computeMod(row[stat])}</span>
-                      </div>
-                    ))}
+                    <div className="flex flex-col">
+                      <label className="font-semibold text-xs">STR</label>
+                      <input
+                        id={`stat-str-${row.id}`}
+                        type="number"
+                        className="border p-1 rounded text-sm"
+                        value={row.str}
+                        onChange={(e) => {
+                          const val = clampScore(parseInt(e.target.value) || 10);
+                          updateStatRow(row.id, { ...row, str: val });
+                        }}
+                      />
+                      <span className="text-center text-blue-600 text-xs mt-1">{modSTR}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="font-semibold text-xs">DEX</label>
+                      <input
+                        id={`stat-dex-${row.id}`}
+                        type="number"
+                        className="border p-1 rounded text-sm"
+                        value={row.dex}
+                        onChange={(e) => {
+                          const val = clampScore(parseInt(e.target.value) || 10);
+                          updateStatRow(row.id, { ...row, dex: val });
+                        }}
+                      />
+                      <span className="text-center text-blue-600 text-xs mt-1">{modDEX}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="font-semibold text-xs">CON</label>
+                      <input
+                        id={`stat-con-${row.id}`}
+                        type="number"
+                        className="border p-1 rounded text-sm"
+                        value={row.con}
+                        onChange={(e) => {
+                          const val = clampScore(parseInt(e.target.value) || 10);
+                          updateStatRow(row.id, { ...row, con: val });
+                        }}
+                      />
+                      <span className="text-center text-blue-600 text-xs mt-1">{modCON}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="font-semibold text-xs">INT</label>
+                      <input
+                        id={`stat-int-${row.id}`}
+                        type="number"
+                        className="border p-1 rounded text-sm"
+                        value={row.int}
+                        onChange={(e) => {
+                          const val = clampScore(parseInt(e.target.value) || 10);
+                          updateStatRow(row.id, { ...row, int: val });
+                        }}
+                      />
+                      <span className="text-center text-blue-600 text-xs mt-1">{modINT}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="font-semibold text-xs">WIS</label>
+                      <input
+                        id={`stat-wis-${row.id}`}
+                        type="number"
+                        className="border p-1 rounded text-sm"
+                        value={row.wis}
+                        onChange={(e) => {
+                          const val = clampScore(parseInt(e.target.value) || 10);
+                          updateStatRow(row.id, { ...row, wis: val });
+                        }}
+                      />
+                      <span className="text-center text-blue-600 text-xs mt-1">{modWIS}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="font-semibold text-xs">CHA</label>
+                      <input
+                        id={`stat-cha-${row.id}`}
+                        type="number"
+                        className="border p-1 rounded text-sm"
+                        value={row.cha}
+                        onChange={(e) => {
+                          const val = clampScore(parseInt(e.target.value) || 10);
+                          updateStatRow(row.id, { ...row, cha: val });
+                        }}
+                      />
+                      <span className="text-center text-blue-600 text-xs mt-1">{modCHA}</span>
+                    </div>
                   </div>
                 </div>
               );
@@ -585,7 +746,7 @@
       );
     }
 
-    /** 8) MapSection (Fixed) */
+    /** 8) MapSection (Fixed to display as rectangle) */
     function MapSection({ mapImage, setMapImage, dotPositions, setDotPositions }) {
       const [isDragging, setIsDragging] = React.useState(null);
       const mapRef = React.useRef(null);
@@ -641,42 +802,54 @@
         <div className="bg-gray-100 p-4 rounded-lg mb-4">
           <h2 className="text-xl font-bold mb-2">Party & Enemy Location Map</h2>
           {mapImage ? (
-            <div style={{ position: "relative" }}>
+            <div className="relative">
               <div
                 ref={mapRef}
-                className="w-full h-96 overflow-hidden"
+                className="relative cursor-pointer"
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
               >
-                <img src={mapImage} alt="Map" className="w-full h-full object-contain" />
+                <img src={mapImage} alt="Map" className="w-full" />
                 {dotPositions.map((dot, index) => (
                   <div
                     key={index}
-                    className="absolute rounded-full border-2 border-white select-none"
+                    className="absolute w-4 h-4 rounded-full"
                     style={{
-                      width: "16px",
-                      height: "16px",
                       left: `${dot.x}%`,
                       top: `${dot.y}%`,
                       transform: "translate(-50%, -50%)",
                       backgroundColor: dot.color,
-                      cursor: isDragging === index ? "grabbing" : "grab",
-                      zIndex: 10,
+                      cursor: "grab",
                     }}
                     onMouseDown={handleMouseDown(index)}
                   />
                 ))}
               </div>
-              <div className="mt-2 flex justify-between items-center">
-                <p className="text-xs text-gray-700">Red: P1 | Blue: P2 | Green: P3 | Purple: P4 | Orange: Enemies</p>
-                <button className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm" onClick={handleDeleteImage}>Delete Map</button>
+              <div className="mt-2">
+                <p className="text-sm text-gray-700 mb-2">
+                  Red: P1 | Blue: P2 | Green: P3 | Purple: P4 | Orange: Enemies
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="border p-1 rounded"
+                  />
+                  <button
+                    className="px-2 py-1 bg-red-500 text-white rounded"
+                    onClick={handleDeleteImage}
+                  >
+                    Delete Map
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Upload Map Image</label>
-              <input type="file" accept="image/*" onChange={handleImageUpload} className="border p-1 rounded text-sm" />
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="border p-1 rounded text-sm" id="map-upload" />
             </div>
           )}
         </div>
@@ -733,9 +906,9 @@
           ...enemies.map((e) => "Enemy: " + e.name + "\nHealth: " + e.health + "/" + e.maxHealth),
         ].join("\n\n");
 
-        navigator.clipboard.writeText(text).then(() => alert("Data copied to clipboard!")).catch((err) => {
-          console.error("Failed to copy: ", err);
-          alert("Failed to copy data.");
+        navigator.clipboard.writeText(text).then(() => alert("Character and enemy data copied to clipboard!")).catch((err) => {
+          console.error("Failed to copy text: ", err);
+          alert("Failed to copy data. Check console for details.");
         });
       }
 
@@ -746,67 +919,126 @@
       );
     }
 
-    /** 11) ClassesSection */
+    /** 11) ClassesSection (Restored with links) */
     function ClassesSection() {
       const classes = [
-        { name: "Barbarian", desc: "Rage-fueled warriors with high strength and resilience." },
-        { name: "Bard", desc: "Charismatic performers using magic and inspiration." },
-        { name: "Cleric", desc: "Divine healers and warriors channeling godly power." },
-        { name: "Druid", desc: "Nature’s guardians with shapeshifting and elemental magic." },
-        { name: "Fighter", desc: "Versatile combatants excelling in martial prowess." },
-        { name: "Monk", desc: "Agile martial artists using ki for supernatural feats." },
-        { name: "Paladin", desc: "Holy knights blending combat and divine magic." },
-        { name: "Ranger", desc: "Skilled trackers with nature magic and ranged combat." },
-        { name: "Rogue", desc: "Stealthy tricksters specializing in sneak attacks." },
-        { name: "Sorcerer", desc: "Innate spellcasters with raw magical power." },
-        { name: "Warlock", desc: "Pact-bound casters wielding eldritch magic." },
-        { name: "Wizard", desc: "Scholars mastering arcane spells through study." },
+        { name: "Artificer (Tinkerers & Inventors)", desc: "Artificers thrive on intelligence, crafting, and magical engineering. Gnomes are natural inventors with minor illusions and magic resistance, while Autognomes are durable constructs with mechanical resilience. Vedalken excel in logic and mental resistance, and Warforged are living constructs immune to many conditions. Artificers specialize in infusions, magical tinkering, and intelligence-based spellcasting, making these races ideal for their class." },
+        { name: "Barbarian (Unstoppable Warriors)", desc: "Barbarians rely on raw strength, endurance, and primal fury. Goliaths reduce incoming damage and excel in athletics, while Orcs gain extra movement and resilience in combat. Minotaurs are melee-focused chargers, and Half-Orcs can survive near-fatal blows while delivering devastating crits. Lizardfolk add natural armor and self-healing through bites. Barbarians excel in rage-fueled combat, unarmored defense, and brutal critical hits." },
+        { name: "Bard (Charming Performers & Spellcasters)", desc: "Bards blend charisma, magic, and storytelling. Half-Elves gain extra skills and social flexibility, while Satyrs resist magic and enhance musical abilities. Fairies provide flight and innate spells, and Tabaxi have agility and charm, making them excellent performers. Kenku mimic sounds perfectly, ideal for deception and intrigue. Bards specialize in inspiring allies, versatile spellcasting, and performance-based magic." },
+        { name: "Cleric (Divine Warriors & Healers)", desc: "Clerics channel divine magic for healing and battle. Aasimar have celestial energy and radiant resistance, while Dwarves provide durability and divine weapon proficiencies. Tritons control water and communicate with sea creatures, and Firbolgs possess nature magic and invisibility. Owlin offer wisdom-based spellcasting with natural flight. Clerics excel in divine magic, healing, and powerful protective spells." },
+        { name: "Druid (Nature’s Guardians & Shapeshifters)", desc: "Druids command nature and transform into beasts. Firbolgs excel with plant communication and stealth, while Tortles provide natural armor for defense. Lizardfolk have primal instincts and self-healing, and Shifters channel lycanthropic abilities. Wood Elves thrive in forests with heightened agility. Druids master wild shape, nature magic, and elemental control." },
+        { name: "Fighter (Master Combatants & Strategists)", desc: "Fighters dominate the battlefield with weapons and tactics. Half-Orcs hit hard and endure, while Goliaths resist damage and excel in athletics. Hobgoblins enhance teamwork and tactical advantage, and Warforged provide durability with built-in armor. Leonin use powerful roars to intimidate foes. Fighters specialize in multiple attacks, weapon mastery, and versatile combat styles." },
+        { name: "Monk (Masters of Martial Arts & Speed)", desc: "Monks rely on speed, agility, and spiritual focus. Tabaxi are nimble and fast, while Harengon have quick reflexes and high jumps. Kenku are stealthy and precise, and Githzerai have psionic defenses. Lizardfolk enhance their unarmed strikes with natural weapons. Monks excel in unarmed combat, mobility, and ki-powered abilities." },
+        { name: "Paladin (Holy Warriors & Protectors)", desc: "Paladins wield divine magic alongside martial prowess. Aasimar gain celestial blessings and radiant abilities, while Dragonborn channel draconic power with elemental breath weapons. Dwarves bring durability and divine weapon skills, and Tritons harness oceanic magic. Leonin have natural authority and powerful combat presence. Paladins specialize in divine smites, healing, and protective auras." },
+        { name: "Ranger (Wilderness Scouts & Hunters)", desc: "Rangers track, hunt, and wield nature magic. Wood Elves have superior stealth and speed, while Tabaxi move swiftly and excel in scouting. Goliaths are rugged survivalists with cold resistance, and Firbolgs use magic to blend into nature. Kenku thrive in ambush tactics. Rangers excel in tracking, ranged combat, and natural exploration." },
+        { name: "Rogue (Stealthy Assassins & Tricksters)", desc: "Rogues rely on cunning, speed, and precision. Halflings avoid misfortune with their luck trait, while Tabaxi use agility and speed for quick getaways. Kobolds have pack tactics for deadly strikes, and Kenku mimic voices for deception. Goblin rogues use their nimbleness and quick escapes. Rogues specialize in sneak attacks, evasive movement, and deception." },
+        { name: "Sorcerer (Innate Spellcasters & Magical Prodigies)", desc: "Sorcerers wield raw, untamed magic. Dragonborn inherit draconic power with elemental resistances, while Tieflings draw strength from infernal ancestry. Aasimar harness celestial energy, and Genasi wield elemental magic. Fairies bring flight and innate spellcasting. Sorcerers specialize in metamagic, spontaneous casting, and magical surges." },
+        { name: "Warlock (Pact-Bound Spellcasters & Eldritch Wielders)", desc: "Warlocks make pacts with powerful entities for magic. Tieflings tap into fiendish energy, while Hexbloods have hag-like magic. Reborn warlocks possess undead resilience, and Githyanki wield psionic gifts. Drow Elves enhance darkness magic. Warlocks excel in eldritch invocations, powerful cantrips, and supernatural pacts." },
+        { name: "Wizard (Scholars of Magic & Arcane Masters)", desc: "Wizards master magic through study and knowledge. Gnomes have magical resistance and keen intellect, while Elves bring heightened senses and arcane heritage. Hobgoblins store magical energy for later use, and Vedalken provide logic-based spellcasting. Warforged offer a unique take on magical constructs. Wizards specialize in ritual magic, vast spell knowledge, and arcane mastery." },
       ];
 
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
-          <h2 className="text-xl font-bold mb-2">D&D Classes</h2>
+          <h2 className="text-xl font-bold mb-2">D&D 5th Edition Classes</h2>
+          <p className="mb-2">
+            Source: <a href="https://rpgbot.net/dnd5/characters/classes/" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">RPGBot Classes</a>
+          </p>
           <ul className="list-disc list-inside space-y-2">
             {classes.map((cls) => (
-              <li key={cls.name}><span className="font-semibold">{cls.name}</span>: {cls.desc}</li>
+              <li key={cls.name}>
+                <span className="font-semibold">{cls.name}</span>: {cls.desc}
+              </li>
             ))}
           </ul>
         </div>
       );
     }
 
-    /** 12) RacesSection */
+    /** 12) RacesSection (Restored with links) */
     function RacesSection() {
       const races = [
-        { name: "Dwarf", desc: "Stout and resilient with a knack for crafting." },
-        { name: "Elf", desc: "Graceful and long-lived with keen senses." },
-        { name: "Halfling", desc: "Small and lucky with nimble movements." },
-        { name: "Human", desc: "Versatile and adaptable to any role." },
-        { name: "Dragonborn", desc: "Draconic humanoids with breath weapons." },
-        { name: "Gnome", desc: "Clever inventors with magical resistance." },
-        { name: "Half-Elf", desc: "Blend of human and elven traits." },
-        { name: "Half-Orc", desc: "Strong and enduring warriors." },
-        { name: "Tiefling", desc: "Fiendish humanoids with infernal magic." },
+        { name: "Aarakocra", desc: "Bird-like humanoids with the ability to fly and sharp talons, often living in high-altitude environments." },
+        { name: "Aasimar", desc: "Celestial-touched beings with divine power, resistant to necrotic and radiant damage, and capable of radiant transformations." },
+        { name: "Autognome", desc: "Small robotic beings from Spelljammer, resilient with built-in mechanical advantages." },
+        { name: "Bugbear", desc: "Large goblinoid ambush predators with extended reach and powerful surprise attacks." },
+        { name: "Centaur", desc: "Half-human, half-horse creatures with natural speed and melee combat prowess." },
+        { name: "Changeling", desc: "Shapeshifters who can alter their appearance at will, making them excellent spies and social manipulators." },
+        { name: "Custom Lineage", desc: "A flexible non-race option that allows custom origins, granting a feat and bonus abilities." },
+        { name: "Dhampir", desc: "Half-vampires with supernatural abilities such as wall-climbing and life-draining bites." },
+        { name: "Dragonborn", desc: "Draconic humanoids with breath weapons and elemental resistances based on their draconic ancestry." },
+        { name: "Dwarf", desc: "Stocky, resilient warriors and craftsmen known for their endurance, resistance to poison, and expertise in mining." },
+        { name: "Elf", desc: "Graceful, long-lived humanoids with various subraces offering magical abilities and keen perception." },
+        { name: "Fairy", desc: "Tiny winged beings with natural flight and innate spellcasting abilities." },
+        { name: "Firbolg", desc: "Gentle giant-kin with druidic abilities, including limited invisibility and plant communication." },
+        { name: "Genasi", desc: "Elemental humanoids influenced by air, earth, fire, or water, each with unique traits and spell-like abilities." },
+        { name: "Giff", desc: "Large, gun-wielding hippo-like humanoids from Spelljammer with strength-based combat prowess." },
+        { name: "Gith", desc: "Psionic humanoids split into Githyanki (warriors and conquerors) and Githzerai (monks and mystics)." },
+        { name: "Gnome", desc: "Small, inventive, and magically inclined humanoids with innate resistance to mind-affecting magic." },
+        { name: "Goblin", desc: "Small, quick, and cunning humanoids with mobility-focused traits and the ability to disengage easily." },
+        { name: "Goliath", desc: "Towering mountain-dwellers with natural endurance and damage-reducing abilities." },
+        { name: "Hadozee", desc: "Gliding, monkey-like humanoids from Spelljammer with prehensile feet." },
+        { name: "Half-Elf", desc: "A mix of humans and elves, gaining benefits from both, including adaptability and social skills." },
+        { name: "Half-Orc", desc: "Fierce warriors with relentless endurance and the ability to deal devastating critical strikes." },
+        { name: "Halfling", desc: "Small, lucky humanoids known for their nimbleness and ability to reroll natural 1s on d20 rolls." },
+        { name: "Harengon", desc: "Rabbit-like humanoids with enhanced reflexes and exceptional mobility." },
+        { name: "Hexblood", desc: "Individuals influenced by hags, gaining minor divination and disguise-based magic." },
+        { name: "Hobgoblin", desc: "Military-minded goblinoids with teamwork-based abilities and martial discipline." },
+        { name: "Human", desc: "Versatile and adaptable, with a variant option allowing for a feat at level 1." },
+        { name: "Kalashtar", desc: "Psychic beings connected to the plane of dreams, resistant to psychic damage and skilled in telepathy." },
+        { name: "Kender", desc: "Mischievous, fear-resistant humanoids from Krynn (Dragonlance) with a knack for acquiring random objects." },
+        { name: "Kenku", desc: "Crow-like humanoids that can perfectly mimic sounds, making them excellent spies and thieves." },
+        { name: "Kobold", desc: "Small draconic humanoids, often working in groups, with a variety of combat-focused abilities." },
+        { name: "Leonin", desc: "Lion-like humanoids with powerful roars and natural combat prowess." },
+        { name: "Lizardfolk", desc: "Cold-blooded reptilian humanoids with durable scales, natural weapons, and an ability to craft from slain foes." },
+        { name: "Loxodon", desc: "Elephant-like humanoids with tough skin, a powerful trunk, and a calm, meditative nature." },
+        { name: "Minotaur", desc: "Large, bull-headed warriors built for charging into battle with deadly efficiency." },
+        { name: "Orc", desc: "Powerful and resilient warriors with a drive for battle and an ability to endure massive damage." },
+        { name: "Owlin", desc: "Owl-like humanoids with natural flight and silent movement, making them great scouts." },
+        { name: "Plasmoid", desc: "Ooze-like beings with amorphous bodies, able to squeeze through tight spaces and extend pseudopods." },
+        { name: "Reborn", desc: "Undead or resurrected beings with fragmented memories and resistance to disease and poison." },
+        { name: "Satyr", desc: "Goat-like humanoids with magical resistance and an affinity for revelry and adventure." },
+        { name: "Shifter", desc: "Werebeast-like humanoids that can temporarily transform into more animalistic forms." },
+        { name: "Simic Hybrid", desc: "Magically altered humanoids with animal-like features and customizable traits." },
+        { name: "Tabaxi", desc: "Cat-like humanoids with keen senses, exceptional speed, and curiosity-driven instincts." },
+        { name: "Thri-Kreen", desc: "Four-armed, mantis-like humanoids with natural armor and telepathic communication." },
+        { name: "Tiefling", desc: "Fiend-touched humanoids with infernal resistances, innate magic, and an affinity for dark powers." },
+        { name: "Tortle", desc: "Turtle-like humanoids with natural armor and a laid-back but sturdy nature." },
+        { name: "Triton", desc: "Amphibious ocean-dwellers with command over sea creatures and innate water-based magic." },
+        { name: "Vedalken", desc: "Intellectual, blue-skinned humanoids with heightened mental resistance and a focus on logic." },
+        { name: "Verdan", desc: "Green-skinned, magically mutating humanoids that change in size as they age." },
+        { name: "Warforged", desc: "Living constructs built for durability and adaptability, making them excellent warriors or spellcasters." },
+        { name: "Yuan-Ti", desc: "Snake-like humanoids with resistance to poison and magic, often linked to dark deities." },
       ];
 
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
-          <h2 className="text-xl font-bold mb-2">D&D Races</h2>
+          <h2 className="text-xl font-bold mb-2">D&D 5th Edition Races</h2>
+          <p className="mb-2">
+            Source: <a href="https://rpgbot.net/dnd5/characters/races/" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">RPGBot Races</a>
+          </p>
           <ul className="list-disc list-inside space-y-1">
             {races.map((race) => (
-              <li key={race.name}><span className="font-semibold">{race.name}</span>: {race.desc}</li>
+              <li key={race.name}>
+                <span className="font-semibold">{race.name}</span>: {race.desc}
+              </li>
             ))}
           </ul>
         </div>
       );
     }
 
-    /** 13) MonsterCreatureList */
+    /** 13) MonsterCreatureList (Restored with links) */
     function MonsterCreatureList() {
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
           <h2 className="text-xl font-bold mb-2">Monster/Creature List</h2>
-          <p className="mb-2">Access monster stats at: <a href="https://www.aidedd.org/dnd-filters/monsters.php" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">AIDEDD Monster Database</a></p>
+          <p className="mb-2">
+            Access a comprehensive database of D&D monsters and creatures at:
+          </p>
+          <a href="https://www.aidedd.org/dnd-filters/monsters.php" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">AIDEDD Monster Database</a>
+          <p className="mt-2 text-sm text-gray-700">
+            Use this resource to find detailed stats and information for monsters in your campaign.
+          </p>
         </div>
       );
     }
@@ -832,11 +1064,11 @@
           <div className="flex flex-wrap items-end gap-2">
             <div>
               <label className="block text-sm font-medium mb-1">Amount</label>
-              <input type="number" className="border rounded p-1 text-sm w-20" value={amount} onChange={(e) => setAmount(e.target.value)} />
+              <input id="bulk-amount" type="number" className="border rounded p-1 text-sm w-20" value={amount} onChange={(e) => setAmount(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Target</label>
-              <select className="border rounded p-1 text-sm" value={targetType} onChange={(e) => setTargetType(e.target.value)}>
+              <select id="bulk-target" className="border rounded p-1 text-sm" value={targetType} onChange={(e) => setTargetType(e.target.value)}>
                 <option value="characters">All Characters</option>
                 <option value="enemies">All Enemies</option>
               </select>
@@ -1055,12 +1287,14 @@
           <div className="flex justify-between items-center mb-4">
             <DarkModeToggle />
             <div className="flex gap-2">
-              <button className="px-3 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 text-sm" onClick={backupLocalStorage}>Backup</button>
-              <input type="file" accept=".json" onChange={(e) => restoreLocalStorage(e.target.files)} className="border p-1 rounded text-sm" />
+              <button className="px-3 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 text-sm" onClick={backupLocalStorage}>Backup LocalStorage</button>
+              <input type="file" accept=".json" onChange={(e) => restoreLocalStorage(e.target.files)} className="border p-1 rounded text-sm" id="restore-backup" />
             </div>
           </div>
 
-          <CopyButton characters={characters} enemies={enemies} />
+          <div className="mb-4">
+            <CopyButton characters={characters} enemies={enemies} />
+          </div>
 
           <div className="grid gap-4">
             {/* Party Status */}
