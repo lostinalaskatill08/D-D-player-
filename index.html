@@ -22,32 +22,36 @@
     crossorigin="anonymous"
   ></script>
 
-  <!-- Babel (in-browser JSX transform) -->
+  <!-- Babel for inline JSX (dev use) -->
   <script
     src="https://unpkg.com/babel-standalone@6/babel.min.js"
     type="text/javascript"
   ></script>
 
-  <!-- D&D-inspired font (optional) -->
+  <!-- D&D-ish font -->
   <link
     href="https://fonts.googleapis.com/css2?family=Cinzel&display=swap"
     rel="stylesheet"
   />
 
   <style>
-    /* D&D-ish font and transitions */
+    /* Medieval D&D font styling */
     body {
       font-family: 'Cinzel', serif;
       transition: background-color 0.3s, color 0.3s;
     }
+
+    /* Parchment-like background for the entire page */
+    body.parchment {
+      background: url("https://www.transparenttextures.com/patterns/aged-paper.png");
+    }
+
+    /* Dark mode override */
     .dark {
       background-color: #1a1a1a;
       color: #fafafa;
     }
-    /* Optional parchment background */
-    .parchment-bg {
-      background: url("https://www.transparenttextures.com/patterns/aged-paper.png");
-    }
+
     /* Collapsible icons */
     .collapse-button::after {
       content: "▼";
@@ -61,7 +65,8 @@
       transition: max-height 0.3s ease;
       overflow: hidden;
     }
-    /* Custom tan scrollbar (WebKit browsers) */
+
+    /* Custom tan scrollbar */
     ::-webkit-scrollbar {
       width: 12px;
     }
@@ -76,18 +81,22 @@
   </style>
 </head>
 
-<body class="bg-gray-50 text-gray-800">
+<body class="parchment text-gray-800">
   <div id="root" class="p-4"></div>
 
-  <!-- Main Script -->
   <script type="text/babel">
-    /**************************************************
-     * Minimal D&D Tracker with requested enhancements
-     **************************************************/
+    /************************************************
+     * Single-File D&D Tracker
+     * With:
+     *  - Parchment background
+     *  - Tan scrollbar
+     *  - Colorful medieval buttons
+     *  - Static Map (no map-drag, only marker-drag)
+     ************************************************/
 
-    /***************
-     * 1) Utility
-     ***************/
+    /*********************************
+     * 1) LocalStorage Backup/Restore
+     *********************************/
     function backupLocalStorage() {
       const data = {
         characters: localStorage.getItem("characters"),
@@ -130,6 +139,9 @@
       reader.readAsText(file);
     }
 
+    /*********************************
+     * 2) Hook for Expand/Collapse
+     *********************************/
     function useCollapseState(storageKey) {
       const [collapseState, setCollapseState] = React.useState(() => {
         const saved = localStorage.getItem(storageKey);
@@ -143,12 +155,13 @@
           return newVal;
         });
       }
+
       return [collapseState, toggleCollapse];
     }
 
-    /***************
-     * 2) Dark Mode
-     ***************/
+    /*********************************
+     * 3) Dark Mode Toggle
+     *********************************/
     function DarkModeToggle() {
       const [darkMode, setDarkMode] = React.useState(() => {
         return localStorage.getItem("darkMode") === "true";
@@ -165,7 +178,7 @@
 
       return (
         <button
-          className="px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+          className="px-3 py-1 bg-yellow-700 text-white rounded hover:bg-yellow-800"
           onClick={() => setDarkMode(!darkMode)}
         >
           {darkMode ? "Light Mode" : "Dark Mode"}
@@ -173,9 +186,9 @@
       );
     }
 
-    /***************
-     * 3) CharacterCard
-     ***************/
+    /*********************************
+     * 4) CharacterCard
+     *********************************/
     function CharacterCard({
       char,
       collapsed,
@@ -191,6 +204,7 @@
       onRemoveChar,
     }) {
       const [isEditing, setIsEditing] = React.useState(false);
+
       const [editName, setEditName] = React.useState(char.name);
       const [editClass, setEditClass] = React.useState(char.class);
       const [editMaxHealth, setEditMaxHealth] = React.useState(String(char.maxHealth));
@@ -232,6 +246,7 @@
       function handleSave() {
         const parsedMax = parseInt(editMaxHealth, 10) || 0;
         const clippedHealth = Math.min(char.health, parsedMax);
+
         onUpdateChar({
           ...char,
           name: editName,
@@ -248,32 +263,27 @@
 
       function handleAddStatus() {
         if (!newStatus.trim()) return;
-        const updated = [...char.status, newStatus.trim()];
-        onUpdateChar({ ...char, status: updated });
+        onUpdateChar({ ...char, status: [...char.status, newStatus.trim()] });
         setNewStatus("");
       }
       function handleAddEffect() {
         if (!newEffect.trim()) return;
-        const updated = [...char.effects, newEffect.trim()];
-        onUpdateChar({ ...char, effects: updated });
+        onUpdateChar({ ...char, effects: [...char.effects, newEffect.trim()] });
         setNewEffect("");
       }
       function handleAddItem() {
         if (!newItem.trim()) return;
-        const updated = [...char.inventory, newItem.trim()];
-        onUpdateChar({ ...char, inventory: updated });
+        onUpdateChar({ ...char, inventory: [...char.inventory, newItem.trim()] });
         setNewItem("");
       }
       function handleAddAbility() {
         if (!newAbility.trim()) return;
-        const updated = [...char.specialAbilities, newAbility.trim()];
-        onUpdateChar({ ...char, specialAbilities: updated });
+        onUpdateChar({ ...char, specialAbilities: [...char.specialAbilities, newAbility.trim()] });
         setNewAbility("");
       }
       function handleAddSpell() {
         if (!newSpell.trim()) return;
-        const updated = [...char.spellsMagic, newSpell.trim()];
-        onUpdateChar({ ...char, spellsMagic: updated });
+        onUpdateChar({ ...char, spellsMagic: [...char.spellsMagic, newSpell.trim()] });
         setNewSpell("");
       }
 
@@ -284,6 +294,7 @@
         onDamage(char.id, parseInt(dmgInput, 10) || 0);
       }
 
+      // Death Saves
       function toggleDeathSaveSuccess() {
         if (char.deathSaves.success < 3) {
           onUpdateChar({
@@ -323,7 +334,7 @@
             <div className="flex justify-between items-center">
               <h3 className="font-bold">Editing {char.name}</h3>
               <button
-                className="px-2 py-1 bg-red-500 text-white rounded"
+                className="px-2 py-1 bg-red-700 text-white rounded hover:bg-red-800"
                 onClick={() => onRemoveChar(char.id)}
               >
                 Remove
@@ -343,30 +354,30 @@
                 onChange={(e) => setEditClass(e.target.value)}
               />
               <input
+                type="number"
                 className="border p-1 rounded"
                 placeholder="Max Health"
-                type="number"
                 value={editMaxHealth}
                 onChange={(e) => setEditMaxHealth(e.target.value)}
               />
               <input
+                type="number"
                 className="border p-1 rounded"
                 placeholder="Level"
-                type="number"
                 value={editLevel}
                 onChange={(e) => setEditLevel(e.target.value)}
               />
               <input
+                type="number"
                 className="border p-1 rounded"
                 placeholder="XP"
-                type="number"
                 value={editXP}
                 onChange={(e) => setEditXP(e.target.value)}
               />
               <input
+                type="number"
                 className="border p-1 rounded"
                 placeholder="Initiative"
-                type="number"
                 value={editInitiative}
                 onChange={(e) => setEditInitiative(e.target.value)}
               />
@@ -380,7 +391,7 @@
             />
             <div className="flex gap-2">
               <button
-                className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800"
                 onClick={handleSave}
               >
                 Save
@@ -417,19 +428,20 @@
                 Init: {char.initiative || 0} | Lvl: {char.level || 1}
               </span>
               <button
-                className="p-1 text-gray-500 hover:text-gray-700"
+                className="px-2 py-1 bg-yellow-700 text-white rounded hover:bg-yellow-800 text-sm"
                 onClick={() => setIsEditing(true)}
               >
-                [EDIT]
+                Edit
               </button>
               <button
-                className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-2 py-1 bg-red-700 text-white rounded hover:bg-red-800 text-sm"
                 onClick={() => onRemoveChar(char.id)}
               >
                 Remove
               </button>
             </div>
           </div>
+
           <div
             className="collapsible-content transition-all duration-300 ease-in-out"
             style={mainContentStyle}
@@ -448,7 +460,7 @@
                     className="w-16 h-16 object-cover rounded-full"
                   />
                   <button
-                    className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                    className="px-2 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800"
                     onClick={() => onUpdateChar({ ...char, image: null })}
                   >
                     Remove Image
@@ -462,13 +474,14 @@
                   className="mt-1 text-sm"
                 />
               )}
-              {/* Health */}
+
+              {/* Health Bar */}
               <div className="mt-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-red-500">❤️</span>
+                  <span className="text-red-600 font-bold">♥</span>
                   <div className="w-full bg-gray-200 rounded-full h-4">
                     <div
-                      className="bg-red-500 rounded-full h-4"
+                      className="bg-red-600 rounded-full h-4"
                       style={{
                         width: (char.health / char.maxHealth) * 100 + "%",
                       }}
@@ -479,6 +492,7 @@
                   </span>
                 </div>
               </div>
+
               {/* Status */}
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Status Conditions:</h4>
@@ -506,13 +520,14 @@
                     placeholder="Add status"
                   />
                   <button
-                    className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                    className="px-2 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800"
                     onClick={handleAddStatus}
                   >
                     Add
                   </button>
                 </div>
               </div>
+
               {/* Effects */}
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Effects:</h4>
@@ -540,13 +555,14 @@
                     placeholder="Add effect"
                   />
                   <button
-                    className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                    className="px-2 py-1 bg-blue-700 text-white rounded text-sm hover:bg-blue-800"
                     onClick={handleAddEffect}
                   >
                     Add
                   </button>
                 </div>
               </div>
+
               {/* Inventory */}
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Inventory:</h4>
@@ -576,14 +592,15 @@
                     placeholder="New item"
                   />
                   <button
-                    className="px-2 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
+                    className="px-2 py-1 bg-gray-700 text-white rounded text-sm hover:bg-gray-800"
                     onClick={handleAddItem}
                   >
                     Add
                   </button>
                 </div>
               </div>
-              {/* Abilities */}
+
+              {/* Special Abilities */}
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Special Abilities:</h4>
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -610,14 +627,15 @@
                     placeholder="Add ability"
                   />
                   <button
-                    className="px-2 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+                    className="px-2 py-1 bg-green-700 text-white rounded text-sm hover:bg-green-800"
                     onClick={handleAddAbility}
                   >
                     Add
                   </button>
                 </div>
               </div>
-              {/* Spells */}
+
+              {/* Spells/Magic */}
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Spells/Magic:</h4>
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -644,13 +662,14 @@
                     placeholder="Add spell"
                   />
                   <button
-                    className="px-2 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700"
+                    className="px-2 py-1 bg-purple-700 text-white rounded text-sm hover:bg-purple-800"
                     onClick={handleAddSpell}
                   >
                     Add
                   </button>
                 </div>
               </div>
+
               {/* Heal / Damage */}
               <div className="mt-4 flex gap-4 flex-wrap">
                 <div>
@@ -663,7 +682,7 @@
                       onChange={(e) => setHealInput(e.target.value)}
                     />
                     <button
-                      className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+                      className="px-3 py-1 bg-green-700 text-white rounded text-sm hover:bg-green-800"
                       onClick={applyHeal}
                     >
                       Heal
@@ -680,7 +699,7 @@
                       onChange={(e) => setDmgInput(e.target.value)}
                     />
                     <button
-                      className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                      className="px-3 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800"
                       onClick={applyDamage}
                     >
                       Damage
@@ -688,6 +707,7 @@
                   </div>
                 </div>
               </div>
+
               {/* Death Saves */}
               {char.health <= 0 && (
                 <div className="mt-4">
@@ -719,6 +739,7 @@
                   </div>
                 </div>
               )}
+
               {/* Notes */}
               {char.notes && (
                 <div className="mt-4">
@@ -732,9 +753,9 @@
       );
     }
 
-    /***************
-     * 4) EnemyCard
-     ***************/
+    /*********************************
+     * 5) EnemyCard
+     *********************************/
     function EnemyCard({
       enemy,
       collapsed,
@@ -787,7 +808,7 @@
             <div className="flex justify-between items-center">
               <h3 className="font-bold">Editing Enemy</h3>
               <button
-                className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-2 py-1 bg-red-700 text-white rounded hover:bg-red-800"
                 onClick={() => onRemoveEnemy(enemy.id)}
               >
                 Defeat
@@ -816,7 +837,7 @@
               />
               <div className="flex gap-2">
                 <button
-                  className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                  className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800"
                   onClick={handleSave}
                 >
                   Save
@@ -850,13 +871,13 @@
             </div>
             <div className="flex gap-2 items-center">
               <button
-                className="p-1 text-gray-500 hover:text-gray-700"
+                className="px-2 py-1 bg-yellow-700 text-white rounded hover:bg-yellow-800 text-sm"
                 onClick={() => setIsEditing(true)}
               >
-                [EDIT]
+                Edit
               </button>
               <button
-                className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-2 py-1 bg-red-700 text-white rounded hover:bg-red-800 text-sm"
                 onClick={() => onRemoveEnemy(enemy.id)}
               >
                 Defeat
@@ -869,10 +890,10 @@
           >
             <div className={collapsed ? "hidden" : "block"}>
               <div className="flex items-center gap-2 mt-2">
-                <span className="text-red-500">❤️</span>
+                <span className="text-red-600 font-bold">♥</span>
                 <div className="w-full bg-gray-200 rounded-full h-4">
                   <div
-                    className="bg-red-500 rounded-full h-4"
+                    className="bg-red-600 rounded-full h-4"
                     style={{
                       width: (enemy.health / enemy.maxHealth) * 100 + "%",
                     }}
@@ -893,7 +914,7 @@
                       onChange={(e) => setHealInput(e.target.value)}
                     />
                     <button
-                      className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+                      className="px-3 py-1 bg-green-700 text-white rounded text-sm hover:bg-green-800"
                       onClick={applyHeal}
                     >
                       Heal
@@ -910,7 +931,7 @@
                       onChange={(e) => setDmgInput(e.target.value)}
                     />
                     <button
-                      className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                      className="px-3 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800"
                       onClick={applyDamage}
                     >
                       Damage
@@ -924,9 +945,9 @@
       );
     }
 
-    /***************
-     * 5) StatsSection
-     ***************/
+    /*********************************
+     * 6) StatsSection
+     *********************************/
     function StatsSection({ statRows, setStatRows }) {
       const [nextId, setNextId] = React.useState(
         statRows.length ? Math.max(...statRows.map((r) => r.id)) + 1 : 2
@@ -971,9 +992,7 @@
       }
 
       function sortByAbility(ability) {
-        setStatRows((prev) => {
-          return [...prev].sort((a, b) => b[ability] - a[ability]);
-        });
+        setStatRows((prev) => [...prev].sort((a, b) => b[ability] - a[ability]));
       }
 
       return (
@@ -981,7 +1000,7 @@
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-2xl font-bold">Stat Calculator</h2>
             <button
-              className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="px-2 py-1 bg-blue-700 text-white rounded hover:bg-blue-800"
               onClick={addStatRow}
             >
               Add Stat Row
@@ -992,37 +1011,37 @@
           </p>
           <div className="mb-2 flex gap-2 flex-wrap">
             <button
-              className="px-2 py-1 bg-blue-400 text-white rounded text-sm hover:bg-blue-500"
+              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
               onClick={() => sortByAbility("str")}
             >
               Sort by STR
             </button>
             <button
-              className="px-2 py-1 bg-blue-400 text-white rounded text-sm hover:bg-blue-500"
+              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
               onClick={() => sortByAbility("dex")}
             >
               Sort by DEX
             </button>
             <button
-              className="px-2 py-1 bg-blue-400 text-white rounded text-sm hover:bg-blue-500"
+              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
               onClick={() => sortByAbility("con")}
             >
               Sort by CON
             </button>
             <button
-              className="px-2 py-1 bg-blue-400 text-white rounded text-sm hover:bg-blue-500"
+              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
               onClick={() => sortByAbility("int")}
             >
               Sort by INT
             </button>
             <button
-              className="px-2 py-1 bg-blue-400 text-white rounded text-sm hover:bg-blue-500"
+              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
               onClick={() => sortByAbility("wis")}
             >
               Sort by WIS
             </button>
             <button
-              className="px-2 py-1 bg-blue-400 text-white rounded text-sm hover:bg-blue-500"
+              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
               onClick={() => sortByAbility("cha")}
             >
               Sort by CHA
@@ -1047,7 +1066,7 @@
                     }
                   />
                   <button
-                    className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                    className="px-2 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800"
                     onClick={() => removeStatRow(row.id)}
                   >
                     Remove Row
@@ -1158,9 +1177,9 @@
       );
     }
 
-    /***************
-     * 6) DiceRoller
-     ***************/
+    /*********************************
+     * 7) DiceRoller
+     *********************************/
     function DiceRoller() {
       const [rollHistory, setRollHistory] = React.useState([]);
       const audioRef = React.useRef(null);
@@ -1186,7 +1205,7 @@
               <button
                 key={sides}
                 onClick={() => rollD(sides)}
-                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="px-3 py-1 bg-blue-700 text-white rounded hover:bg-blue-800"
               >
                 d{sides}
               </button>
@@ -1205,17 +1224,12 @@
       );
     }
 
-    /***************
-     * 7) MapSection (No Mouse-Wheel Zoom)
-     ***************/
+    /*********************************
+     * 8) MapSection (Static, markers only)
+     *********************************/
     function MapSection({ mapImage, setMapImage, dotPositions, setDotPositions }) {
       const [isDragging, setIsDragging] = React.useState(null);
       const containerRef = React.useRef(null);
-
-      const [scale, setScale] = React.useState(1);
-      const [offset, setOffset] = React.useState({ x: 0, y: 0 });
-      const [isPanning, setIsPanning] = React.useState(false);
-      const [panStart, setPanStart] = React.useState({ x: 0, y: 0 });
 
       function handleImageUpload(event) {
         const file = event.target.files[0];
@@ -1224,8 +1238,6 @@
           reader.onload = (e) => {
             setMapImage(e.target.result);
             setDotPositions([]);
-            setScale(1);
-            setOffset({ x: 0, y: 0 });
           };
           reader.readAsDataURL(file);
         }
@@ -1238,89 +1250,57 @@
 
       function handleMouseDown(index) {
         return (e) => {
-          e.stopPropagation(); 
+          // Begin dragging this marker
           setIsDragging(index);
           moveDot(index, e);
         };
       }
 
       function handleMouseMove(e) {
-        if (isDragging !== null) {
+        if (isDragging !== null && containerRef.current && mapImage) {
           moveDot(isDragging, e);
-        } else if (isPanning) {
-          const dx = e.clientX - panStart.x;
-          const dy = e.clientY - panStart.y;
-          setPanStart({ x: e.clientX, y: e.clientY });
-          setOffset((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
         }
       }
 
       function handleMouseUp() {
         setIsDragging(null);
-        setIsPanning(false);
       }
 
       function moveDot(index, e) {
-        if (!containerRef.current || !mapImage) return;
         const rect = containerRef.current.getBoundingClientRect();
-        // Convert from pixels to percentages, factoring in offset & scale
-        const x = e.clientX - rect.left - offset.x;
-        const y = e.clientY - rect.top - offset.y;
-        const mapW = rect.width * scale;
-        const mapH = rect.height * scale;
-        // convert to percent
-        const xPercent = (x / mapW) * 100;
-        const yPercent = (y / mapH) * 100;
-
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
         setDotPositions((prev) =>
           prev.map((dot, i) =>
             i === index
               ? {
                   ...dot,
-                  x: Math.max(0, Math.min(100, xPercent)),
-                  y: Math.max(0, Math.min(100, yPercent)),
+                  x: Math.max(0, Math.min(100, x)),
+                  y: Math.max(0, Math.min(100, y)),
                 }
               : dot
           )
         );
       }
 
-      // Removed onWheel to prevent scroll-based zoom
-      function handlePanStart(e) {
-        setIsPanning(true);
-        setPanStart({ x: e.clientX, y: e.clientY });
-      }
-
-      function zoomIn() {
-        setScale((prev) => Math.min(prev + 0.1, 3));
-      }
-      function zoomOut() {
-        setScale((prev) => Math.max(prev - 0.1, 0.5));
-      }
-      function resetView() {
-        setScale(1);
-        setOffset({ x: 0, y: 0 });
-      }
-
       function addDot() {
+        // Add a new marker in the center
         setDotPositions((prev) => [
           ...prev,
-          {
-            x: 50,
-            y: 50,
-            color: "red",
-            label: "Marker",
-          },
+          { x: 50, y: 50, color: "red", label: "Marker" },
         ]);
       }
+
       function removeDot(index) {
         setDotPositions((prev) => prev.filter((_, i) => i !== index));
       }
+
       function updateDotLabel(index, value) {
         setDotPositions((prev) =>
           prev.map((dot, i) => (i === index ? { ...dot, label: value } : dot))
         );
       }
+
       function updateDotColor(index, value) {
         setDotPositions((prev) =>
           prev.map((dot, i) => (i === index ? { ...dot, color: value } : dot))
@@ -1328,31 +1308,33 @@
       }
 
       return (
-        <div className="bg-gray-100 p-4 rounded-lg">
+        <div
+          className="bg-gray-100 p-4 rounded-lg"
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
           <h2 className="text-xl font-bold mb-2">Party & Enemy Location Map</h2>
           {mapImage ? (
             <div>
               <div
-                className="relative overflow-hidden border-2 border-gray-300"
+                ref={containerRef}
+                className="relative border-2 border-gray-300 overflow-hidden"
                 style={{
                   width: "100%",
                   height: "500px",
-                  cursor: isPanning ? "grabbing" : "grab",
+                  userSelect: "none",
                 }}
-                ref={containerRef}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                onMouseDown={handlePanStart}
               >
                 <img
                   src={mapImage}
                   alt="Map"
+                  draggable="false"
+                  onDragStart={(e) => e.preventDefault()}
                   style={{
                     width: "100%",
                     height: "100%",
-                    transformOrigin: "top left",
-                    transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
+                    objectFit: "cover",
                   }}
                 />
                 {dotPositions.map((dot, index) => (
@@ -1360,9 +1342,9 @@
                     key={index}
                     className="absolute w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold"
                     style={{
-                      left: `calc(${dot.x}% + ${offset.x}px)`,
-                      top: `calc(${dot.y}% + ${offset.y}px)`,
-                      transform: `translate(-50%, -50%) scale(${scale})`,
+                      left: dot.x + "%",
+                      top: dot.y + "%",
+                      transform: "translate(-50%, -50%)",
                       backgroundColor: dot.color,
                       cursor: "grab",
                     }}
@@ -1371,36 +1353,15 @@
                 ))}
               </div>
               <div className="mt-2">
-                <p className="text-sm text-gray-700 mb-2">
-                  Use the buttons below to zoom or add markers. Drag inside the map to pan (move).
-                </p>
                 <div className="flex gap-2 flex-wrap mb-2">
                   <button
-                    className="px-2 py-1 bg-blue-400 text-white rounded hover:bg-blue-500"
-                    onClick={zoomIn}
-                  >
-                    Zoom In
-                  </button>
-                  <button
-                    className="px-2 py-1 bg-blue-400 text-white rounded hover:bg-blue-500"
-                    onClick={zoomOut}
-                  >
-                    Zoom Out
-                  </button>
-                  <button
-                    className="px-2 py-1 bg-blue-400 text-white rounded hover:bg-blue-500"
-                    onClick={resetView}
-                  >
-                    Reset View
-                  </button>
-                  <button
-                    className="px-2 py-1 bg-green-400 text-white rounded hover:bg-green-500"
+                    className="px-2 py-1 bg-green-700 text-white rounded hover:bg-green-800"
                     onClick={addDot}
                   >
                     Add Marker
                   </button>
                   <button
-                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    className="px-2 py-1 bg-red-700 text-white rounded hover:bg-red-800"
                     onClick={handleDeleteImage}
                   >
                     Delete Map
@@ -1432,7 +1393,7 @@
                           <option>pink</option>
                         </select>
                         <button
-                          className="px-2 py-1 bg-red-400 text-white rounded hover:bg-red-500"
+                          className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                           onClick={() => removeDot(index)}
                         >
                           Remove
@@ -1457,9 +1418,9 @@
       );
     }
 
-    /***************
-     * 8) PartyImages
-     ***************/
+    /*********************************
+     * 9) PartyImages
+     *********************************/
     function PartyImages({ characters }) {
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
@@ -1486,9 +1447,9 @@
       );
     }
 
-    /***************
-     * 9) CopyButton
-     ***************/
+    /*********************************
+     * 10) CopyButton
+     *********************************/
     function CopyButton({ characters, enemies }) {
       function handleCopy() {
         const text = [
@@ -1530,7 +1491,7 @@
 
       return (
         <button
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mb-2"
+          className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 mb-2"
           onClick={handleCopy}
         >
           Copy for Prompt
@@ -1538,9 +1499,9 @@
       );
     }
 
-    /***************
-     * 10) ClassesSection (Short)
-     ***************/
+    /*********************************
+     * 11) ClassesSection (Short)
+     *********************************/
     function ClassesSection() {
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
@@ -1556,17 +1517,16 @@
               RPGBot Classes
             </a>
           </p>
-          {/* Just leave placeholders for your own text */}
           <p className="text-sm text-gray-700">
-            (Add your class descriptions here as needed)
+            (Add your class details here as needed...)
           </p>
         </div>
       );
     }
 
-    /***************
-     * 11) RacesSection (Short)
-     ***************/
+    /*********************************
+     * 12) RacesSection (Short)
+     *********************************/
     function RacesSection() {
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
@@ -1582,17 +1542,16 @@
               RPGBot Races
             </a>
           </p>
-          {/* Placeholder for your own race descriptions */}
           <p className="text-sm text-gray-700">
-            (Add your race descriptions here as needed)
+            (Add your race details here as needed...)
           </p>
         </div>
       );
     }
 
-    /***************
-     * 12) MonsterCreatureList
-     ***************/
+    /*********************************
+     * 13) MonsterCreatureList
+     *********************************/
     function MonsterCreatureList() {
       return (
         <div className="bg-gray-100 p-4 rounded-lg">
@@ -1612,9 +1571,9 @@
       );
     }
 
-    /***************
-     * 13) Session Notes
-     ***************/
+    /*********************************
+     * 14) SessionNotes
+     *********************************/
     function SessionNotes() {
       const [notes, setNotes] = React.useState(() => {
         return localStorage.getItem("sessionNotes") || "";
@@ -1637,9 +1596,9 @@
       );
     }
 
-    /***************
-     * 14) BulkActions
-     ***************/
+    /*********************************
+     * 15) BulkActions
+     *********************************/
     function BulkActions({ onBulkHeal, onBulkDamage }) {
       const [amount, setAmount] = React.useState("0");
       const [targetType, setTargetType] = React.useState("characters");
@@ -1679,16 +1638,16 @@
             </div>
             <div className="flex gap-2">
               <button
-                className="px-2 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+                className="px-2 py-1 bg-green-700 text-white rounded text-sm hover:bg-green-800"
                 onClick={handleHeal}
               >
-                Heal
+                Bulk Heal
               </button>
               <button
-                className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                className="px-2 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800"
                 onClick={handleDamage}
               >
-                Damage
+                Bulk Damage
               </button>
             </div>
           </div>
@@ -1696,9 +1655,9 @@
       );
     }
 
-    /***************
+    /*********************************
      * Main DnDTracker
-     ***************/
+     *********************************/
     function DnDTracker() {
       const [collapsedCharacters, toggleCharacterCollapse] = useCollapseState("collapsedCharacters");
       const [collapsedEnemies, toggleEnemyCollapse] = useCollapseState("collapsedEnemies");
@@ -1744,7 +1703,7 @@
         return saved ? JSON.parse(saved) : [];
       });
 
-      // Stats
+      // Stat Rows
       const [statRows, setStatRows] = React.useState(() => {
         const saved = localStorage.getItem("statRows");
         return saved
@@ -1759,7 +1718,7 @@
         return saved ? JSON.parse(saved) : [];
       });
 
-      // Save to localStorage when data changes
+      // Save on every update
       React.useEffect(() => {
         localStorage.setItem("characters", JSON.stringify(characters));
       }, [characters]);
@@ -1808,9 +1767,7 @@
       function healCharacter(charId, amt) {
         setCharacters((prev) =>
           prev.map((c) =>
-            c.id === charId
-              ? { ...c, health: Math.min(c.maxHealth, c.health + amt) }
-              : c
+            c.id === charId ? { ...c, health: Math.min(c.maxHealth, c.health + amt) } : c
           )
         );
       }
@@ -1899,64 +1856,44 @@
       }
       function healEnemy(enemyId, amt) {
         setEnemies((prev) =>
-          prev.map((e) =>
-            e.id === enemyId
-              ? { ...e, health: Math.min(e.maxHealth, e.health + amt) }
-              : e
-          )
+          prev.map((e) => (e.id === enemyId ? { ...e, health: Math.min(e.maxHealth, e.health + amt) } : e))
         );
       }
       function damageEnemy(enemyId, amt) {
         setEnemies((prev) =>
-          prev.map((e) =>
-            e.id === enemyId ? { ...e, health: Math.max(0, e.health - amt) } : e
-          )
+          prev.map((e) => (e.id === enemyId ? { ...e, health: Math.max(0, e.health - amt) } : e))
         );
       }
       function updateEnemy(updated) {
         setEnemies((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
       }
 
-      // Bulk
+      // Bulk Heal/Damage
       function handleBulkHeal(target, amt) {
         if (target === "characters") {
           setCharacters((prev) =>
-            prev.map((c) => ({
-              ...c,
-              health: Math.min(c.maxHealth, c.health + amt),
-            }))
+            prev.map((c) => ({ ...c, health: Math.min(c.maxHealth, c.health + amt) }))
           );
         } else {
-          // Enemies
           setEnemies((prev) =>
-            prev.map((e) => ({
-              ...e,
-              health: Math.min(e.maxHealth, e.health + amt),
-            }))
+            prev.map((e) => ({ ...e, health: Math.min(e.maxHealth, e.health + amt) }))
           );
         }
       }
       function handleBulkDamage(target, amt) {
         if (target === "characters") {
           setCharacters((prev) =>
-            prev.map((c) => ({
-              ...c,
-              health: Math.max(0, c.health - amt),
-            }))
+            prev.map((c) => ({ ...c, health: Math.max(0, c.health - amt) }))
           );
         } else {
-          // Enemies
           setEnemies((prev) =>
-            prev.map((e) => ({
-              ...e,
-              health: Math.max(0, e.health - amt),
-            }))
+            prev.map((e) => ({ ...e, health: Math.max(0, e.health - amt) }))
           );
         }
       }
 
       return (
-        <div className="container mx-auto p-4 space-y-4 parchment-bg">
+        <div className="container mx-auto p-4 space-y-4">
           <div className="flex flex-wrap justify-between items-center mb-2">
             <div className="flex gap-2">
               <CopyButton characters={characters} enemies={enemies} />
@@ -1964,12 +1901,12 @@
             </div>
             <div className="flex gap-2">
               <button
-                className="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
+                className="px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-800"
                 onClick={backupLocalStorage}
               >
                 Backup Data
               </button>
-              <label className="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer">
+              <label className="px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-800 cursor-pointer">
                 Restore
                 <input
                   type="file"
@@ -1984,12 +1921,12 @@
           {/* Bulk Heal/Damage */}
           <BulkActions onBulkHeal={handleBulkHeal} onBulkDamage={handleBulkDamage} />
 
-          {/* Characters */}
+          {/* Party Characters */}
           <div className="bg-gray-100 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Party Status</h2>
               <button
-                className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800"
                 onClick={addCharacter}
               >
                 Add Character
@@ -2027,7 +1964,7 @@
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Enemies</h2>
               <button
-                className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600"
+                className="px-3 py-1 bg-purple-700 text-white rounded hover:bg-purple-800"
                 onClick={addEnemy}
               >
                 Add Enemy
@@ -2063,10 +2000,10 @@
           {/* Session Notes */}
           <SessionNotes />
 
-          {/* Classes (Short) */}
+          {/* Classes */}
           <ClassesSection />
 
-          {/* Races (Short) */}
+          {/* Races */}
           <RacesSection />
 
           {/* Monster List */}
@@ -2075,7 +2012,6 @@
       );
     }
 
-    // Render
     ReactDOM.render(<DnDTracker />, document.getElementById("root"));
   </script>
 </body>
