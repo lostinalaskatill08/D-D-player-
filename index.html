@@ -35,24 +35,20 @@
   />
 
   <style>
-    /* Medieval D&D font styling */
     body {
       font-family: 'Cinzel', serif;
       transition: background-color 0.3s, color 0.3s;
+      background: #f4e4bc url("https://www.transparenttextures.com/patterns/aged-paper.png") repeat;
+      background-blend-mode: overlay;
+      color: #4a2c0f;
     }
 
-    /* Parchment-like background for the entire page */
-    body.parchment {
-      background: url("https://www.transparenttextures.com/patterns/aged-paper.png");
-    }
-
-    /* Dark mode override */
     .dark {
       background-color: #1a1a1a;
       color: #fafafa;
+      background-blend-mode: normal;
     }
 
-    /* Collapsible icons */
     .collapse-button::after {
       content: "▼";
       display: inline-block;
@@ -66,34 +62,24 @@
       overflow: hidden;
     }
 
-    /* Custom tan scrollbar */
     ::-webkit-scrollbar {
       width: 12px;
     }
     ::-webkit-scrollbar-track {
-      background: #f5f0e6; /* a light tan */
+      background: #f5e8c7;
     }
     ::-webkit-scrollbar-thumb {
-      background-color: #d2b48c; /* tan */
+      background-color: #8b5a2b;
       border-radius: 20px;
-      border: 3px solid #f5f0e6;
+      border: 3px solid #f5e8c7;
     }
   </style>
 </head>
 
-<body class="parchment text-gray-800">
+<body class="text-gray-800">
   <div id="root" class="p-4"></div>
 
   <script type="text/babel">
-    /************************************************
-     * Single-File D&D Tracker
-     * With:
-     *  - Parchment background
-     *  - Tan scrollbar
-     *  - Colorful medieval buttons
-     *  - Static Map (no map-drag, only marker-drag)
-     ************************************************/
-
     /*********************************
      * 1) LocalStorage Backup/Restore
      *********************************/
@@ -178,7 +164,7 @@
 
       return (
         <button
-          className="px-3 py-1 bg-yellow-700 text-white rounded hover:bg-yellow-800"
+          className="px-3 py-1 bg-amber-700 text-white rounded hover:bg-amber-800"
           onClick={() => setDarkMode(!darkMode)}
         >
           {darkMode ? "Light Mode" : "Dark Mode"}
@@ -294,7 +280,6 @@
         onDamage(char.id, parseInt(dmgInput, 10) || 0);
       }
 
-      // Death Saves
       function toggleDeathSaveSuccess() {
         if (char.deathSaves.success < 3) {
           onUpdateChar({
@@ -334,7 +319,7 @@
             <div className="flex justify-between items-center">
               <h3 className="font-bold">Editing {char.name}</h3>
               <button
-                className="px-2 py-1 bg-red-700 text-white rounded hover:bg-red-800"
+                className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900"
                 onClick={() => onRemoveChar(char.id)}
               >
                 Remove
@@ -391,13 +376,13 @@
             />
             <div className="flex gap-2">
               <button
-                className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800"
+                className="px-3 py-1 bg-green-800 text-white rounded hover:bg-green-900"
                 onClick={handleSave}
               >
                 Save
               </button>
               <button
-                className="px-2 py-1 bg-gray-400 text-white rounded hover:bg-gray-500"
+                className="px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
                 onClick={() => setIsEditing(false)}
               >
                 Cancel
@@ -428,13 +413,13 @@
                 Init: {char.initiative || 0} | Lvl: {char.level || 1}
               </span>
               <button
-                className="px-2 py-1 bg-yellow-700 text-white rounded hover:bg-yellow-800 text-sm"
+                className="px-2 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 text-sm"
                 onClick={() => setIsEditing(true)}
               >
                 Edit
               </button>
               <button
-                className="px-2 py-1 bg-red-700 text-white rounded hover:bg-red-800 text-sm"
+                className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
                 onClick={() => onRemoveChar(char.id)}
               >
                 Remove
@@ -448,7 +433,6 @@
           >
             <div className={collapsed ? "hidden" : "block"}>
               <div className="text-sm mb-1 mt-2">XP: {char.xp || 0}</div>
-              {/* Character Image */}
               <label className="block text-sm font-medium text-gray-700">
                 Character Image
               </label>
@@ -460,7 +444,7 @@
                     className="w-16 h-16 object-cover rounded-full"
                   />
                   <button
-                    className="px-2 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800"
+                    className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
                     onClick={() => onUpdateChar({ ...char, image: null })}
                   >
                     Remove Image
@@ -475,7 +459,6 @@
                 />
               )}
 
-              {/* Health Bar */}
               <div className="mt-2">
                 <div className="flex items-center gap-2">
                   <span className="text-red-600 font-bold">♥</span>
@@ -493,7 +476,6 @@
                 </div>
               </div>
 
-              {/* Status */}
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Status Conditions:</h4>
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -520,7 +502,7 @@
                     placeholder="Add status"
                   />
                   <button
-                    className="px-2 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800"
+                    className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
                     onClick={handleAddStatus}
                   >
                     Add
@@ -528,7 +510,6 @@
                 </div>
               </div>
 
-              {/* Effects */}
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Effects:</h4>
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -555,7 +536,7 @@
                     placeholder="Add effect"
                   />
                   <button
-                    className="px-2 py-1 bg-blue-700 text-white rounded text-sm hover:bg-blue-800"
+                    className="px-2 py-1 bg-blue-800 text-white rounded hover:bg-blue-900 text-sm"
                     onClick={handleAddEffect}
                   >
                     Add
@@ -563,7 +544,6 @@
                 </div>
               </div>
 
-              {/* Inventory */}
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Inventory:</h4>
                 <div
@@ -592,7 +572,7 @@
                     placeholder="New item"
                   />
                   <button
-                    className="px-2 py-1 bg-gray-700 text-white rounded text-sm hover:bg-gray-800"
+                    className="px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-800 text-sm"
                     onClick={handleAddItem}
                   >
                     Add
@@ -600,7 +580,6 @@
                 </div>
               </div>
 
-              {/* Special Abilities */}
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Special Abilities:</h4>
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -627,7 +606,7 @@
                     placeholder="Add ability"
                   />
                   <button
-                    className="px-2 py-1 bg-green-700 text-white rounded text-sm hover:bg-green-800"
+                    className="px-2 py-1 bg-green-800 text-white rounded hover:bg-green-900 text-sm"
                     onClick={handleAddAbility}
                   >
                     Add
@@ -635,7 +614,6 @@
                 </div>
               </div>
 
-              {/* Spells/Magic */}
               <div className="mt-2">
                 <h4 className="font-semibold text-sm">Spells/Magic:</h4>
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -662,7 +640,7 @@
                     placeholder="Add spell"
                   />
                   <button
-                    className="px-2 py-1 bg-purple-700 text-white rounded text-sm hover:bg-purple-800"
+                    className="px-2 py-1 bg-purple-800 text-white rounded hover:bg-purple-900 text-sm"
                     onClick={handleAddSpell}
                   >
                     Add
@@ -670,7 +648,6 @@
                 </div>
               </div>
 
-              {/* Heal / Damage */}
               <div className="mt-4 flex gap-4 flex-wrap">
                 <div>
                   <label className="text-sm block">Heal #</label>
@@ -682,7 +659,7 @@
                       onChange={(e) => setHealInput(e.target.value)}
                     />
                     <button
-                      className="px-3 py-1 bg-green-700 text-white rounded text-sm hover:bg-green-800"
+                      className="px-3 py-1 bg-green-800 text-white rounded hover:bg-green-900 text-sm"
                       onClick={applyHeal}
                     >
                       Heal
@@ -699,7 +676,7 @@
                       onChange={(e) => setDmgInput(e.target.value)}
                     />
                     <button
-                      className="px-3 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800"
+                      className="px-3 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
                       onClick={applyDamage}
                     >
                       Damage
@@ -708,7 +685,6 @@
                 </div>
               </div>
 
-              {/* Death Saves */}
               {char.health <= 0 && (
                 <div className="mt-4">
                   <h4 className="font-semibold text-sm">Death Saves</h4>
@@ -717,21 +693,21 @@
                   </p>
                   <div className="flex gap-2 mt-1">
                     <button
-                      className="px-2 py-1 bg-green-400 text-white rounded text-sm"
+                      className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
                       onClick={toggleDeathSaveSuccess}
                       disabled={char.deathSaves.success >= 3}
                     >
                       + Success
                     </button>
                     <button
-                      className="px-2 py-1 bg-red-400 text-white rounded text-sm"
+                      className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                       onClick={toggleDeathSaveFail}
                       disabled={char.deathSaves.fail >= 3}
                     >
                       + Fail
                     </button>
                     <button
-                      className="px-2 py-1 bg-gray-400 text-white rounded text-sm"
+                      className="px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
                       onClick={resetDeathSaves}
                     >
                       Reset
@@ -740,7 +716,6 @@
                 </div>
               )}
 
-              {/* Notes */}
               {char.notes && (
                 <div className="mt-4">
                   <h4 className="font-semibold text-sm">Notes/Bio:</h4>
@@ -808,7 +783,7 @@
             <div className="flex justify-between items-center">
               <h3 className="font-bold">Editing Enemy</h3>
               <button
-                className="px-2 py-1 bg-red-700 text-white rounded hover:bg-red-800"
+                className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900"
                 onClick={() => onRemoveEnemy(enemy.id)}
               >
                 Defeat
@@ -837,13 +812,13 @@
               />
               <div className="flex gap-2">
                 <button
-                  className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800"
+                  className="px-3 py-1 bg-green-800 text-white rounded hover:bg-green-900"
                   onClick={handleSave}
                 >
                   Save
                 </button>
                 <button
-                  className="px-2 py-1 bg-gray-400 text-white rounded hover:bg-gray-500"
+                  className="px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
                   onClick={() => setIsEditing(false)}
                 >
                   Cancel
@@ -871,13 +846,13 @@
             </div>
             <div className="flex gap-2 items-center">
               <button
-                className="px-2 py-1 bg-yellow-700 text-white rounded hover:bg-yellow-800 text-sm"
+                className="px-2 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 text-sm"
                 onClick={() => setIsEditing(true)}
               >
                 Edit
               </button>
               <button
-                className="px-2 py-1 bg-red-700 text-white rounded hover:bg-red-800 text-sm"
+                className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
                 onClick={() => onRemoveEnemy(enemy.id)}
               >
                 Defeat
@@ -914,7 +889,7 @@
                       onChange={(e) => setHealInput(e.target.value)}
                     />
                     <button
-                      className="px-3 py-1 bg-green-700 text-white rounded text-sm hover:bg-green-800"
+                      className="px-3 py-1 bg-green-800 text-white rounded hover:bg-green-900 text-sm"
                       onClick={applyHeal}
                     >
                       Heal
@@ -931,7 +906,7 @@
                       onChange={(e) => setDmgInput(e.target.value)}
                     />
                     <button
-                      className="px-3 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800"
+                      className="px-3 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
                       onClick={applyDamage}
                     >
                       Damage
@@ -1000,7 +975,7 @@
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-2xl font-bold">Stat Calculator</h2>
             <button
-              className="px-2 py-1 bg-blue-700 text-white rounded hover:bg-blue-800"
+              className="px-2 py-1 bg-blue-800 text-white rounded hover:bg-blue-900"
               onClick={addStatRow}
             >
               Add Stat Row
@@ -1011,37 +986,37 @@
           </p>
           <div className="mb-2 flex gap-2 flex-wrap">
             <button
-              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
               onClick={() => sortByAbility("str")}
             >
               Sort by STR
             </button>
             <button
-              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
               onClick={() => sortByAbility("dex")}
             >
               Sort by DEX
             </button>
             <button
-              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
               onClick={() => sortByAbility("con")}
             >
               Sort by CON
             </button>
             <button
-              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
               onClick={() => sortByAbility("int")}
             >
               Sort by INT
             </button>
             <button
-              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
               onClick={() => sortByAbility("wis")}
             >
               Sort by WIS
             </button>
             <button
-              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+              className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
               onClick={() => sortByAbility("cha")}
             >
               Sort by CHA
@@ -1066,14 +1041,13 @@
                     }
                   />
                   <button
-                    className="px-2 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800"
+                    className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
                     onClick={() => removeStatRow(row.id)}
                   >
                     Remove Row
                   </button>
                 </div>
                 <div className="grid grid-cols-6 gap-4 mt-2">
-                  {/* STR */}
                   <div className="flex flex-col">
                     <label className="font-semibold">STR</label>
                     <input
@@ -1089,7 +1063,6 @@
                       {modSTR}
                     </span>
                   </div>
-                  {/* DEX */}
                   <div className="flex flex-col">
                     <label className="font-semibold">DEX</label>
                     <input
@@ -1105,7 +1078,6 @@
                       {modDEX}
                     </span>
                   </div>
-                  {/* CON */}
                   <div className="flex flex-col">
                     <label className="font-semibold">CON</label>
                     <input
@@ -1121,7 +1093,6 @@
                       {modCON}
                     </span>
                   </div>
-                  {/* INT */}
                   <div className="flex flex-col">
                     <label className="font-semibold">INT</label>
                     <input
@@ -1137,7 +1108,6 @@
                       {modINT}
                     </span>
                   </div>
-                  {/* WIS */}
                   <div className="flex flex-col">
                     <label className="font-semibold">WIS</label>
                     <input
@@ -1153,7 +1123,6 @@
                       {modWIS}
                     </span>
                   </div>
-                  {/* CHA */}
                   <div className="flex flex-col">
                     <label className="font-semibold">CHA</label>
                     <input
@@ -1205,7 +1174,7 @@
               <button
                 key={sides}
                 onClick={() => rollD(sides)}
-                className="px-3 py-1 bg-blue-700 text-white rounded hover:bg-blue-800"
+                className="px-3 py-1 bg-blue-800 text-white rounded hover:bg-blue-900"
               >
                 d{sides}
               </button>
@@ -1225,7 +1194,7 @@
     }
 
     /*********************************
-     * 8) MapSection (Fixed version)
+     * 8) MapSection (Fixed)
      *********************************/
     function MapSection({ mapImage, setMapImage, dotPositions, setDotPositions }) {
       const [isDragging, setIsDragging] = React.useState(null);
@@ -1308,14 +1277,14 @@
       }
 
       return (
-        <div className="bg-gray-100 p-4 rounded-lg">
+        <div className="bg-gray-100 p-4 rounded-lg mb-8">
           <h2 className="text-xl font-bold mb-2">Party & Enemy Location Map</h2>
           {mapImage ? (
             <div>
               <div
                 ref={mapRef}
-                className="relative border-2 border-gray-300 overflow-hidden"
-                style={{ width: "100%", height: "500px" }}
+                className="relative border-2 border-gray-400 overflow-hidden bg-white"
+                style={{ width: "100%", height: "500px", position: "relative" }}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
@@ -1323,14 +1292,14 @@
                 <img
                   src={mapImage}
                   alt="Map"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                   draggable="false"
                   onDragStart={(e) => e.preventDefault()}
                 />
                 {dotPositions.map((dot, index) => (
                   <div
                     key={index}
-                    className="absolute rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white"
+                    className="absolute rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white select-none"
                     style={{
                       width: "24px",
                       height: "24px",
@@ -1339,6 +1308,7 @@
                       transform: "translate(-50%, -50%)",
                       backgroundColor: dot.color,
                       cursor: isDragging === index ? "grabbing" : "grab",
+                      zIndex: 10,
                     }}
                     onMouseDown={handleMouseDown(index)}
                   >
@@ -1349,13 +1319,13 @@
               <div className="mt-2">
                 <div className="flex gap-2 flex-wrap mb-2">
                   <button
-                    className="px-2 py-1 bg-green-700 text-white rounded hover:bg-green-800"
+                    className="px-2 py-1 bg-green-800 text-white rounded hover:bg-green-900"
                     onClick={addDot}
                   >
                     Add Marker
                   </button>
                   <button
-                    className="px-2 py-1 bg-red-700 text-white rounded hover:bg-red-800"
+                    className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900"
                     onClick={handleDeleteImage}
                   >
                     Delete Map
@@ -1387,7 +1357,7 @@
                           <option value="pink">Pink</option>
                         </select>
                         <button
-                          className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                          className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900"
                           onClick={() => removeDot(index)}
                         >
                           Remove
@@ -1413,27 +1383,27 @@
     }
 
     /*********************************
-     * 9) PartyImages (Adjusted size)
+     * 9) PartyImages (Fixed)
      *********************************/
     function PartyImages({ characters }) {
       return (
-        <div className="bg-gray-100 p-4 rounded-lg">
+        <div className="bg-gray-100 p-4 rounded-lg mb-8">
           <h2 className="text-xl font-bold mb-2">Party Member Images</h2>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+          <div className="flex flex-wrap gap-4 justify-center">
             {characters.map((char) => (
               <div key={char.id} className="text-center">
                 {char.image ? (
                   <img
                     src={char.image}
                     alt={char.name}
-                    className="w-16 h-16 object-cover rounded-full mx-auto"
+                    className="w-12 h-12 object-cover rounded-full mx-auto"
                   />
                 ) : (
-                  <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gray-300 rounded-full mx-auto flex items-center justify-center">
                     <span className="text-gray-500 text-xs">No Image</span>
                   </div>
                 )}
-                <p className="mt-1 text-xs truncate">{char.name}</p>
+                <p className="mt-1 text-xs truncate w-12">{char.name}</p>
               </div>
             ))}
           </div>
@@ -1485,7 +1455,7 @@
 
       return (
         <button
-          className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 mb-2"
+          className="px-4 py-2 bg-blue-800 text-white rounded hover:bg-blue-900 mb-2"
           onClick={handleCopy}
         >
           Copy for Prompt
@@ -1494,11 +1464,11 @@
     }
 
     /*********************************
-     * 11) ClassesSection (Short)
+     * 11) ClassesSection
      *********************************/
     function ClassesSection() {
       return (
-        <div className="bg-gray-100 p-4 rounded-lg">
+        <div className="bg-gray-100 p-4 rounded-lg mb-8">
           <h2 className="text-xl font-bold mb-2">D&D 5th Edition Classes</h2>
           <p className="text-sm mb-2">
             Source:{" "}
@@ -1519,11 +1489,11 @@
     }
 
     /*********************************
-     * 12) RacesSection (Short)
+     * 12) RacesSection
      *********************************/
     function RacesSection() {
       return (
-        <div className="bg-gray-100 p-4 rounded-lg">
+        <div className="bg-gray-100 p-4 rounded-lg mb-8">
           <h2 className="text-xl font-bold mb-2">D&D 5th Edition Races</h2>
           <p className="text-sm mb-2">
             Source:{" "}
@@ -1548,7 +1518,7 @@
      *********************************/
     function MonsterCreatureList() {
       return (
-        <div className="bg-gray-100 p-4 rounded-lg">
+        <div className="bg-gray-100 p-4 rounded-lg mb-8">
           <h2 className="text-xl font-bold mb-2">Monster/Creature List</h2>
           <p className="mb-2 text-sm">
             Access a comprehensive database of D&D monsters and creatures at:
@@ -1578,7 +1548,7 @@
       }, [notes]);
 
       return (
-        <div className="bg-gray-100 p-4 rounded-lg">
+        <div className="bg-gray-100 p-4 rounded-lg mb-8">
           <h2 className="text-xl font-bold mb-2">Session Notes</h2>
           <textarea
             className="border p-2 rounded w-full h-32 text-sm"
@@ -1607,7 +1577,7 @@
       }
 
       return (
-        <div className="bg-gray-100 p-4 rounded-lg">
+        <div className="bg-gray-100 p-4 rounded-lg mb-8">
           <h2 className="text-xl font-bold mb-2">Bulk Heal/Damage</h2>
           <div className="flex flex-wrap items-end gap-2">
             <div>
@@ -1632,13 +1602,13 @@
             </div>
             <div className="flex gap-2">
               <button
-                className="px-2 py-1 bg-green-700 text-white rounded text-sm hover:bg-green-800"
+                className="px-2 py-1 bg-green-800 text-white rounded hover:bg-green-900 text-sm"
                 onClick={handleHeal}
               >
                 Bulk Heal
               </button>
               <button
-                className="px-2 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800"
+                className="px-2 py-1 bg-red-800 text-white rounded hover:bg-red-900 text-sm"
                 onClick={handleDamage}
               >
                 Bulk Damage
@@ -1656,7 +1626,6 @@
       const [collapsedCharacters, toggleCharacterCollapse] = useCollapseState("collapsedCharacters");
       const [collapsedEnemies, toggleEnemyCollapse] = useCollapseState("collapsedEnemies");
 
-      // Characters
       const [characters, setCharacters] = React.useState(() => {
         const saved = localStorage.getItem("characters");
         let loaded = saved
@@ -1691,13 +1660,11 @@
         }));
       });
 
-      // Enemies
       const [enemies, setEnemies] = React.useState(() => {
         const saved = localStorage.getItem("enemies");
         return saved ? JSON.parse(saved) : [];
       });
 
-      // Stat Rows
       const [statRows, setStatRows] = React.useState(() => {
         const saved = localStorage.getItem("statRows");
         return saved
@@ -1705,14 +1672,12 @@
           : [{ id: 1, label: "Jory", str: 11, dex: 11, con: 13, int: 13, wis: 11, cha: 15 }];
       });
 
-      // Map
       const [mapImage, setMapImage] = React.useState(() => localStorage.getItem("mapImage") || null);
       const [dotPositions, setDotPositions] = React.useState(() => {
         const saved = localStorage.getItem("dotPositions");
         return saved ? JSON.parse(saved) : [];
       });
 
-      // Save on every update
       React.useEffect(() => {
         localStorage.setItem("characters", JSON.stringify(characters));
       }, [characters]);
@@ -1727,7 +1692,6 @@
         localStorage.setItem("dotPositions", JSON.stringify(dotPositions));
       }, [mapImage, dotPositions]);
 
-      // Character CRUD
       function addCharacter() {
         const newId = Date.now();
         setCharacters((prev) => [
@@ -1833,7 +1797,6 @@
         );
       }
 
-      // Enemy CRUD
       function addEnemy() {
         setEnemies((prev) => [
           ...prev,
@@ -1862,7 +1825,6 @@
         setEnemies((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
       }
 
-      // Bulk Heal/Damage
       function handleBulkHeal(target, amt) {
         if (target === "characters") {
           setCharacters((prev) =>
@@ -1887,7 +1849,7 @@
       }
 
       return (
-        <div className="container mx-auto p-4 space-y-4">
+        <div className="container mx-auto p-4 space-y-8">
           <div className="flex flex-wrap justify-between items-center mb-2">
             <div className="flex gap-2">
               <CopyButton characters={characters} enemies={enemies} />
@@ -1912,15 +1874,13 @@
             </div>
           </div>
 
-          {/* Bulk Heal/Damage */}
           <BulkActions onBulkHeal={handleBulkHeal} onBulkDamage={handleBulkDamage} />
 
-          {/* Party Characters */}
           <div className="bg-gray-100 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Party Status</h2>
               <button
-                className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800"
+                className="px-3 py-1 bg-green-800 text-white rounded hover:bg-green-900"
                 onClick={addCharacter}
               >
                 Add Character
@@ -1947,18 +1907,15 @@
             </div>
           </div>
 
-          {/* Party Images */}
           <PartyImages characters={characters} />
 
-          {/* Stats */}
           <StatsSection statRows={statRows} setStatRows={setStatRows} />
 
-          {/* Enemies */}
           <div className="bg-gray-100 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Enemies</h2>
               <button
-                className="px-3 py-1 bg-purple-700 text-white rounded hover:bg-purple-800"
+                className="px-3 py-1 bg-purple-800 text-white rounded hover:bg-purple-900"
                 onClick={addEnemy}
               >
                 Add Enemy
@@ -1980,7 +1937,6 @@
             </div>
           </div>
 
-          {/* Map */}
           <MapSection
             mapImage={mapImage}
             setMapImage={setMapImage}
@@ -1988,19 +1944,14 @@
             setDotPositions={setDotPositions}
           />
 
-          {/* Dice Roller */}
           <DiceRoller />
 
-          {/* Session Notes */}
           <SessionNotes />
 
-          {/* Classes */}
           <ClassesSection />
 
-          {/* Races */}
           <RacesSection />
 
-          {/* Monster List */}
           <MonsterCreatureList />
         </div>
       );
