@@ -38,17 +38,7 @@
      * 8) RacesSection (D&D 5e Races with Links)
      * 9) CopyButton (NEW: Copies Character and Enemy Data)
      * 10) MonsterCreatureList (NEW: Links to Monster Database)
-     * 11) InitiativeTracker (NEW: Manages combat order)
-     * 12) SpellTracker (NEW: Tracks spell slots and prepared spells)
-     * 13) RestTracker (NEW: Manages short and long rests)
-     * 14) ConditionReference (NEW: Reference for all conditions) 
-     * 15) CurrencyTracker (NEW: Tracks party gold, silver, copper)
-     * 16) WeatherTimeTracker (NEW: Tracks in-game time and weather)
-     * 17) CombatLog (NEW: Tracks combat actions and results)
-     * 18) NotepadComponent (NEW: For tracking campaign notes)
-     * 19) XpTracker (NEW: Tracks experience points and levels)
-     * 20) SpellLookup (NEW: Quick reference for spells)
-     * 21) Main DnDTracker
+     * 11) Main DnDTracker
      ************************************************/
 
     /* ---------------------------
@@ -1065,11 +1055,445 @@ Health: ${enemy.health}/${enemy.maxHealth}
         { name: "Barbarian (Unstoppable Warriors)", desc: "Barbarians rely on raw strength, endurance, and primal fury. Goliaths reduce incoming damage and excel in athletics, while Orcs gain extra movement and resilience in combat. Minotaurs are melee-focused chargers, and Half-Orcs can survive near-fatal blows while delivering devastating crits. Lizardfolk add natural armor and self-healing through bites. Barbarians excel in rage-fueled combat, unarmored defense, and brutal critical hits." },
         { name: "Bard (Charming Performers & Spellcasters)", desc: "Bards blend charisma, magic, and storytelling. Half-Elves gain extra skills and social flexibility, while Satyrs resist magic and enhance musical abilities. Fairies provide flight and innate spells, and Tabaxi have agility and charm, making them excellent performers. Kenku mimic sounds perfectly, ideal for deception and intrigue. Bards specialize in inspiring allies, versatile spellcasting, and performance-based magic." },
         { name: "Cleric (Divine Warriors & Healers)", desc: "Clerics channel divine magic for healing and battle. Aasimar have celestial energy and radiant resistance, while Dwarves provide durability and divine weapon proficiencies. Tritons control water and communicate with sea creatures, and Firbolgs possess nature magic and invisibility. Owlin offer wisdom-based spellcasting with natural flight. Clerics excel in divine magic, healing, and powerful protective spells." },
-        { name: "Druid (Nature's Guardians & Shapeshifters)", desc: "Druids command nature and transform into beasts. Firbolgs excel with plant communication and stealth, while Tortles provide natural armor for defense. Lizardfolk have primal instincts and self-healing, and Shifters channel lycanthropic abilities. Wood Elves thrive in forests with heightened agility. Druids master wild shape, nature magic, and elemental control." },
+        { name: "Druid (Nature’s Guardians & Shapeshifters)", desc: "Druids command nature and transform into beasts. Firbolgs excel with plant communication and stealth, while Tortles provide natural armor for defense. Lizardfolk have primal instincts and self-healing, and Shifters channel lycanthropic abilities. Wood Elves thrive in forests with heightened agility. Druids master wild shape, nature magic, and elemental control." },
         { name: "Fighter (Master Combatants & Strategists)", desc: "Fighters dominate the battlefield with weapons and tactics. Half-Orcs hit hard and endure, while Goliaths resist damage and excel in athletics. Hobgoblins enhance teamwork and tactical advantage, and Warforged provide durability with built-in armor. Leonin use powerful roars to intimidate foes. Fighters specialize in multiple attacks, weapon mastery, and versatile combat styles." },
         { name: "Monk (Masters of Martial Arts & Speed)", desc: "Monks rely on speed, agility, and spiritual focus. Tabaxi are nimble and fast, while Harengon have quick reflexes and high jumps. Kenku are stealthy and precise, and Githzerai have psionic defenses. Lizardfolk enhance their unarmed strikes with natural weapons. Monks excel in unarmed combat, mobility, and ki-powered abilities." },
         { name: "Paladin (Holy Warriors & Protectors)", desc: "Paladins wield divine magic alongside martial prowess. Aasimar gain celestial blessings and radiant abilities, while Dragonborn channel draconic power with elemental breath weapons. Dwarves bring durability and divine weapon skills, and Tritons harness oceanic magic. Leonin have natural authority and powerful combat presence. Paladins specialize in divine smites, healing, and protective auras." },
         { name: "Ranger (Wilderness Scouts & Hunters)", desc: "Rangers track, hunt, and wield nature magic. Wood Elves have superior stealth and speed, while Tabaxi move swiftly and excel in scouting. Goliaths are rugged survivalists with cold resistance, and Firbolgs use magic to blend into nature. Kenku thrive in ambush tactics. Rangers excel in tracking, ranged combat, and natural exploration." },
         { name: "Rogue (Stealthy Assassins & Tricksters)", desc: "Rogues rely on cunning, speed, and precision. Halflings avoid misfortune with their luck trait, while Tabaxi use agility and speed for quick getaways. Kobolds have pack tactics for deadly strikes, and Kenku mimic voices for deception. Goblin rogues use their nimbleness and quick escapes. Rogues specialize in sneak attacks, evasive movement, and deception." },
         { name: "Sorcerer (Innate Spellcasters & Magical Prodigies)", desc: "Sorcerers wield raw, untamed magic. Dragonborn inherit draconic power with elemental resistances, while Tieflings draw strength from infernal ancestry. Aasimar harness celestial energy, and Genasi wield elemental magic. Fairies bring flight and innate spellcasting. Sorcerers specialize in metamagic, spontaneous casting, and magical surges." },
-        { name: "Warlock (Pact-Bound Spellcasters & Eldritch Wielders)", desc: "Warlocks make pacts with powerful entities for magic. Tieflings tap into fiendish energy, while Hexbloods have
+        { name: "Warlock (Pact-Bound Spellcasters & Eldritch Wielders)", desc: "Warlocks make pacts with powerful entities for magic. Tieflings tap into fiendish energy, while Hexbloods have hag-like magic. Reborn warlocks possess undead resilience, and Githyanki wield psionic gifts. Drow Elves enhance darkness magic. Warlocks excel in eldritch invocations, powerful cantrips, and supernatural pacts." },
+        { name: "Wizard (Scholars of Magic & Arcane Masters)", desc: "Wizards master magic through study and knowledge. Gnomes have magical resistance and keen intellect, while Elves bring heightened senses and arcane heritage. Hobgoblins store magical energy for later use, and Vedalken provide logic-based spellcasting. Warforged offer a unique take on magical constructs. Wizards specialize in ritual magic, vast spell knowledge, and arcane mastery." },
+      ];
+
+      return (
+        <div className="bg-gray-100 p-4 rounded-lg">
+          <h2 className="text-xl font-bold mb-2">D&D 5th Edition Classes</h2>
+          <p className="mb-2">
+            Source:{" "}
+            <a
+              href="https://rpgbot.net/dnd5/characters/classes/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              RPGBot Classes
+            </a>
+          </p>
+          <ul className="list-disc list-inside space-y-2">
+            {classes.map((cls) => (
+              <li key={cls.name}>
+                <span className="font-semibold">{cls.name}</span>: {cls.desc}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+
+    /* ---------------------------
+       RacesSection
+       - Lists D&D 5e races with descriptions and a link to RPGBot
+    ---------------------------- */
+    function RacesSection() {
+      const races = [
+        { name: "Aarakocra", desc: "Bird-like humanoids with the ability to fly and sharp talons, often living in high-altitude environments." },
+        { name: "Aasimar", desc: "Celestial-touched beings with divine power, resistant to necrotic and radiant damage, and capable of radiant transformations." },
+        { name: "Autognome", desc: "Small robotic beings from Spelljammer, resilient with built-in mechanical advantages." },
+        { name: "Bugbear", desc: "Large goblinoid ambush predators with extended reach and powerful surprise attacks." },
+        { name: "Centaur", desc: "Half-human, half-horse creatures with natural speed and melee combat prowess." },
+        { name: "Changeling", desc: "Shapeshifters who can alter their appearance at will, making them excellent spies and social manipulators." },
+        { name: "Custom Lineage", desc: "A flexible non-race option that allows custom origins, granting a feat and bonus abilities." },
+        { name: "Dhampir", desc: "Half-vampires with supernatural abilities such as wall-climbing and life-draining bites." },
+        { name: "Dragonborn", desc: "Draconic humanoids with breath weapons and elemental resistances based on their draconic ancestry." },
+        { name: "Dwarf", desc: "Stocky, resilient warriors and craftsmen known for their endurance, resistance to poison, and expertise in mining." },
+        { name: "Elf", desc: "Graceful, long-lived humanoids with various subraces offering magical abilities and keen perception." },
+        { name: "Fairy", desc: "Tiny winged beings with natural flight and innate spellcasting abilities." },
+        { name: "Firbolg", desc: "Gentle giant-kin with druidic abilities, including limited invisibility and plant communication." },
+        { name: "Genasi", desc: "Elemental humanoids influenced by air, earth, fire, or water, each with unique traits and spell-like abilities." },
+        { name: "Giff", desc: "Large, gun-wielding hippo-like humanoids from Spelljammer with strength-based combat prowess." },
+        { name: "Gith", desc: "Psionic humanoids split into Githyanki (warriors and conquerors) and Githzerai (monks and mystics)." },
+        { name: "Gnome", desc: "Small, inventive, and magically inclined humanoids with innate resistance to mind-affecting magic." },
+        { name: "Goblin", desc: "Small, quick, and cunning humanoids with mobility-focused traits and the ability to disengage easily." },
+        { name: "Goliath", desc: "Towering mountain-dwellers with natural endurance and damage-reducing abilities." },
+        { name: "Hadozee", desc: "Gliding, monkey-like humanoids from Spelljammer with prehensile feet." },
+        { name: "Half-Elf", desc: "A mix of humans and elves, gaining benefits from both, including adaptability and social skills." },
+        { name: "Half-Orc", desc: "Fierce warriors with relentless endurance and the ability to deal devastating critical strikes." },
+        { name: "Halfling", desc: "Small, lucky humanoids known for their nimbleness and ability to reroll natural 1s on d20 rolls." },
+        { name: "Harengon", desc: "Rabbit-like humanoids with enhanced reflexes and exceptional mobility." },
+        { name: "Hexblood", desc: "Individuals influenced by hags, gaining minor divination and disguise-based magic." },
+        { name: "Hobgoblin", desc: "Military-minded goblinoids with teamwork-based abilities and martial discipline." },
+        { name: "Human", desc: "Versatile and adaptable, with a variant option allowing for a feat at level 1." },
+        { name: "Kalashtar", desc: "Psychic beings connected to the plane of dreams, resistant to psychic damage and skilled in telepathy." },
+        { name: "Kender", desc: "Mischievous, fear-resistant humanoids from Krynn (Dragonlance) with a knack for acquiring random objects." },
+        { name: "Kenku", desc: "Crow-like humanoids that can perfectly mimic sounds, making them excellent spies and thieves." },
+        { name: "Kobold", desc: "Small draconic humanoids, often working in groups, with a variety of combat-focused abilities." },
+        { name: "Leonin", desc: "Lion-like humanoids with powerful roars and natural combat prowess." },
+        { name: "Lizardfolk", desc: "Cold-blooded reptilian humanoids with durable scales, natural weapons, and an ability to craft from slain foes." },
+        { name: "Loxodon", desc: "Elephant-like humanoids with tough skin, a powerful trunk, and a calm, meditative nature." },
+        { name: "Minotaur", desc: "Large, bull-headed warriors built for charging into battle with deadly efficiency." },
+        { name: "Orc", desc: "Powerful and resilient warriors with a drive for battle and an ability to endure massive damage." },
+        { name: "Owlin", desc: "Owl-like humanoids with natural flight and silent movement, making them great scouts." },
+        { name: "Plasmoid", desc: "Ooze-like beings with amorphous bodies, able to squeeze through tight spaces and extend pseudopods." },
+        { name: "Reborn", desc: "Undead or resurrected beings with fragmented memories and resistance to disease and poison." },
+        { name: "Satyr", desc: "Goat-like humanoids with magical resistance and an affinity for revelry and adventure." },
+        { name: "Shifter", desc: "Werebeast-like humanoids that can temporarily transform into more animalistic forms." },
+        { name: "Simic Hybrid", desc: "Magically altered humanoids with animal-like features and customizable traits." },
+        { name: "Tabaxi", desc: "Cat-like humanoids with keen senses, exceptional speed, and curiosity-driven instincts." },
+        { name: "Thri-Kreen", desc: "Four-armed, mantis-like humanoids with natural armor and telepathic communication." },
+        { name: "Tiefling", desc: "Fiend-touched humanoids with infernal resistances, innate magic, and an affinity for dark powers." },
+        { name: "Tortle", desc: "Turtle-like humanoids with natural armor and a laid-back but sturdy nature." },
+        { name: "Triton", desc: "Amphibious ocean-dwellers with command over sea creatures and innate water-based magic." },
+        { name: "Vedalken", desc: "Intellectual, blue-skinned humanoids with heightened mental resistance and a focus on logic." },
+        { name: "Verdan", desc: "Green-skinned, magically mutating humanoids that change in size as they age." },
+        { name: "Warforged", desc: "Living constructs built for durability and adaptability, making them excellent warriors or spellcasters." },
+        { name: "Yuan-Ti", desc: "Snake-like humanoids with resistance to poison and magic, often linked to dark deities." },
+      ];
+
+      return (
+        <div className="bg-gray-100 p-4 rounded-lg">
+          <h2 className="text-xl font-bold mb-2">D&D 5th Edition Races</h2>
+          <p className="mb-2">
+            Source:{" "}
+            <a
+              href="https://rpgbot.net/dnd5/characters/races/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              RPGBot Races
+            </a>
+          </p>
+          <ul className="list-disc list-inside space-y-1">
+            {races.map((race) => (
+              <li key={race.name}>
+                <span className="font-semibold">{race.name}</span>: {race.desc}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+
+    /* ---------------------------
+       MonsterCreatureList
+       - Links to monster database for easy reference
+    ---------------------------- */
+    function MonsterCreatureList() {
+      return (
+        <div className="bg-gray-100 p-4 rounded-lg">
+          <h2 className="text-xl font-bold mb-2">Monster/Creature List</h2>
+          <p className="mb-2">
+            Access a comprehensive database of D&D monsters and creatures at:
+          </p>
+          <a
+            href="https://www.aidedd.org/dnd-filters/monsters.php"
+            target="_blank"
+            rel="noreferrer"
+            className="text-blue-500 hover:underline"
+          >
+            AIDEDD Monster Database
+          </a>
+          <p className="mt-2 text-sm text-gray-700">
+            Use this resource to find detailed stats and information for monsters in your campaign.
+          </p>
+        </div>
+      );
+    }
+
+    /* ---------------------------
+       Main DnDTracker
+       - Includes all sections with new copy button and monster list
+    ---------------------------- */
+    function DnDTracker() {
+      const [characters, setCharacters] = React.useState(() => {
+        const saved = localStorage.getItem("characters");
+        return saved
+          ? JSON.parse(saved)
+          : [
+              {
+                id: 1,
+                name: "Jory",
+                class: "Cleric",
+                health: 100,
+                maxHealth: 100,
+                status: [],
+                effects: [],
+                inventory: ["Mace", "Shield"],
+                specialAbilities: ["Turn Undead"],
+                spellsMagic: ["Cure Wounds"],
+                image: null,
+              },
+            ];
+      });
+
+      const [enemies, setEnemies] = React.useState(() => {
+        const saved = localStorage.getItem("enemies");
+        return saved ? JSON.parse(saved) : [];
+      });
+
+      const [statRows, setStatRows] = React.useState(() => {
+        const saved = localStorage.getItem("statRows");
+        return saved
+          ? JSON.parse(saved)
+          : [{ id: 1, label: "Character #1", str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }];
+      });
+
+      const [mapImage, setMapImage] = React.useState(() => localStorage.getItem("mapImage") || null);
+      const [dotPositions, setDotPositions] = React.useState(() => {
+        const saved = localStorage.getItem("dotPositions");
+        return saved ? JSON.parse(saved) : [];
+      });
+
+      React.useEffect(() => {
+        localStorage.setItem("characters", JSON.stringify(characters));
+      }, [characters]);
+
+      React.useEffect(() => {
+        localStorage.setItem("enemies", JSON.stringify(enemies));
+      }, [enemies]);
+
+      React.useEffect(() => {
+        localStorage.setItem("statRows", JSON.stringify(statRows));
+      }, [statRows]);
+
+      React.useEffect(() => {
+        localStorage.setItem("mapImage", mapImage);
+        localStorage.setItem("dotPositions", JSON.stringify(dotPositions));
+      }, [mapImage, dotPositions]);
+
+      function addCharacter() {
+        const newId = Date.now();
+        setCharacters((prev) => [
+          ...prev,
+          {
+            id: newId,
+            name: "New Character",
+            class: "Unassigned",
+            health: 50,
+            maxHealth: 50,
+            status: [],
+            effects: [],
+            inventory: [],
+            specialAbilities: [],
+            spellsMagic: [],
+            image: null,
+          },
+        ]);
+      }
+
+      function removeCharacter(charId) {
+        setCharacters((prev) => prev.filter((c) => c.id !== charId));
+      }
+
+      function updateCharacter(updated) {
+        setCharacters((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+      }
+
+      function healCharacter(charId, amount) {
+        setCharacters((prev) =>
+          prev.map((c) => (c.id === charId ? { ...c, health: Math.min(c.maxHealth, c.health + amount) } : c))
+        );
+      }
+
+      function damageCharacter(charId, amount) {
+        setCharacters((prev) =>
+          prev.map((c) => (c.id === charId ? { ...c, health: Math.max(0, c.health - amount) } : c))
+        );
+      }
+
+      function removeStatus(charId, idx) {
+        setCharacters((prev) =>
+          prev.map((c) => {
+            if (c.id === charId) {
+              const updated = [...c.status];
+              updated.splice(idx, 1);
+              return { ...c, status: updated };
+            }
+            return c;
+          })
+        );
+      }
+
+      function removeEffect(charId, idx) {
+        setCharacters((prev) =>
+          prev.map((c) => {
+            if (c.id === charId) {
+              const updated = [...c.effects];
+              updated.splice(idx, 1);
+              return { ...c, effects: updated };
+            }
+            return c;
+          })
+        );
+      }
+
+      function removeItem(charId, idx) {
+        setCharacters((prev) =>
+          prev.map((c) => {
+            if (c.id === charId) {
+              const updated = [...c.inventory];
+              updated.splice(idx, 1);
+              return { ...c, inventory: updated };
+            }
+            return c;
+          })
+        );
+      }
+
+      function removeAbility(charId, idx) {
+        setCharacters((prev) =>
+          prev.map((c) => {
+            if (c.id === charId) {
+              const updated = [...c.specialAbilities];
+              updated.splice(idx, 1);
+              return { ...c, specialAbilities: updated };
+            }
+            return c;
+          })
+        );
+      }
+
+      function removeSpell(charId, idx) {
+        setCharacters((prev) =>
+          prev.map((c) => {
+            if (c.id === charId) {
+              const updated = [...c.spellsMagic];
+              updated.splice(idx, 1);
+              return { ...c, spellsMagic: updated };
+            }
+            return c;
+          })
+        );
+      }
+
+      function addEnemy() {
+        setEnemies((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            name: `Enemy ${prev.length + 1}`,
+            health: 50,
+            maxHealth: 50,
+          },
+        ]);
+      }
+
+      function removeEnemy(enemyId) {
+        setEnemies((prev) => prev.filter((e) => e.id !== enemyId));
+      }
+
+      function healEnemy(enemyId, amount) {
+        setEnemies((prev) =>
+          prev.map((e) => (e.id === enemyId ? { ...e, health: Math.min(e.maxHealth, e.health + amount) } : e))
+        );
+      }
+
+      function damageEnemy(enemyId, amount) {
+        setEnemies((prev) =>
+          prev.map((e) => (e.id === enemyId ? { ...e, health: Math.max(0, e.health - amount) } : e))
+        );
+      }
+
+      function updateEnemy(updated) {
+        setEnemies((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+      }
+
+      return (
+        <div className="container mx-auto p-4">
+          <div className="mb-4">
+            <CopyButton characters={characters} enemies={enemies} />
+          </div>
+          <div className="grid gap-4">
+            {/* Party Status */}
+            <div className="bg-gray-100 p-4 rounded-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Party Status</h2>
+                <button
+                  className="px-3 py-1 bg-green-500 text-white rounded"
+                  onClick={addCharacter}
+                >
+                  Add Character
+                </button>
+              </div>
+              <div className="grid gap-4">
+                {characters.map((char) => (
+                  <CharacterCard
+                    key={char.id}
+                    char={char}
+                    onRemoveChar={removeCharacter}
+                    onUpdateChar={updateCharacter}
+                    onHeal={healCharacter}
+                    onDamage={damageCharacter}
+                    onRemoveStatus={removeStatus}
+                    onRemoveEffect={removeEffect}
+                    onRemoveItem={removeItem}
+                    onRemoveAbility={removeAbility}
+                    onRemoveSpell={removeSpell}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Party Images Section */}
+            <PartyImages characters={characters} />
+
+            {/* Stats Section */}
+            <StatsSection statRows={statRows} setStatRows={setStatRows} />
+
+            {/* Enemy Section */}
+            <div className="bg-gray-100 p-4 rounded-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Enemies</h2>
+                <button
+                  className="px-3 py-1 bg-purple-500 text-white rounded"
+                  onClick={addEnemy}
+                >
+                  Add Enemy
+                </button>
+              </div>
+              <div className="grid gap-4">
+                {enemies.map((enemy) => (
+                  <EnemyCard
+                    key={enemy.id}
+                    enemy={enemy}
+                    onRemoveEnemy={removeEnemy}
+                    onHealEnemy={healEnemy}
+                    onDamageEnemy={damageEnemy}
+                    onUpdateEnemy={updateEnemy}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Map Section */}
+            <MapSection
+              mapImage={mapImage}
+              setMapImage={setMapImage}
+              dotPositions={dotPositions}
+              setDotPositions={setDotPositions}
+            />
+
+            {/* Dice Roller */}
+            <DiceRoller />
+
+            {/* Classes Section */}
+            <ClassesSection />
+
+            {/* Races Section */}
+            <RacesSection />
+
+            {/* Monster/Creature List Section */}
+            <MonsterCreatureList />
+          </div>
+        </div>
+      );
+    }
+
+    // Render the main tracker
+    ReactDOM.render(<DnDTracker />, document.getElementById("root"));
+  </script>
+</body>
+</html>
+
+
