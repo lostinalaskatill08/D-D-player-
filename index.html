@@ -814,14 +814,19 @@
           const reader = new FileReader();
           reader.onload = (e) => {
             setMapImage(e.target.result);
-            // Initialize dot positions if none exist
+            
+            // Set default dot positions if none exist
             if (!dotPositions.length) {
               setDotPositions([
-                { x: 20, y: 20, color: "red" },
-                { x: 40, y: 40, color: "blue" },
-                { x: 60, y: 60, color: "green" },
-                { x: 80, y: 80, color: "purple" },
-                { x: 50, y: 50, color: "orange" },
+                { x: 20, y: 20, color: "red", label: "Player 1" },
+                { x: 40, y: 40, color: "blue", label: "Player 2" },
+                { x: 60, y: 60, color: "green", label: "Player 3" },
+                { x: 80, y: 80, color: "purple", label: "Player 4" },
+                { x: 30, y: 30, color: "orange", label: "Enemy 1" },
+                { x: 50, y: 50, color: "yellow", label: "Enemy 2" },
+                { x: 70, y: 70, color: "pink", label: "Enemy 3" },
+                { x: 90, y: 90, color: "cyan", label: "Enemy 4" },
+                { x: 45, y: 45, color: "lime", label: "Enemy 5" }
               ]);
             }
           };
@@ -901,18 +906,27 @@
                 {dotPositions.map((dot, index) => (
                   <div
                     key={index}
-                    className="absolute w-4 h-4 rounded-full"
+                    className="absolute"
                     style={{
                       left: `${dot.x}%`,
                       top: `${dot.y}%`,
                       transform: "translate(-50%, -50%)",
-                      backgroundColor: dot.color,
                       cursor: "grab",
-                      boxShadow: "0 0 4px rgba(0,0,0,0.5)"
                     }}
-                    onMouseDown={handleMouseDown(index)}
-                    onTouchStart={handleTouchStart(index)}
-                  />
+                  >
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center"
+                      style={{
+                        backgroundColor: dot.color,
+                        boxShadow: "0 0 6px rgba(0,0,0,0.8)"
+                      }}
+                      onMouseDown={handleMouseDown(index)}
+                      onTouchStart={handleTouchStart(index)}
+                    ></div>
+                    <div className="absolute top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold bg-black bg-opacity-50 text-white px-1 rounded whitespace-nowrap">
+                      {dot.label || `Token ${index+1}`}
+                    </div>
+                  </div>
                 ))}
               </div>
               <div className="mt-2">
@@ -1015,98 +1029,26 @@
       );
     }
 
-    /** ClassesSection (Restored with links) */
+    /** ClassesSection (Simplified with link) */
     function ClassesSection() {
-      const [isExpanded, setIsExpanded] = React.useState(false);
-      const classes = [
-        { name: "Artificer (Tinkerers & Inventors)", desc: "Artificers thrive on intelligence, crafting, and magical engineering. Gnomes are natural inventors with minor illusions and magic resistance, while Autognomes are durable constructs with mechanical resilience. Vedalken excel in logic and mental resistance, and Warforged are living constructs immune to many conditions. Artificers specialize in infusions, magical tinkering, and intelligence-based spellcasting, making these races ideal for their class." },
-        { name: "Barbarian (Unstoppable Warriors)", desc: "Barbarians rely on raw strength, endurance, and primal fury. Goliaths reduce incoming damage and excel in athletics, while Orcs gain extra movement and resilience in combat. Minotaurs are melee-focused chargers, and Half-Orcs can survive near-fatal blows while delivering devastating crits. Lizardfolk add natural armor and self-healing through bites. Barbarians excel in rage-fueled combat, unarmored defense, and brutal critical hits." },
-        { name: "Bard (Charming Performers & Spellcasters)", desc: "Bards blend charisma, magic, and storytelling. Half-Elves gain extra skills and social flexibility, while Satyrs resist magic and enhance musical abilities. Fairies provide flight and innate spells, and Tabaxi have agility and charm, making them excellent performers. Kenku mimic sounds perfectly, ideal for deception and intrigue. Bards specialize in inspiring allies, versatile spellcasting, and performance-based magic." },
-        { name: "Cleric (Divine Warriors & Healers)", desc: "Clerics channel divine magic for healing and battle. Aasimar have celestial energy and radiant resistance, while Dwarves provide durability and divine weapon proficiencies. Tritons control water and communicate with sea creatures, and Firbolgs possess nature magic and invisibility. Owlin offer wisdom-based spellcasting with natural flight. Clerics excel in divine magic, healing, and powerful protective spells." },
-        { name: "Druid (Nature's Guardians & Shapeshifters)", desc: "Druids command nature and transform into beasts. Firbolgs excel with plant communication and stealth, while Tortles provide natural armor for defense. Lizardfolk have primal instincts and self-healing, and Shifters channel lycanthropic abilities. Wood Elves thrive in forests with heightened agility. Druids master wild shape, nature magic, and elemental control." },
-        { name: "Fighter (Master Combatants & Strategists)", desc: "Fighters dominate the battlefield with weapons and tactics. Half-Orcs hit hard and endure, while Goliaths resist damage and excel in athletics. Hobgoblins enhance teamwork and tactical advantage, and Warforged provide durability with built-in armor. Leonin use powerful roars to intimidate foes. Fighters specialize in multiple attacks, weapon mastery, and versatile combat styles." },
-        { name: "Monk (Masters of Martial Arts & Speed)", desc: "Monks rely on speed, agility, and spiritual focus. Tabaxi are nimble and fast, while Harengon have quick reflexes and high jumps. Kenku are stealthy and precise, and Githzerai have psionic defenses. Lizardfolk enhance their unarmed strikes with natural weapons. Monks excel in unarmed combat, mobility, and ki-powered abilities." },
-        { name: "Paladin (Holy Warriors & Protectors)", desc: "Paladins wield divine magic alongside martial prowess. Aasimar gain celestial blessings and radiant abilities, while Dragonborn channel draconic power with elemental breath weapons. Dwarves bring durability and divine weapon skills, and Tritons harness oceanic magic. Leonin have natural authority and powerful combat presence. Paladins specialize in divine smites, healing, and protective auras." },
-        { name: "Ranger (Wilderness Scouts & Hunters)", desc: "Rangers track, hunt, and wield nature magic. Wood Elves have superior stealth and speed, while Tabaxi move swiftly and excel in scouting. Goliaths are rugged survivalists with cold resistance, and Firbolgs use magic to blend into nature. Kenku thrive in ambush tactics. Rangers excel in tracking, ranged combat, and natural exploration." },
-        { name: "Rogue (Stealthy Assassins & Tricksters)", desc: "Rogues rely on cunning, speed, and precision. Halflings avoid misfortune with their luck trait, while Tabaxi use agility and speed for quick getaways. Kobolds have pack tactics for deadly strikes, and Kenku mimic voices for deception. Goblin rogues use their nimbleness and quick escapes. Rogues specialize in sneak attacks, evasive movement, and deception." },
-        { name: "Sorcerer (Innate Spellcasters & Magical Prodigies)", desc: "Sorcerers wield raw, untamed magic. Dragonborn inherit draconic power with elemental resistances, while Tieflings draw strength from infernal ancestry. Aasimar harness celestial energy, and Genasi wield elemental magic. Fairies bring flight and innate spellcasting. Sorcerers specialize in metamagic, spontaneous casting, and magical surges." },
-        { name: "Warlock (Pact-Bound Spellcasters & Eldritch Wielders)", desc: "Warlocks make pacts with powerful entities for magic. Tieflings tap into fiendish energy, while Hexbloods have hag-like magic. Reborn warlocks possess undead resilience, and Githyanki wield psionic gifts. Drow Elves enhance darkness magic. Warlocks excel in eldritch invocations, powerful cantrips, and supernatural pacts." },
-        { name: "Wizard (Scholars of Magic & Arcane Masters)", desc: "Wizards master magic through study and knowledge. Gnomes have magical resistance and keen intellect, while Elves bring heightened senses and arcane heritage. Hobgoblins store magical energy for later use, and Vedalken provide logic-based spellcasting. Warforged offer a unique take on magical constructs. Wizards specialize in ritual magic, vast spell knowledge, and arcane mastery." },
-      ];
-
       return (
         <div className="character-card p-4 rounded-lg mb-4">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-bold text-amber-400">D&D 5th Edition Classes</h2>
-            <button 
-              className="px-2 py-1 btn-dnd rounded text-sm" 
-              onClick={() => setIsExpanded(!isExpanded)}
-            >
-              {isExpanded ? "Collapse" : "Expand"}
-            </button>
-          </div>
+          <h2 className="text-xl font-bold text-amber-400 mb-2">D&D 5th Edition Classes</h2>
           <p className="mb-2">
-            Source: <a href="https://rpgbot.net/dnd5/characters/classes/" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">RPGBot Classes</a>
+            View all classes and details at: <a href="https://rpgbot.net/dnd5/characters/classes/" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">RPGBot Classes</a>
           </p>
-          <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[9999px]' : 'max-h-16'}`}>
-            <ul className="list-disc list-inside space-y-2">
-              {classes.map((cls) => (
-                <li key={cls.name}>
-                  <span className="font-semibold text-amber-400">{cls.name}</span>: {cls.desc}
-                </li>
-              ))}
-            </ul>
-          </div>
-          {!isExpanded && <div className="text-center text-sm mt-2">▼ Click Expand to see all classes ▼</div>}
         </div>
       );
     }
 
-    /** RacesSection (Restored with links) */
+    /** RacesSection (Simplified with link) */
     function RacesSection() {
-      const [isExpanded, setIsExpanded] = React.useState(false);
-      const races = [
-        { name: "Aarakocra", desc: "Bird-like humanoids with the ability to fly and sharp talons, often living in high-altitude environments." },
-        { name: "Aasimar", desc: "Celestial-touched beings with divine power, resistant to necrotic and radiant damage, and capable of radiant transformations." },
-        { name: "Autognome", desc: "Small robotic beings from Spelljammer, resilient with built-in mechanical advantages." },
-        { name: "Bugbear", desc: "Large goblinoid ambush predators with extended reach and powerful surprise attacks." },
-        { name: "Centaur", desc: "Half-human, half-horse creatures with natural speed and melee combat prowess." },
-        { name: "Changeling", desc: "Shapeshifters who can alter their appearance at will, making them excellent spies and social manipulators." },
-        { name: "Custom Lineage", desc: "A flexible non-race option that allows custom origins, granting a feat and bonus abilities." },
-        { name: "Dhampir", desc: "Half-vampires with supernatural abilities such as wall-climbing and life-draining bites." },
-        { name: "Dragonborn", desc: "Draconic humanoids with breath weapons and elemental resistances based on their draconic ancestry." },
-        { name: "Dwarf", desc: "Stocky, resilient warriors and craftsmen known for their endurance, resistance to poison, and expertise in mining." },
-        { name: "Elf", desc: "Graceful, long-lived humanoids with various subraces offering magical abilities and keen perception." },
-        { name: "Fairy", desc: "Tiny winged beings with natural flight and innate spellcasting abilities." },
-        { name: "Firbolg", desc: "Gentle giant-kin with druidic abilities, including limited invisibility and plant communication." },
-        { name: "Genasi", desc: "Elemental humanoids influenced by air, earth, fire, or water, each with unique traits and spell-like abilities." },
-        // Additional races would be listed here...
-      ];
-
       return (
         <div className="character-card p-4 rounded-lg mb-4">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-bold text-amber-400">D&D 5th Edition Races</h2>
-            <button 
-              className="px-2 py-1 btn-dnd rounded text-sm" 
-              onClick={() => setIsExpanded(!isExpanded)}
-            >
-              {isExpanded ? "Collapse" : "Expand"}
-            </button>
-          </div>
+          <h2 className="text-xl font-bold text-amber-400 mb-2">D&D 5th Edition Races</h2>
           <p className="mb-2">
-            Source: <a href="https://rpgbot.net/dnd5/characters/races/" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">RPGBot Races</a>
+            View all races and details at: <a href="https://rpgbot.net/dnd5/characters/races/" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">RPGBot Races</a>
           </p>
-          <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[9999px]' : 'max-h-16'}`}>
-            <ul className="list-disc list-inside space-y-1">
-              {races.map((race) => (
-                <li key={race.name}>
-                  <span className="font-semibold text-amber-400">{race.name}</span>: {race.desc}
-                </li>
-              ))}
-            </ul>
-          </div>
-          {!isExpanded && <div className="text-center text-sm mt-2">▼ Click Expand to see all races ▼</div>}
         </div>
       );
     }
@@ -1127,44 +1069,7 @@
       );
     }
 
-    /** BulkActions */
-    function BulkActions({ onBulkHeal, onBulkDamage }) {
-      const [amount, setAmount] = React.useState("0");
-      const [targetType, setTargetType] = React.useState("characters");
-
-      function handleHeal() {
-        const amt = parseInt(amount, 10) || 0;
-        if (amt > 0) onBulkHeal(targetType, amt);
-      }
-
-      function handleDamage() {
-        const amt = parseInt(amount, 10) || 0;
-        if (amt > 0) onBulkDamage(targetType, amt);
-      }
-
-      return (
-        <div className="character-card p-4 rounded-lg mb-4">
-          <h2 className="text-xl font-bold text-amber-400 mb-2">Bulk Heal/Damage</h2>
-          <div className="flex flex-wrap items-end gap-2">
-            <div>
-              <label className="block text-sm font-medium text-amber-400 mb-1">Amount</label>
-              <input id="bulk-amount" type="number" className="border rounded p-1 text-sm w-20" value={amount} onChange={(e) => setAmount(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-amber-400 mb-1">Target</label>
-              <select id="bulk-target" className="border rounded p-1 text-sm" value={targetType} onChange={(e) => setTargetType(e.target.value)}>
-                <option value="characters">All Characters</option>
-                <option value="enemies">All Enemies</option>
-              </select>
-            </div>
-            <div className="flex gap-2">
-              <button className="px-2 py-1 bg-green-700 text-white rounded hover:bg-green-800 text-sm" onClick={handleHeal}>Bulk Heal</button>
-              <button className="px-2 py-1 btn-dnd rounded text-sm" onClick={handleDamage}>Bulk Damage</button>
-            </div>
-          </div>
-        </div>
-      );
-    }
+    /** Note: BulkActions component removed as requested since it's already in the combat tracker */
 
     /** Main DnDTracker */
     function DnDTracker() {
@@ -1214,7 +1119,19 @@
       const [mapImage, setMapImage] = React.useState(() => localStorage.getItem("mapImage") || null);
       const [dotPositions, setDotPositions] = React.useState(() => {
         const saved = localStorage.getItem("dotPositions");
-        return saved ? JSON.parse(saved) : [];
+        // Default enemy dots with different colors and labels if no saved dots exist
+        const defaultDots = [
+          { x: 20, y: 20, color: "red", label: "Player 1" },
+          { x: 40, y: 40, color: "blue", label: "Player 2" },
+          { x: 60, y: 60, color: "green", label: "Player 3" },
+          { x: 80, y: 80, color: "purple", label: "Player 4" },
+          { x: 30, y: 30, color: "orange", label: "Enemy 1" },
+          { x: 50, y: 50, color: "yellow", label: "Enemy 2" },
+          { x: 70, y: 70, color: "pink", label: "Enemy 3" },
+          { x: 90, y: 90, color: "cyan", label: "Enemy 4" },
+          { x: 45, y: 45, color: "lime", label: "Enemy 5" }
+        ];
+        return saved ? JSON.parse(saved) : defaultDots;
       });
 
       React.useEffect(() => {
@@ -1455,7 +1372,7 @@
               </div>
             </div>
 
-            <BulkActions onBulkHeal={handleBulkHeal} onBulkDamage={handleBulkDamage} />
+            {/* BulkActions component removed as requested */}
             <MapSection mapImage={mapImage} setMapImage={setMapImage} dotPositions={dotPositions} setDotPositions={setDotPositions} />
             <ClassesSection />
             <RacesSection />
