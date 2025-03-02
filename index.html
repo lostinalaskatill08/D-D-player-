@@ -354,14 +354,35 @@
               <button className="px-2 py-1 btn-dnd rounded" onClick={() => onRemoveChar(char.id)}>Remove</button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input id={`edit-name-${char.id}`} className="border p-1 rounded" placeholder="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
-              <input id={`edit-class-${char.id}`} className="border p-1 rounded" placeholder="Class" value={editClass} onChange={(e) => setEditClass(e.target.value)} />
-              <input id={`edit-maxhealth-${char.id}`} type="number" className="border p-1 rounded" placeholder="Max Health" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} />
-              <input id={`edit-level-${char.id}`} type="number" className="border p-1 rounded" placeholder="Level" value={editLevel} onChange={(e) => setEditLevel(e.target.value)} />
-              <input id={`edit-xp-${char.id}`} type="number" className="border p-1 rounded" placeholder="XP" value={editXP} onChange={(e) => setEditXP(e.target.value)} />
-              <input id={`edit-initiative-${char.id}`} type="number" className="border p-1 rounded" placeholder="Initiative" value={editInitiative} onChange={(e) => setEditInitiative(e.target.value)} />
+              <div>
+                <label htmlFor={`edit-name-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Character Name</label>
+                <input id={`edit-name-${char.id}`} className="border p-1 rounded w-full" value={editName} onChange={(e) => setEditName(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor={`edit-class-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Class/Race</label>
+                <input id={`edit-class-${char.id}`} className="border p-1 rounded w-full" value={editClass} onChange={(e) => setEditClass(e.target.value)} placeholder="Fighter/Human" />
+              </div>
+              <div>
+                <label htmlFor={`edit-maxhealth-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Max Health</label>
+                <input id={`edit-maxhealth-${char.id}`} type="number" className="border p-1 rounded w-full" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor={`edit-level-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Level</label>
+                <input id={`edit-level-${char.id}`} type="number" className="border p-1 rounded w-full" value={editLevel} onChange={(e) => setEditLevel(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor={`edit-xp-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Experience Points</label>
+                <input id={`edit-xp-${char.id}`} type="number" className="border p-1 rounded w-full" value={editXP} onChange={(e) => setEditXP(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor={`edit-initiative-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Initiative Bonus</label>
+                <input id={`edit-initiative-${char.id}`} type="number" className="border p-1 rounded w-full" value={editInitiative} onChange={(e) => setEditInitiative(e.target.value)} />
+              </div>
             </div>
-            <textarea id={`edit-notes-${char.id}`} className="border p-1 rounded w-full" rows={3} placeholder="Notes / Bio / Extra Info" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} />
+            <div>
+              <label htmlFor={`edit-notes-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Character Notes/Bio</label>
+              <textarea id={`edit-notes-${char.id}`} className="border p-1 rounded w-full" rows={3} value={editNotes} onChange={(e) => setEditNotes(e.target.value)} />
+            </div>
             <div className="flex gap-2">
               <button className="px-3 py-1 btn-dnd rounded" onClick={handleSave}>Save</button>
               <button className="px-2 py-1 bg-gray-700 text-f4e4bc rounded" onClick={() => setIsEditing(false)}>Cancel</button>
@@ -590,9 +611,18 @@
               <button className="px-2 py-1 btn-dnd rounded" onClick={() => onRemoveEnemy(enemy.id)}>Defeat</button>
             </div>
             <div className="flex flex-col gap-2">
-              <input id={`edit-enemy-name-${enemy.id}`} className="border p-1 rounded" placeholder="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
-              <input id={`edit-enemy-maxhealth-${enemy.id}`} type="number" className="border p-1 rounded" placeholder="Max Health" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} />
-              <input id={`edit-enemy-health-${enemy.id}`} type="number" className="border p-1 rounded" placeholder="Current Health" value={editHealth} onChange={(e) => setEditHealth(e.target.value)} />
+              <div>
+                <label htmlFor={`edit-enemy-name-${enemy.id}`} className="block text-sm font-medium text-amber-400 mb-1">Enemy Name</label>
+                <input id={`edit-enemy-name-${enemy.id}`} className="border p-1 rounded w-full" value={editName} onChange={(e) => setEditName(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor={`edit-enemy-maxhealth-${enemy.id}`} className="block text-sm font-medium text-amber-400 mb-1">Max Health</label>
+                <input id={`edit-enemy-maxhealth-${enemy.id}`} type="number" className="border p-1 rounded w-full" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor={`edit-enemy-health-${enemy.id}`} className="block text-sm font-medium text-amber-400 mb-1">Current Health</label>
+                <input id={`edit-enemy-health-${enemy.id}`} type="number" className="border p-1 rounded w-full" value={editHealth} onChange={(e) => setEditHealth(e.target.value)} />
+              </div>
               <div className="flex gap-2">
                 <button className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800" onClick={handleSave}>Save</button>
                 <button className="px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-600" onClick={() => setIsEditing(false)}>Cancel</button>
@@ -822,11 +852,18 @@
                 { x: 40, y: 40, color: "blue", label: "Player 2" },
                 { x: 60, y: 60, color: "green", label: "Player 3" },
                 { x: 80, y: 80, color: "purple", label: "Player 4" },
-                { x: 30, y: 30, color: "orange", label: "Enemy 1" },
-                { x: 50, y: 50, color: "yellow", label: "Enemy 2" },
-                { x: 70, y: 70, color: "pink", label: "Enemy 3" },
-                { x: 90, y: 90, color: "cyan", label: "Enemy 4" },
-                { x: 45, y: 45, color: "lime", label: "Enemy 5" }
+                { x: 25, y: 30, color: "orange", label: "Enemy 1" },
+                { x: 45, y: 50, color: "yellow", label: "Enemy 2" },
+                { x: 65, y: 70, color: "pink", label: "Enemy 3" },
+                { x: 85, y: 90, color: "cyan", label: "Enemy 4" },
+                { x: 35, y: 45, color: "lime", label: "Enemy 5" },
+                { x: 55, y: 65, color: "magenta", label: "Enemy 6" },
+                { x: 75, y: 85, color: "teal", label: "Enemy 7" },
+                { x: 15, y: 55, color: "indigo", label: "Enemy 8" },
+                { x: 30, y: 75, color: "violet", label: "Enemy 9" },
+                { x: 50, y: 25, color: "crimson", label: "Enemy 10" },
+                { x: 70, y: 35, color: "darkgreen", label: "Enemy 11" },
+                { x: 90, y: 15, color: "navy", label: "Enemy 12" }
               ]);
             }
           };
@@ -912,6 +949,7 @@
                       top: `${dot.y}%`,
                       transform: "translate(-50%, -50%)",
                       cursor: "grab",
+                      zIndex: 10
                     }}
                   >
                     <div
@@ -923,8 +961,8 @@
                       onMouseDown={handleMouseDown(index)}
                       onTouchStart={handleTouchStart(index)}
                     ></div>
-                    <div className="absolute top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold bg-black bg-opacity-50 text-white px-1 rounded whitespace-nowrap">
-                      {dot.label || `Token ${index+1}`}
+                    <div className="absolute top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold bg-black bg-opacity-75 text-white px-1 py-0.5 rounded whitespace-nowrap" style={{ zIndex: 20 }}>
+                      {dot.label}
                     </div>
                   </div>
                 ))}
@@ -1125,11 +1163,18 @@
           { x: 40, y: 40, color: "blue", label: "Player 2" },
           { x: 60, y: 60, color: "green", label: "Player 3" },
           { x: 80, y: 80, color: "purple", label: "Player 4" },
-          { x: 30, y: 30, color: "orange", label: "Enemy 1" },
-          { x: 50, y: 50, color: "yellow", label: "Enemy 2" },
-          { x: 70, y: 70, color: "pink", label: "Enemy 3" },
-          { x: 90, y: 90, color: "cyan", label: "Enemy 4" },
-          { x: 45, y: 45, color: "lime", label: "Enemy 5" }
+          { x: 25, y: 30, color: "orange", label: "Enemy 1" },
+          { x: 45, y: 50, color: "yellow", label: "Enemy 2" },
+          { x: 65, y: 70, color: "pink", label: "Enemy 3" },
+          { x: 85, y: 90, color: "cyan", label: "Enemy 4" },
+          { x: 35, y: 45, color: "lime", label: "Enemy 5" },
+          { x: 55, y: 65, color: "magenta", label: "Enemy 6" },
+          { x: 75, y: 85, color: "teal", label: "Enemy 7" },
+          { x: 15, y: 55, color: "indigo", label: "Enemy 8" },
+          { x: 30, y: 75, color: "violet", label: "Enemy 9" },
+          { x: 50, y: 25, color: "crimson", label: "Enemy 10" },
+          { x: 70, y: 35, color: "darkgreen", label: "Enemy 11" },
+          { x: 90, y: 15, color: "navy", label: "Enemy 12" }
         ];
         return saved ? JSON.parse(saved) : defaultDots;
       });
@@ -1155,7 +1200,7 @@
           {
             id: newId,
             name: "New Character",
-            class: "Unassigned",
+            class: "Class/Race",
             health: 50,
             maxHealth: 50,
             status: [],
@@ -1308,14 +1353,15 @@
           <div className="app-container p-4 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-2">D&D Character & Party Tracker</h2>
             <div className="mb-6 bg-gray-800 p-3 rounded-lg border border-amber-900">
-              <h3 className="text-amber-400 font-bold mb-1">How To Use This Tracker:</h3>
+              <h3 className="text-amber-400 font-bold mb-1">D&D Player Tracker Features:</h3>
               <ol className="list-decimal pl-5 text-sm text-amber-300">
-                <li className="mb-1">Add characters by clicking "Add Character" button</li>
-                <li className="mb-1">Track health, status effects, inventory and abilities</li>
-                <li className="mb-1">Use the map to visualize party and enemy positions</li>
-                <li className="mb-1">Apply bulk damage or healing to multiple targets at once</li>
-                <li className="mb-1">Calculate ability score modifiers with the stat calculator</li>
-                <li className="mb-1">View character portraits in the Party Images section</li>
+                <li className="mb-1">Track character details including Class/Race combinations</li>
+                <li className="mb-1">Manage health, status effects, inventory, and abilities</li>
+                <li className="mb-1">Use the interactive map with up to 12 enemy tokens</li>
+                <li className="mb-1">Organize character stats with the calculator</li>
+                <li className="mb-1">Track enemies and their health separately</li>
+                <li className="mb-1">Quick-reference D&D classes and races through external links</li>
+                <li className="mb-1">Backup and restore your campaign data</li>
               </ol>
             </div>
 
