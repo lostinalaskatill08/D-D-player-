@@ -1,4 +1,38 @@
-<!DOCTYPE html>
+
+<div className="mt-2">
+                <h4 className="font-semibold text-sm text-amber-400">Cantrips/Basic Skills:</h4>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {char.cantrips && char.cantrips.map((cantrip, idx) => (
+                    <div key={idx} className="status-tag flex items-center justify-between">
+                      {cantrip}
+                      <button className="ml-2 text-red-400 hover:text-red-600" onClick={() => removeCantrip(char.id, idx)}>×</button>
+                    </div>
+                  ))}
+                  {(!char.cantrips || char.cantrips.length === 0) && <span className="text-gray-500 text-sm">None</span>}
+                </div>
+                <div className="flex gap-2 mt-1">
+                  <input id={`new-cantrip-${char.id}`} className="border p-1 rounded text-sm" value={newCantrip} onChange={(e) => setNewCantrip(e.target.value)} placeholder="Add cantrip/skill" />
+                  <button className="px-2 py-1 btn-dnd rounded text-sm" onClick={handleAddCantrip}>Add</button>
+                </div>
+              </div>            <div className="flex gap-2 mt-4">
+              <button className="px-3 py-1 btn-dnd rounded" onClick={handleSave}>Save</button>
+              <button className="px-2 py-1 bg-gray-700 text-f4e4bc rounded" onClick={() => setIsEditing(false)}>Cancel</button>
+            </div>      function handleAddCantrip() {
+        if (!newCantrip.trim()) return;
+        onUpdateChar({ ...char, cantrips: [...char.cantrips, newCantrip.trim()] });
+        setNewCantrip("");
+      }
+      
+      function removeCantrip(charId, idx) {
+        setCharacters((prev) => prev.map((c) => {
+          if (c.id === charId) {
+            const updated = [...c.cantrips];
+            updated.splice(idx, 1);
+            return { ...c, cantrips: updated };
+          }
+          return c;
+        }));
+      }<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -27,6 +61,7 @@
       border-radius: 0.5rem;
       color: #f4e4bc;
     }
+    /* Global styles to ensure text in inputs is black on white */
     input, select, textarea {
       font-family: 'Cinzel', serif;
       color: #000000 !important;
@@ -106,6 +141,18 @@
       overflow: hidden;
       transition: max-height 0.3s ease-in-out;
     }
+    .party-token {
+      background: radial-gradient(circle, #4169E1, #191970);
+      border: 2px solid #00BFFF;
+    }
+    .enemy-token {
+      background: radial-gradient(circle, #B22222, #8B0000);
+      border: 2px solid #FF4500;
+    }
+    .neutral-token {
+      background: radial-gradient(circle, #DAA520, #B8860B);
+      border: 2px solid #FFD700;
+    }
     ::-webkit-scrollbar {
       width: 12px;
     }
@@ -125,28 +172,23 @@
   <script type="text/babel">
     /** LocalStorage Backup/Restore */
     function backupLocalStorage() {
-      try {
-        const data = {
-          characters: localStorage.getItem("characters"),
-          enemies: localStorage.getItem("enemies"),
-          statRows: localStorage.getItem("statRows"),
-          mapImage: localStorage.getItem("mapImage"),
-          dotPositions: localStorage.getItem("dotPositions"),
-          collapsedCharacters: localStorage.getItem("collapsedCharacters"),
-          collapsedEnemies: localStorage.getItem("collapsedEnemies"),
-          darkMode: localStorage.getItem("darkMode"),
-        };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "dnd_tracker_backup.json";
-        a.click();
-        URL.revokeObjectURL(url);
-      } catch (err) {
-        console.error("Backup failed:", err);
-        alert("Failed to backup data.");
-      }
+      const data = {
+        characters: localStorage.getItem("characters"),
+        enemies: localStorage.getItem("enemies"),
+        statRows: localStorage.getItem("statRows"),
+        mapImage: localStorage.getItem("mapImage"),
+        dotPositions: localStorage.getItem("dotPositions"),
+        collapsedCharacters: localStorage.getItem("collapsedCharacters"),
+        collapsedEnemies: localStorage.getItem("collapsedEnemies"),
+        darkMode: localStorage.getItem("darkMode"),
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "dnd_tracker_backup.json";
+      a.click();
+      URL.revokeObjectURL(url);
     }
 
     function restoreLocalStorage(event) {
@@ -164,7 +206,7 @@
           }
           alert("LocalStorage restored. Please refresh the page.");
         } catch (err) {
-          console.error("Restore failed:", err);
+          console.error(err);
           alert("Failed to restore. Invalid JSON?");
         }
       };
@@ -210,13 +252,13 @@
       }, [darkMode]);
 
       return (
-        <button className="px-3 py-1 btn-dnd rounded" onClick={() => setDarkMode(!darkMode)}>
+        <button className="px-3 py-1 bg-amber-700 text-white rounded hover:bg-amber-800" onClick={() => setDarkMode(!darkMode)}>
           {darkMode ? "Light Mode" : "Dark Mode"}
         </button>
       );
     }
 
-    /** CharacterCard */
+    /** CharacterCard (with Background/Bio and Image) */
     function CharacterCard({
       char,
       collapsed,
@@ -250,8 +292,6 @@
       const [healInput, setHealInput] = React.useState("0");
       const [dmgInput, setDmgInput] = React.useState("0");
 
-      const cantrips = Array.isArray(char.cantrips) ? char.cantrips : [];
-
       React.useEffect(() => {
         setEditName(char.name);
         setEditClass(char.class);
@@ -274,25 +314,20 @@
       }
 
       function handleSave() {
-        const parsedMax = Math.max(1, parseInt(editMaxHealth, 10) || 1);
-        const parsedLevel = Math.max(1, parseInt(editLevel, 10) || 1);
-        const parsedXP = Math.max(0, parseInt(editXP, 10) || 0);
-        const parsedInitiative = parseInt(editInitiative, 10) || 0;
-        const parsedArmorClass = Math.max(0, parseInt(editArmorClass, 10) || 10);
-        const clippedHealth = Math.min(Math.max(0, char.health), parsedMax);
+        const parsedMax = parseInt(editMaxHealth, 10) || 0;
+        const clippedHealth = Math.min(char.health, parsedMax);
         onUpdateChar({
           ...char,
           name: editName,
           class: editClass,
           maxHealth: parsedMax,
           health: clippedHealth,
-          level: parsedLevel,
-          xp: parsedXP,
-          initiative: parsedInitiative,
-          armorClass: parsedArmorClass,
+          level: parseInt(editLevel, 10) || 1,
+          xp: parseInt(editXP, 10) || 0,
+          initiative: parseInt(editInitiative, 10) || 0,
+          armorClass: parseInt(editArmorClass, 10) || 10,
           equippedWeapon: editEquippedWeapon,
           notes: editNotes,
-          cantrips: cantrips,
         });
         setIsEditing(false);
       }
@@ -321,12 +356,6 @@
         setNewAbility("");
       }
 
-      function handleAddCantrip() {
-        if (!newCantrip.trim()) return;
-        onUpdateChar({ ...char, cantrips: [...cantrips, newCantrip.trim()] });
-        setNewCantrip("");
-      }
-
       function handleAddSpell() {
         if (!newSpell.trim()) return;
         onUpdateChar({ ...char, spellsMagic: [...char.spellsMagic, newSpell.trim()] });
@@ -334,11 +363,11 @@
       }
 
       function applyHeal() {
-        onHeal(char.id, Math.max(0, parseInt(healInput, 10) || 0));
+        onHeal(char.id, parseInt(healInput, 10) || 0);
       }
 
       function applyDamage() {
-        onDamage(char.id, Math.max(0, parseInt(dmgInput, 10) || 0));
+        onDamage(char.id, parseInt(dmgInput, 10) || 0);
       }
 
       function toggleDeathSaveSuccess() {
@@ -377,23 +406,25 @@
               </div>
               <div>
                 <label htmlFor={`edit-maxhealth-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Max Health</label>
-                <input id={`edit-maxhealth-${char.id}`} type="number" className="border p-1 rounded w-full" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} min="1" />
+                <input id={`edit-maxhealth-${char.id}`} type="number" className="border p-1 rounded w-full" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} />
               </div>
               <div>
                 <label htmlFor={`edit-level-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Level</label>
-                <input id={`edit-level-${char.id}`} type="number" className="border p-1 rounded w-full" value={editLevel} onChange={(e) => setEditLevel(e.target.value)} min="1" />
+                <input id={`edit-level-${char.id}`} type="number" className="border p-1 rounded w-full" value={editLevel} onChange={(e) => setEditLevel(e.target.value)} />
               </div>
               <div>
                 <label htmlFor={`edit-xp-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Experience Points</label>
-                <input id={`edit-xp-${char.id}`} type="number" className="border p-1 rounded w-full" value={editXP} onChange={(e) => setEditXP(e.target.value)} min="0" />
+                <input id={`edit-xp-${char.id}`} type="number" className="border p-1 rounded w-full" value={editXP} onChange={(e) => setEditXP(e.target.value)} />
               </div>
               <div>
                 <label htmlFor={`edit-initiative-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Initiative Bonus</label>
                 <input id={`edit-initiative-${char.id}`} type="number" className="border p-1 rounded w-full" value={editInitiative} onChange={(e) => setEditInitiative(e.target.value)} />
               </div>
+            </div>
+            <div>
               <div>
                 <label htmlFor={`edit-armorclass-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Armor Class</label>
-                <input id={`edit-armorclass-${char.id}`} type="number" className="border p-1 rounded w-full" value={editArmorClass} onChange={(e) => setEditArmorClass(e.target.value)} min="0" />
+                <input id={`edit-armorclass-${char.id}`} type="number" className="border p-1 rounded w-full" value={editArmorClass} onChange={(e) => setEditArmorClass(e.target.value)} />
               </div>
               <div>
                 <label htmlFor={`edit-weapon-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Equipped Weapon/Item</label>
@@ -403,10 +434,6 @@
             <div>
               <label htmlFor={`edit-notes-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Character Notes/Bio</label>
               <textarea id={`edit-notes-${char.id}`} className="border p-1 rounded w-full" rows={3} value={editNotes} onChange={(e) => setEditNotes(e.target.value)} />
-            </div>
-            <div className="flex gap-2 mt-4">
-              <button className="px-3 py-1 btn-dnd rounded" onClick={handleSave}>Save</button>
-              <button className="px-2 py-1 bg-gray-700 text-f4e4bc rounded" onClick={() => setIsEditing(false)}>Cancel</button>
             </div>
           </div>
         );
@@ -427,24 +454,25 @@
               <button className="px-2 py-1 btn-dnd rounded text-sm" onClick={() => onRemoveChar(char.id)}>Remove</button>
             </div>
           </div>
+
           <div className="collapsible-content transition-all duration-300 ease-in-out" style={mainContentStyle}>
             {!collapsed && (
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <div className="text-sm mb-1 mt-2">XP: {char.xp || 0}</div>
-                  <div className="text-sm">Armor Class: {char.armorClass || 10}</div>
-                </div>
-                <div className="mb-2">
-                  <div className="text-sm font-medium text-amber-400">Equipped: {char.equippedWeapon || "None"}</div>
-                </div>
-                <label className="block text-sm font-medium text-amber-400">Character Image</label>
+              <div className="flex justify-between items-center mb-2">
+                <div className="text-sm mb-1 mt-2">XP: {char.xp || 0}</div>
+                <div className="text-sm">Armor Class: {char.armorClass || 10}</div>
+              </div>
+              
+              <div className="mb-2">
+                <div className="text-sm font-medium text-amber-400">Equipped: {char.equippedWeapon || "None"}</div>
+              </div>
+              
+              <label className="block text-sm font-medium text-amber-400">Character Image</label>
                 <div className="flex items-center gap-2 mt-1">
                   {char.image ? (
                     <img src={char.image} alt={char.name} className="w-12 h-12 object-cover rounded-full" />
                   ) : (
-                    <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
-                      <span className="text-gray-400 text-xs">No Img</span>
-                    </div>
+                    <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center text-gray-400 text-xs">No Image</div>
                   )}
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="mt-1 text-sm" id={`image-upload-${char.id}`} />
                   {char.image && (
@@ -453,6 +481,7 @@
                     </button>
                   )}
                 </div>
+
                 <div className="mt-2">
                   <div className="flex items-center gap-2">
                     <span className="text-red-600 font-bold">♥</span>
@@ -465,6 +494,7 @@
                     <span className="text-sm">{char.health}/{char.maxHealth}</span>
                   </div>
                 </div>
+
                 <div className="mt-2">
                   <h4 className="font-semibold text-sm text-amber-400">Status Conditions:</h4>
                   <div className="mt-1 flex flex-wrap gap-1">
@@ -481,6 +511,7 @@
                     <button className="px-2 py-1 btn-dnd rounded text-sm" onClick={handleAddStatus}>Add</button>
                   </div>
                 </div>
+
                 <div className="mt-2">
                   <h4 className="font-semibold text-sm text-amber-400">Effects:</h4>
                   <div className="mt-1 flex flex-wrap gap-1">
@@ -497,6 +528,7 @@
                     <button className="px-2 py-1 btn-dnd rounded text-sm" onClick={handleAddEffect}>Add</button>
                   </div>
                 </div>
+
                 <div className="mt-2">
                   <h4 className="font-semibold text-sm text-amber-400">Inventory:</h4>
                   <div className="mt-1 flex flex-wrap gap-1">
@@ -513,37 +545,7 @@
                     <button className="px-2 py-1 btn-dnd rounded text-sm" onClick={handleAddItem}>Add</button>
                   </div>
                 </div>
-                <div className="mt-2">
-                  <h4 className="font-semibold text-sm text-amber-400">Cantrips/Basic Skills:</h4>
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {cantrips.map((cantrip, idx) => (
-                      <div key={idx} className="status-tag flex items-center justify-between">
-                        {cantrip}
-                        <button 
-                          className="ml-2 text-red-400 hover:text-red-600" 
-                          onClick={() => {
-                            const updatedCantrips = [...cantrips];
-                            updatedCantrips.splice(idx, 1);
-                            onUpdateChar({ ...char, cantrips: updatedCantrips });
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                    {cantrips.length === 0 && <span className="text-gray-500 text-sm">None</span>}
-                  </div>
-                  <div className="flex gap-2 mt-1">
-                    <input 
-                      id={`new-cantrip-${char.id}`} 
-                      className="border p-1 rounded text-sm" 
-                      value={newCantrip} 
-                      onChange={(e) => setNewCantrip(e.target.value)} 
-                      placeholder="Add cantrip/skill" 
-                    />
-                    <button className="px-2 py-1 btn-dnd rounded text-sm" onClick={handleAddCantrip}>Add</button>
-                  </div>
-                </div>
+
                 <div className="mt-2">
                   <h4 className="font-semibold text-sm text-amber-400">Special Abilities:</h4>
                   <div className="mt-1 flex flex-wrap gap-1">
@@ -560,6 +562,7 @@
                     <button className="px-2 py-1 btn-dnd rounded text-sm" onClick={handleAddAbility}>Add</button>
                   </div>
                 </div>
+
                 <div className="mt-2">
                   <h4 className="font-semibold text-sm text-amber-400">Spells/Magic:</h4>
                   <div className="mt-1 flex flex-wrap gap-1">
@@ -576,22 +579,24 @@
                     <button className="px-2 py-1 btn-dnd rounded text-sm" onClick={handleAddSpell}>Add</button>
                   </div>
                 </div>
+
                 <div className="mt-4 flex gap-4 flex-wrap">
                   <div>
                     <label className="text-sm block text-amber-400">Heal #</label>
                     <div className="flex items-center gap-2">
-                      <input id={`heal-input-${char.id}`} type="number" className="w-16 border rounded p-1 text-sm" value={healInput} onChange={(e) => setHealInput(e.target.value)} min="0" />
+                      <input id={`heal-input-${char.id}`} type="number" className="w-16 border rounded p-1 text-sm" value={healInput} onChange={(e) => setHealInput(e.target.value)} />
                       <button className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800 text-sm" onClick={applyHeal}>Heal</button>
                     </div>
                   </div>
                   <div>
                     <label className="text-sm block text-amber-400">Damage #</label>
                     <div className="flex items-center gap-2">
-                      <input id={`dmg-input-${char.id}`} type="number" className="w-16 border rounded p-1 text-sm" value={dmgInput} onChange={(e) => setDmgInput(e.target.value)} min="0" />
+                      <input id={`dmg-input-${char.id}`} type="number" className="w-16 border rounded p-1 text-sm" value={dmgInput} onChange={(e) => setDmgInput(e.target.value)} />
                       <button className="px-3 py-1 btn-dnd rounded text-sm" onClick={applyDamage}>Damage</button>
                     </div>
                   </div>
                 </div>
+
                 {char.health <= 0 && (
                   <div className="mt-4 p-2 bg-gray-800 rounded">
                     <h4 className="font-semibold text-sm text-amber-400">Death Saves</h4>
@@ -607,6 +612,7 @@
                     </div>
                   </div>
                 )}
+
                 {char.notes && (
                   <div className="mt-4">
                     <h4 className="font-semibold text-sm text-amber-400">Notes/Bio:</h4>
@@ -636,19 +642,19 @@
       }, [enemy]);
 
       function handleSave() {
-        const parsedMax = Math.max(1, parseInt(editMaxHealth, 10) || 1);
-        const parsedHealth = Math.max(0, parseInt(editHealth, 10) || 0);
+        const parsedMax = parseInt(editMaxHealth, 10) || 0;
+        const parsedHealth = parseInt(editHealth, 10) || 0;
         const clippedHealth = Math.min(parsedHealth, parsedMax);
         onUpdateEnemy({ ...enemy, name: editName, maxHealth: parsedMax, health: clippedHealth });
         setIsEditing(false);
       }
 
       function applyHeal() {
-        onHealEnemy(enemy.id, Math.max(0, parseInt(healInput, 10) || 0));
+        onHealEnemy(enemy.id, parseInt(healInput, 10) || 0);
       }
 
       function applyDamage() {
-        onDamageEnemy(enemy.id, Math.max(0, parseInt(dmgInput, 10) || 0));
+        onDamageEnemy(enemy.id, parseInt(dmgInput, 10) || 0);
       }
 
       const mainContentStyle = collapsed ? { maxHeight: 0, overflow: 'hidden' } : { maxHeight: "9999px" };
@@ -667,11 +673,11 @@
               </div>
               <div>
                 <label htmlFor={`edit-enemy-maxhealth-${enemy.id}`} className="block text-sm font-medium text-amber-400 mb-1">Max Health</label>
-                <input id={`edit-enemy-maxhealth-${enemy.id}`} type="number" className="border p-1 rounded w-full" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} min="1" />
+                <input id={`edit-enemy-maxhealth-${enemy.id}`} type="number" className="border p-1 rounded w-full" value={editMaxHealth} onChange={(e) => setEditMaxHealth(e.target.value)} />
               </div>
               <div>
                 <label htmlFor={`edit-enemy-health-${enemy.id}`} className="block text-sm font-medium text-amber-400 mb-1">Current Health</label>
-                <input id={`edit-enemy-health-${enemy.id}`} type="number" className="border p-1 rounded w-full" value={editHealth} onChange={(e) => setEditHealth(e.target.value)} min="0" />
+                <input id={`edit-enemy-health-${enemy.id}`} type="number" className="border p-1 rounded w-full" value={editHealth} onChange={(e) => setEditHealth(e.target.value)} />
               </div>
               <div className="flex gap-2">
                 <button className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800" onClick={handleSave}>Save</button>
@@ -712,14 +718,14 @@
                   <div>
                     <label className="text-sm block text-amber-400">Heal #</label>
                     <div className="flex items-center gap-2">
-                      <input id={`enemy-heal-input-${enemy.id}`} type="number" className="w-16 border rounded p-1 text-sm" value={healInput} onChange={(e) => setHealInput(e.target.value)} min="0" />
+                      <input id={`enemy-heal-input-${enemy.id}`} type="number" className="w-16 border rounded p-1 text-sm" value={healInput} onChange={(e) => setHealInput(e.target.value)} />
                       <button className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800 text-sm" onClick={applyHeal}>Heal</button>
                     </div>
                   </div>
                   <div>
                     <label className="text-sm block text-amber-400">Damage #</label>
                     <div className="flex items-center gap-2">
-                      <input id={`enemy-dmg-input-${enemy.id}`} type="number" className="w-16 border rounded p-1 text-sm" value={dmgInput} onChange={(e) => setDmgInput(e.target.value)} min="0" />
+                      <input id={`enemy-dmg-input-${enemy.id}`} type="number" className="w-16 border rounded p-1 text-sm" value={dmgInput} onChange={(e) => setDmgInput(e.target.value)} />
                       <button className="px-3 py-1 btn-dnd rounded text-sm" onClick={applyDamage}>Damage</button>
                     </div>
                   </div>
@@ -801,8 +807,6 @@
                           const val = clampScore(parseInt(e.target.value) || 10);
                           updateStatRow(row.id, { ...row, str: val });
                         }}
-                        min="6"
-                        max="20"
                       />
                       <span className="text-center text-blue-400 text-xs mt-1">{modSTR}</span>
                     </div>
@@ -817,8 +821,6 @@
                           const val = clampScore(parseInt(e.target.value) || 10);
                           updateStatRow(row.id, { ...row, dex: val });
                         }}
-                        min="6"
-                        max="20"
                       />
                       <span className="text-center text-blue-400 text-xs mt-1">{modDEX}</span>
                     </div>
@@ -833,8 +835,6 @@
                           const val = clampScore(parseInt(e.target.value) || 10);
                           updateStatRow(row.id, { ...row, con: val });
                         }}
-                        min="6"
-                        max="20"
                       />
                       <span className="text-center text-blue-400 text-xs mt-1">{modCON}</span>
                     </div>
@@ -849,8 +849,6 @@
                           const val = clampScore(parseInt(e.target.value) || 10);
                           updateStatRow(row.id, { ...row, int: val });
                         }}
-                        min="6"
-                        max="20"
                       />
                       <span className="text-center text-blue-400 text-xs mt-1">{modINT}</span>
                     </div>
@@ -865,8 +863,6 @@
                           const val = clampScore(parseInt(e.target.value) || 10);
                           updateStatRow(row.id, { ...row, wis: val });
                         }}
-                        min="6"
-                        max="20"
                       />
                       <span className="text-center text-blue-400 text-xs mt-1">{modWIS}</span>
                     </div>
@@ -881,8 +877,6 @@
                           const val = clampScore(parseInt(e.target.value) || 10);
                           updateStatRow(row.id, { ...row, cha: val });
                         }}
-                        min="6"
-                        max="20"
                       />
                       <span className="text-center text-blue-400 text-xs mt-1">{modCHA}</span>
                     </div>
@@ -895,7 +889,7 @@
       );
     }
 
-    /** MapSection */
+    /** MapSection (Fixed to display as rectangle) */
     function MapSection({ mapImage, setMapImage, dotPositions, setDotPositions }) {
       const [isDragging, setIsDragging] = React.useState(null);
       const mapRef = React.useRef(null);
@@ -906,6 +900,8 @@
           const reader = new FileReader();
           reader.onload = (e) => {
             setMapImage(e.target.result);
+            
+            // Set default dot positions if none exist
             if (!dotPositions.length) {
               setDotPositions([
                 { x: 20, y: 20, color: "red", label: "Player 1" },
@@ -1020,48 +1016,26 @@
                 ))}
               </div>
               <div className="mt-2">
-                <div className="text-sm mb-2 flex flex-wrap gap-2">
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-1"></span> Player 1
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-blue-500 mr-1"></span> Player 2
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-1"></span> Player 3
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-purple-500 mr-1"></span> Player 4
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-orange-500 mr-1"></span> Enemy 1
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-yellow-500 mr-1"></span> Enemy 2
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-pink-500 mr-1"></span> Enemy 3
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-cyan-500 mr-1"></span> Enemy 4
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <label className="px-3 py-1 btn-dnd rounded text-sm cursor-pointer">
-                    Choose File
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="map-upload" />
-                  </label>
-                  <button className="px-3 py-1 btn-dnd rounded text-sm" onClick={handleDeleteImage}>Delete Map</button>
-                </div>
+                <p className="text-sm mb-2">
+                  <span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-1"></span> Player 1 | 
+                  <span className="inline-block w-3 h-3 rounded-full bg-blue-500 mx-1"></span> Player 2 | 
+                  <span className="inline-block w-3 h-3 rounded-full bg-green-500 mx-1"></span> Player 3 | 
+                  <span className="inline-block w-3 h-3 rounded-full bg-purple-500 mx-1"></span> Player 4 | 
+                  <span className="inline-block w-3 h-3 rounded-full bg-orange-500 mx-1"></span> Enemies
+                </p>
+            <div className="flex gap-2">
+              <label className="px-3 py-1 btn-dnd rounded text-sm cursor-pointer">
+                Choose File
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="map-upload" />
+              </label>
+              <button className="px-3 py-1 btn-dnd rounded text-sm" onClick={handleDeleteImage}>Delete Map</button>
+            </div>
               </div>
             </div>
           ) : (
             <div>
               <label className="block text-sm font-medium text-amber-400 mb-1">Upload Map Image</label>
-              <label className="px-3 py-1 btn-dnd rounded text-sm cursor-pointer">
-                Choose File
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="map-upload" />
-              </label>
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="border p-1 rounded text-sm" id="map-upload" />
             </div>
           )}
         </div>
@@ -1104,14 +1078,11 @@
               "\nLevel: " + (c.level || 1) +
               "\nXP: " + (c.xp || 0) +
               "\nInitiative: " + (c.initiative || 0) +
-              "\nArmor Class: " + (c.armorClass || 10) +
-              "\nEquipped: " + (c.equippedWeapon || "None") +
               "\nHealth: " + c.health + "/" + c.maxHealth +
               "\nStatus: " + (c.status.length ? c.status.join(", ") : "None") +
               "\nEffects: " + (c.effects.length ? c.effects.join(", ") : "None") +
               "\nInventory: " + (c.inventory.length ? c.inventory.join(", ") : "None") +
               "\nAbilities: " + (c.specialAbilities.length ? c.specialAbilities.join(", ") : "None") +
-              "\nCantrips: " + (Array.isArray(c.cantrips) && c.cantrips.length ? c.cantrips.join(", ") : "None") +
               "\nSpells: " + (c.spellsMagic.length ? c.spellsMagic.join(", ") : "None") +
               "\nNotes: " + (c.notes || "None") +
               "\nImage: " + (c.image ? "Yes" : "No")
@@ -1137,7 +1108,7 @@
       );
     }
 
-    /** ClassesSection */
+    /** ClassesSection (Simplified with link) */
     function ClassesSection() {
       return (
         <div className="character-card p-4 rounded-lg mb-4">
@@ -1149,7 +1120,7 @@
       );
     }
 
-    /** RacesSection */
+    /** RacesSection (Simplified with link) */
     function RacesSection() {
       return (
         <div className="character-card p-4 rounded-lg mb-4">
@@ -1161,7 +1132,7 @@
       );
     }
 
-    /** MonsterCreatureList */
+    /** MonsterCreatureList (Restored with links) */
     function MonsterCreatureList() {
       return (
         <div className="character-card p-4 rounded-lg mb-4">
@@ -1177,46 +1148,7 @@
       );
     }
 
-    /** BulkActions */
-    function BulkActions({ onBulkHeal, onBulkDamage }) {
-      const [target, setTarget] = React.useState("characters");
-      const [amount, setAmount] = React.useState(0);
-
-      function handleAction(action) {
-        if (action === "heal") {
-          onBulkHeal(target, Math.max(0, parseInt(amount, 10) || 0));
-        } else {
-          onBulkDamage(target, Math.max(0, parseInt(amount, 10) || 0));
-        }
-        setAmount(0);
-      }
-
-      return (
-        <div className="character-card p-4 rounded-lg mb-4">
-          <h2 className="text-xl font-bold text-amber-400 mb-2">Bulk Actions</h2>
-          <div className="flex gap-2 items-center">
-            <select className="border p-1 rounded" value={target} onChange={(e) => setTarget(e.target.value)}>
-              <option value="characters">Characters</option>
-              <option value="enemies">Enemies</option>
-            </select>
-            <input
-              type="number"
-              className="border p-1 rounded w-20"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Amount"
-              min="0"
-            />
-            <button className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800" onClick={() => handleAction("heal")}>
-              Heal
-            </button>
-            <button className="px-3 py-1 btn-dnd rounded" onClick={() => handleAction("damage")}>
-              Damage
-            </button>
-          </div>
-        </div>
-      );
-    }
+    /** Note: BulkActions component removed as requested since it's already in the combat tracker */
 
     /** Main DnDTracker */
     function DnDTracker() {
@@ -1255,7 +1187,7 @@
           deathSaves: c.deathSaves || { success: 0, fail: 0 },
           armorClass: c.armorClass || 10,
           equippedWeapon: c.equippedWeapon || "None",
-          cantrips: Array.isArray(c.cantrips) ? c.cantrips : []
+          cantrips: c.cantrips || []
         }));
       });
 
@@ -1272,6 +1204,7 @@
       const [mapImage, setMapImage] = React.useState(() => localStorage.getItem("mapImage") || null);
       const [dotPositions, setDotPositions] = React.useState(() => {
         const saved = localStorage.getItem("dotPositions");
+        // Default enemy dots with different colors and labels
         const defaultDots = [
           { x: 20, y: 20, color: "red", label: "Player 1" },
           { x: 40, y: 40, color: "blue", label: "Player 2" },
@@ -1449,14 +1382,19 @@
                 Restore Data
                 <input type="file" accept=".json" onChange={restoreLocalStorage} className="hidden" />
               </label>
+              <button className="px-3 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 text-sm" onClick={copyForPrompt}>
+                Copy for Prompt
+              </button>
             </div>
           </div>
+
           <div className="mb-4">
             <CopyButton characters={characters} enemies={enemies} />
             <button className="ml-2 px-4 py-2 btn-dnd rounded mb-2 text-sm" onClick={copyForPrompt}>
               Copy All Content
             </button>
           </div>
+
           <div className="app-container p-4 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-2">D&D Character & Party Tracker</h2>
             <div className="mb-6 bg-gray-800 p-3 rounded-lg border border-amber-900">
@@ -1464,13 +1402,15 @@
               <ol className="list-decimal pl-5 text-sm text-amber-300">
                 <li className="mb-1">Track character details including Class/Race combinations</li>
                 <li className="mb-1">Manage health, status effects, inventory, and abilities</li>
-                <li className="mb-1">Use the interactive map with up to 8 tokens</li>
+                <li className="mb-1">Use the interactive map with up to 12 enemy tokens</li>
                 <li className="mb-1">Organize character stats with the calculator</li>
                 <li className="mb-1">Track enemies and their health separately</li>
                 <li className="mb-1">Quick-reference D&D classes and races through external links</li>
                 <li className="mb-1">Backup and restore your campaign data</li>
               </ol>
             </div>
+
+            {/* Party Status */}
             <div className="character-card p-4 rounded-lg mb-4">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-amber-400">Party Status</h2>
@@ -1496,8 +1436,11 @@
                 ))}
               </div>
             </div>
+
             <PartyImages characters={characters} />
             <StatsSection statRows={statRows} setStatRows={setStatRows} />
+
+            {/* Enemy Section */}
             <div className="character-card p-4 rounded-lg mb-4">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-amber-400">Enemies</h2>
@@ -1519,7 +1462,8 @@
                 {enemies.length === 0 && <p className="text-center">No enemies added. Click "Add Enemy" to add one.</p>}
               </div>
             </div>
-            <BulkActions onBulkHeal={handleBulkHeal} onBulkDamage={handleBulkDamage} />
+
+            {/* BulkActions component removed as requested */}
             <MapSection mapImage={mapImage} setMapImage={setMapImage} dotPositions={dotPositions} setDotPositions={setDotPositions} />
             <ClassesSection />
             <RacesSection />
