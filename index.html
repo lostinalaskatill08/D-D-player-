@@ -257,7 +257,7 @@
       const [healInput, setHealInput] = React.useState("0");
       const [dmgInput, setDmgInput] = React.useState("0");
 
-      // Ensure cantrips is always an array
+      // Ensure cantrips is initialized
       const cantrips = Array.isArray(char.cantrips) ? char.cantrips : [];
 
       React.useEffect(() => {
@@ -296,7 +296,7 @@
           armorClass: parseInt(editArmorClass, 10) || 10,
           equippedWeapon: editEquippedWeapon,
           notes: editNotes,
-          cantrips: cantrips,
+          cantrips: cantrips, // Ensure cantrips is passed through
         });
         setIsEditing(false);
       }
@@ -916,6 +916,8 @@
           const reader = new FileReader();
           reader.onload = (e) => {
             setMapImage(e.target.result);
+            
+            // Set default dot positions if none exist
             if (!dotPositions.length) {
               setDotPositions([
                 { x: 20, y: 20, color: "red", label: "Player 1" },
@@ -1031,30 +1033,51 @@
               </div>
               <div className="mt-2">
                 <div className="text-sm mb-2 flex flex-wrap gap-2">
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-1"></span> Player 1
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-blue-500 mr-1"></span> Player 2
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-1"></span> Player 3
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-purple-500 mr-1"></span> Player 4
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-orange-500 mr-1"></span> Enemy 1
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-yellow-500 mr-1"></span> Enemy 2
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-pink-500 mr-1"></span> Enemy 3
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-cyan-500 mr-1"></span> Enemy 4
-                  </span>
+                  {/* Party tokens */}
+                  <div className="flex flex-col gap-1 mr-4">
+                    <p className="font-bold text-amber-400">Party:</p>
+                    <span className="flex items-center">
+                      <span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-1"></span> Party 1
+                    </span>
+                    <span className="flex items-center">
+                      <span className="inline-block w-3 h-3 rounded-full bg-blue-500 mr-1"></span> Party 2
+                    </span>
+                    <span className="flex items-center">
+                      <span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-1"></span> Party 3
+                    </span>
+                    <span className="flex items-center">
+                      <span className="inline-block w-3 h-3 rounded-full bg-purple-500 mr-1"></span> Party 4
+                    </span>
+                    <span className="flex items-center">
+                      <span className="inline-block w-3 h-3 rounded-full bg-cyan-500 mr-1"></span> Party 5
+                    </span>
+                    <span className="flex items-center">
+                      <span className="inline-block w-3 h-3 rounded-full bg-fuchsia-500 mr-1"></span> Party 6
+                    </span>
+                  </div>
+                  
+                  {/* Enemy tokens */}
+                  <div className="flex flex-col gap-1">
+                    <p className="font-bold text-amber-400">Enemies:</p>
+                    <span className="flex items-center">
+                      <span className="inline-block w-3 h-3 rounded-full bg-orange-500 mr-1"></span> Enemy 1
+                    </span>
+                    <span className="flex items-center">
+                      <span className="inline-block w-3 h-3 rounded-full bg-yellow-500 mr-1"></span> Enemy 2
+                    </span>
+                    <span className="flex items-center">
+                      <span className="inline-block w-3 h-3 rounded-full bg-lime-500 mr-1"></span> Enemy 3
+                    </span>
+                    <span className="flex items-center">
+                      <span className="inline-block w-3 h-3 rounded-full bg-amber-800 mr-1"></span> Enemy 4
+                    </span>
+                    <span className="flex items-center">
+                      <span className="inline-block w-3 h-3 rounded-full bg-indigo-500 mr-1"></span> Enemy 5
+                    </span>
+                    <span className="flex items-center">
+                      <span className="inline-block w-3 h-3 rounded-full bg-teal-500 mr-1"></span> Enemy 6
+                    </span>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <label className="px-3 py-1 btn-dnd rounded text-sm cursor-pointer">
@@ -1187,6 +1210,8 @@
       );
     }
 
+    /** Note: BulkActions component removed as requested since it's already in the combat tracker */
+
     /** Main DnDTracker */
     function DnDTracker() {
       const [collapsedCharacters, toggleCharacterCollapse] = useCollapseState("collapsedCharacters");
@@ -1215,6 +1240,7 @@
           notes: "",
           deathSaves: { success: 0, fail: 0 },
         }];
+        // Ensure all characters have the required properties
         return loaded.map((c) => ({
           ...c,
           level: c.level || 1,
@@ -1224,12 +1250,7 @@
           deathSaves: c.deathSaves || { success: 0, fail: 0 },
           armorClass: c.armorClass || 10,
           equippedWeapon: c.equippedWeapon || "None",
-          cantrips: Array.isArray(c.cantrips) ? c.cantrips : [],
-          status: c.status || [],
-          effects: c.effects || [],
-          inventory: c.inventory || [],
-          specialAbilities: c.specialAbilities || [],
-          spellsMagic: c.spellsMagic || [],
+          cantrips: Array.isArray(c.cantrips) ? c.cantrips : []
         }));
       });
 
@@ -1246,6 +1267,7 @@
       const [mapImage, setMapImage] = React.useState(() => localStorage.getItem("mapImage") || null);
       const [dotPositions, setDotPositions] = React.useState(() => {
         const saved = localStorage.getItem("dotPositions");
+        // Default enemy dots with different colors and labels
         const defaultDots = [
           { x: 20, y: 20, color: "red", label: "Player 1" },
           { x: 40, y: 40, color: "blue", label: "Player 2" },
