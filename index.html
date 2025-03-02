@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +9,10 @@
   <script src="https://cdn.jsdelivr.net/npm/react@17/umd/react.development.js" crossorigin></script>
   <script src="https://cdn.jsdelivr.net/npm/react-dom@17/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel&display=swap"
+    rel="stylesheet"
+  />
   <style>
     body {
       font-family: 'Cinzel', serif;
@@ -1108,13 +1110,12 @@
       );
     }
 
-    /** Note: BulkActions component removed as requested since it's already in the combat tracker */
-
     /** Main DnDTracker */
     function DnDTracker() {
       const [collapsedCharacters, toggleCharacterCollapse] = useCollapseState("collapsedCharacters");
       const [collapsedEnemies, toggleEnemyCollapse] = useCollapseState("collapsedEnemies");
 
+      // FIX: Provide fallback arrays if missing
       const [characters, setCharacters] = React.useState(() => {
         const saved = localStorage.getItem("characters");
         let loaded = saved ? JSON.parse(saved) : [{
@@ -1135,8 +1136,14 @@
           notes: "",
           deathSaves: { success: 0, fail: 0 },
         }];
+        // Ensure arrays are never undefined
         return loaded.map((c) => ({
           ...c,
+          status: c.status || [],
+          effects: c.effects || [],
+          inventory: c.inventory || [],
+          specialAbilities: c.specialAbilities || [],
+          spellsMagic: c.spellsMagic || [],
           level: c.level || 1,
           xp: c.xp || 0,
           initiative: c.initiative || 0,
@@ -1158,7 +1165,7 @@
       const [mapImage, setMapImage] = React.useState(() => localStorage.getItem("mapImage") || null);
       const [dotPositions, setDotPositions] = React.useState(() => {
         const saved = localStorage.getItem("dotPositions");
-        // Default enemy dots with different colors and labels if no saved dots exist
+        // Default enemy dots if none exist
         const defaultDots = [
           { x: 20, y: 20, color: "red", label: "Player 1" },
           { x: 40, y: 40, color: "blue", label: "Player 2" },
@@ -1313,22 +1320,6 @@
         setEnemies((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
       }
 
-      function handleBulkHeal(target, amt) {
-        if (target === "characters") {
-          setCharacters((prev) => prev.map((c) => ({ ...c, health: Math.min(c.maxHealth, c.health + amt) })));
-        } else {
-          setEnemies((prev) => prev.map((e) => ({ ...e, health: Math.min(e.maxHealth, e.health + amt) })));
-        }
-      }
-
-      function handleBulkDamage(target, amt) {
-        if (target === "characters") {
-          setCharacters((prev) => prev.map((c) => ({ ...c, health: Math.max(0, c.health - amt) })));
-        } else {
-          setEnemies((prev) => prev.map((e) => ({ ...e, health: Math.max(0, e.health - amt) })));
-        }
-      }
-
       return (
         <div className="container mx-auto p-4 space-y-4">
           <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
@@ -1419,7 +1410,6 @@
               </div>
             </div>
 
-            {/* BulkActions component removed as requested */}
             <MapSection mapImage={mapImage} setMapImage={setMapImage} dotPositions={dotPositions} setDotPositions={setDotPositions} />
             <ClassesSection />
             <RacesSection />
