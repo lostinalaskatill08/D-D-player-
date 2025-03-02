@@ -27,13 +27,13 @@
       border-radius: 0.5rem;
       color: #f4e4bc;
     }
-    input, select, textarea {
+    input, select {
       font-family: 'Cinzel', serif;
       color: #000000 !important;
       background-color: #f9efd4 !important;
       border-color: #4a3f35 !important;
     }
-    input::placeholder, textarea::placeholder {
+    input::placeholder {
       color: #666666;
     }
     .btn-dnd {
@@ -217,7 +217,7 @@
       }, [darkMode]);
 
       return (
-        <button className="px-3 py-1 btn-dnd rounded" onClick={() => setDarkMode(!darkMode)}>
+        <button className="px-3 py-1 bg-amber-700 text-white rounded hover:bg-amber-800" onClick={() => setDarkMode(!darkMode)}>
           {darkMode ? "Light Mode" : "Dark Mode"}
         </button>
       );
@@ -245,20 +245,14 @@
       const [editLevel, setEditLevel] = React.useState(String(char.level || 1));
       const [editXP, setEditXP] = React.useState(String(char.xp || 0));
       const [editInitiative, setEditInitiative] = React.useState(String(char.initiative || 0));
-      const [editArmorClass, setEditArmorClass] = React.useState(String(char.armorClass || 10));
-      const [editEquippedWeapon, setEditEquippedWeapon] = React.useState(char.equippedWeapon || "None");
       const [editNotes, setEditNotes] = React.useState(char.notes || "");
       const [newStatus, setNewStatus] = React.useState("");
       const [newEffect, setNewEffect] = React.useState("");
       const [newItem, setNewItem] = React.useState("");
       const [newAbility, setNewAbility] = React.useState("");
-      const [newCantrip, setNewCantrip] = React.useState("");
       const [newSpell, setNewSpell] = React.useState("");
       const [healInput, setHealInput] = React.useState("0");
       const [dmgInput, setDmgInput] = React.useState("0");
-
-      // Ensure cantrips is initialized
-      const cantrips = Array.isArray(char.cantrips) ? char.cantrips : [];
 
       React.useEffect(() => {
         setEditName(char.name);
@@ -267,8 +261,6 @@
         setEditLevel(String(char.level || 1));
         setEditXP(String(char.xp || 0));
         setEditInitiative(String(char.initiative || 0));
-        setEditArmorClass(String(char.armorClass || 10));
-        setEditEquippedWeapon(char.equippedWeapon || "None");
         setEditNotes(char.notes || "");
       }, [char]);
 
@@ -293,10 +285,7 @@
           level: parseInt(editLevel, 10) || 1,
           xp: parseInt(editXP, 10) || 0,
           initiative: parseInt(editInitiative, 10) || 0,
-          armorClass: parseInt(editArmorClass, 10) || 10,
-          equippedWeapon: editEquippedWeapon,
           notes: editNotes,
-          cantrips: cantrips, // Ensure cantrips is passed through
         });
         setIsEditing(false);
       }
@@ -323,12 +312,6 @@
         if (!newAbility.trim()) return;
         onUpdateChar({ ...char, specialAbilities: [...char.specialAbilities, newAbility.trim()] });
         setNewAbility("");
-      }
-
-      function handleAddCantrip() {
-        if (!newCantrip.trim()) return;
-        onUpdateChar({ ...char, cantrips: [...cantrips, newCantrip.trim()] });
-        setNewCantrip("");
       }
 
       function handleAddSpell() {
@@ -396,24 +379,11 @@
                 <input id={`edit-initiative-${char.id}`} type="number" className="border p-1 rounded w-full" value={editInitiative} onChange={(e) => setEditInitiative(e.target.value)} />
               </div>
             </div>
-            
-            <div>
-              <div>
-                <label htmlFor={`edit-armorclass-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Armor Class</label>
-                <input id={`edit-armorclass-${char.id}`} type="number" className="border p-1 rounded w-full" value={editArmorClass} onChange={(e) => setEditArmorClass(e.target.value)} />
-              </div>
-              <div>
-                <label htmlFor={`edit-weapon-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Equipped Weapon/Item</label>
-                <input id={`edit-weapon-${char.id}`} className="border p-1 rounded w-full" value={editEquippedWeapon} onChange={(e) => setEditEquippedWeapon(e.target.value)} />
-              </div>
-            </div>
-            
             <div>
               <label htmlFor={`edit-notes-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Character Notes/Bio</label>
               <textarea id={`edit-notes-${char.id}`} className="border p-1 rounded w-full" rows={3} value={editNotes} onChange={(e) => setEditNotes(e.target.value)} />
             </div>
-            
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2">
               <button className="px-3 py-1 btn-dnd rounded" onClick={handleSave}>Save</button>
               <button className="px-2 py-1 bg-gray-700 text-f4e4bc rounded" onClick={() => setIsEditing(false)}>Cancel</button>
             </div>
@@ -440,23 +410,13 @@
           <div className="collapsible-content transition-all duration-300 ease-in-out" style={mainContentStyle}>
             {!collapsed && (
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <div className="text-sm mb-1 mt-2">XP: {char.xp || 0}</div>
-                  <div className="text-sm">Armor Class: {char.armorClass || 10}</div>
-                </div>
-                
-                <div className="mb-2">
-                  <div className="text-sm font-medium text-amber-400">Equipped: {char.equippedWeapon || "None"}</div>
-                </div>
-                
+                <div className="text-sm mb-1 mt-2">XP: {char.xp || 0}</div>
                 <label className="block text-sm font-medium text-amber-400">Character Image</label>
                 <div className="flex items-center gap-2 mt-1">
                   {char.image ? (
                     <img src={char.image} alt={char.name} className="w-12 h-12 object-cover rounded-full" />
                   ) : (
-                    <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
-                      <span className="text-gray-400 text-xs">No Img</span>
-                    </div>
+                    <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center text-gray-400 text-xs">No Image</div>
                   )}
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="mt-1 text-sm" id={`image-upload-${char.id}`} />
                   {char.image && (
@@ -527,38 +487,6 @@
                   <div className="flex gap-2 mt-1">
                     <input id={`new-item-${char.id}`} className="border p-1 rounded text-sm" value={newItem} onChange={(e) => setNewItem(e.target.value)} placeholder="New item" />
                     <button className="px-2 py-1 btn-dnd rounded text-sm" onClick={handleAddItem}>Add</button>
-                  </div>
-                </div>
-
-                <div className="mt-2">
-                  <h4 className="font-semibold text-sm text-amber-400">Cantrips/Basic Skills:</h4>
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {cantrips.map((cantrip, idx) => (
-                      <div key={idx} className="status-tag flex items-center justify-between">
-                        {cantrip}
-                        <button 
-                          className="ml-2 text-red-400 hover:text-red-600" 
-                          onClick={() => {
-                            const updatedCantrips = [...cantrips];
-                            updatedCantrips.splice(idx, 1);
-                            onUpdateChar({ ...char, cantrips: updatedCantrips });
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                    {cantrips.length === 0 && <span className="text-gray-500 text-sm">None</span>}
-                  </div>
-                  <div className="flex gap-2 mt-1">
-                    <input 
-                      id={`new-cantrip-${char.id}`} 
-                      className="border p-1 rounded text-sm" 
-                      value={newCantrip} 
-                      onChange={(e) => setNewCantrip(e.target.value)} 
-                      placeholder="Add cantrip/skill" 
-                    />
-                    <button className="px-2 py-1 btn-dnd rounded text-sm" onClick={handleAddCantrip}>Add</button>
                   </div>
                 </div>
 
@@ -927,7 +855,15 @@
                 { x: 25, y: 30, color: "orange", label: "Enemy 1" },
                 { x: 45, y: 50, color: "yellow", label: "Enemy 2" },
                 { x: 65, y: 70, color: "pink", label: "Enemy 3" },
-                { x: 85, y: 90, color: "cyan", label: "Enemy 4" }
+                { x: 85, y: 90, color: "cyan", label: "Enemy 4" },
+                { x: 35, y: 45, color: "lime", label: "Enemy 5" },
+                { x: 55, y: 65, color: "magenta", label: "Enemy 6" },
+                { x: 75, y: 85, color: "teal", label: "Enemy 7" },
+                { x: 15, y: 55, color: "indigo", label: "Enemy 8" },
+                { x: 30, y: 75, color: "violet", label: "Enemy 9" },
+                { x: 50, y: 25, color: "crimson", label: "Enemy 10" },
+                { x: 70, y: 35, color: "darkgreen", label: "Enemy 11" },
+                { x: 90, y: 15, color: "navy", label: "Enemy 12" }
               ]);
             }
           };
@@ -1032,48 +968,33 @@
                 ))}
               </div>
               <div className="mt-2">
-                <div className="text-sm mb-2 flex flex-wrap gap-2">
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-1"></span> Player 1
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-blue-500 mr-1"></span> Player 2
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-1"></span> Player 3
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-purple-500 mr-1"></span> Player 4
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-orange-500 mr-1"></span> Enemy 1
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-yellow-500 mr-1"></span> Enemy 2
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-pink-500 mr-1"></span> Enemy 3
-                  </span>
-                  <span className="flex items-center">
-                    <span className="inline-block w-3 h-3 rounded-full bg-cyan-500 mr-1"></span> Enemy 4
-                  </span>
-                </div>
+                <p className="text-sm mb-2">
+                  <span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-1"></span> Player 1 | 
+                  <span className="inline-block w-3 h-3 rounded-full bg-blue-500 mx-1"></span> Player 2 | 
+                  <span className="inline-block w-3 h-3 rounded-full bg-green-500 mx-1"></span> Player 3 | 
+                  <span className="inline-block w-3 h-3 rounded-full bg-purple-500 mx-1"></span> Player 4 | 
+                  <span className="inline-block w-3 h-3 rounded-full bg-orange-500 mx-1"></span> Enemies
+                </p>
                 <div className="flex gap-2">
-                  <label className="px-3 py-1 btn-dnd rounded text-sm cursor-pointer">
-                    Choose File
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="map-upload" />
-                  </label>
-                  <button className="px-3 py-1 btn-dnd rounded text-sm" onClick={handleDeleteImage}>Delete Map</button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="border p-1 rounded"
+                  />
+                  <button
+                    className="px-2 py-1 btn-dnd rounded"
+                    onClick={handleDeleteImage}
+                  >
+                    Delete Map
+                  </button>
                 </div>
               </div>
             </div>
           ) : (
             <div>
               <label className="block text-sm font-medium text-amber-400 mb-1">Upload Map Image</label>
-              <label className="px-3 py-1 btn-dnd rounded text-sm cursor-pointer">
-                Choose File
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="map-upload" />
-              </label>
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="border p-1 rounded text-sm" id="map-upload" />
             </div>
           )}
         </div>
@@ -1116,14 +1037,11 @@
               "\nLevel: " + (c.level || 1) +
               "\nXP: " + (c.xp || 0) +
               "\nInitiative: " + (c.initiative || 0) +
-              "\nArmor Class: " + (c.armorClass || 10) +
-              "\nEquipped: " + (c.equippedWeapon || "None") +
               "\nHealth: " + c.health + "/" + c.maxHealth +
               "\nStatus: " + (c.status.length ? c.status.join(", ") : "None") +
               "\nEffects: " + (c.effects.length ? c.effects.join(", ") : "None") +
               "\nInventory: " + (c.inventory.length ? c.inventory.join(", ") : "None") +
               "\nAbilities: " + (c.specialAbilities.length ? c.specialAbilities.join(", ") : "None") +
-              "\nCantrips: " + (Array.isArray(c.cantrips) && c.cantrips.length ? c.cantrips.join(", ") : "None") +
               "\nSpells: " + (c.spellsMagic.length ? c.spellsMagic.join(", ") : "None") +
               "\nNotes: " + (c.notes || "None") +
               "\nImage: " + (c.image ? "Yes" : "No")
@@ -1201,17 +1119,14 @@
         let loaded = saved ? JSON.parse(saved) : [{
           id: 1,
           name: "Jory",
-          class: "Cleric/Human",
+          class: "Cleric",
           health: 100,
           maxHealth: 100,
-          armorClass: 15,
-          equippedWeapon: "Mace +1",
           status: [],
           effects: [],
           inventory: ["Mace", "Shield"],
           specialAbilities: ["Turn Undead"],
-          cantrips: ["Light", "Sacred Flame"],
-          spellsMagic: ["Cure Wounds", "Bless"],
+          spellsMagic: ["Cure Wounds"],
           image: null,
           level: 1,
           xp: 0,
@@ -1219,7 +1134,6 @@
           notes: "",
           deathSaves: { success: 0, fail: 0 },
         }];
-        // Ensure all characters have the required properties
         return loaded.map((c) => ({
           ...c,
           level: c.level || 1,
@@ -1227,9 +1141,6 @@
           initiative: c.initiative || 0,
           notes: c.notes || "",
           deathSaves: c.deathSaves || { success: 0, fail: 0 },
-          armorClass: c.armorClass || 10,
-          equippedWeapon: c.equippedWeapon || "None",
-          cantrips: Array.isArray(c.cantrips) ? c.cantrips : []
         }));
       });
 
@@ -1246,7 +1157,7 @@
       const [mapImage, setMapImage] = React.useState(() => localStorage.getItem("mapImage") || null);
       const [dotPositions, setDotPositions] = React.useState(() => {
         const saved = localStorage.getItem("dotPositions");
-        // Default enemy dots with different colors and labels
+        // Default enemy dots with different colors and labels if no saved dots exist
         const defaultDots = [
           { x: 20, y: 20, color: "red", label: "Player 1" },
           { x: 40, y: 40, color: "blue", label: "Player 2" },
@@ -1255,7 +1166,15 @@
           { x: 25, y: 30, color: "orange", label: "Enemy 1" },
           { x: 45, y: 50, color: "yellow", label: "Enemy 2" },
           { x: 65, y: 70, color: "pink", label: "Enemy 3" },
-          { x: 85, y: 90, color: "cyan", label: "Enemy 4" }
+          { x: 85, y: 90, color: "cyan", label: "Enemy 4" },
+          { x: 35, y: 45, color: "lime", label: "Enemy 5" },
+          { x: 55, y: 65, color: "magenta", label: "Enemy 6" },
+          { x: 75, y: 85, color: "teal", label: "Enemy 7" },
+          { x: 15, y: 55, color: "indigo", label: "Enemy 8" },
+          { x: 30, y: 75, color: "violet", label: "Enemy 9" },
+          { x: 50, y: 25, color: "crimson", label: "Enemy 10" },
+          { x: 70, y: 35, color: "darkgreen", label: "Enemy 11" },
+          { x: 90, y: 15, color: "navy", label: "Enemy 12" }
         ];
         return saved ? JSON.parse(saved) : defaultDots;
       });
@@ -1284,13 +1203,10 @@
             class: "Class/Race",
             health: 50,
             maxHealth: 50,
-            armorClass: 10,
-            equippedWeapon: "None",
             status: [],
             effects: [],
             inventory: [],
             specialAbilities: [],
-            cantrips: [],
             spellsMagic: [],
             image: null,
             level: 1,
@@ -1417,21 +1333,21 @@
           <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
             <DarkModeToggle />
             <div className="flex gap-2">
-              <button className="px-3 py-1 btn-dnd rounded hover:bg-amber-800" onClick={backupLocalStorage}>
+              <button className="px-3 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 text-sm" onClick={backupLocalStorage}>
                 Backup Local Storage
               </button>
-              <label className="px-3 py-1 btn-dnd rounded hover:bg-amber-800 cursor-pointer text-sm">
+              <label className="px-3 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 cursor-pointer text-sm">
                 Restore Data
                 <input type="file" accept=".json" onChange={restoreLocalStorage} className="hidden" />
               </label>
+              <button className="px-3 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 text-sm" onClick={copyForPrompt}>
+                Copy for Prompt
+              </button>
             </div>
           </div>
 
           <div className="mb-4">
             <CopyButton characters={characters} enemies={enemies} />
-            <button className="ml-2 px-4 py-2 btn-dnd rounded mb-2 text-sm" onClick={copyForPrompt}>
-              Copy All Content
-            </button>
           </div>
 
           <div className="app-container p-4 rounded-lg shadow-md">
