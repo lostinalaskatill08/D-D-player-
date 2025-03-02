@@ -920,14 +920,20 @@
             // Set default dot positions if none exist
             if (!dotPositions.length) {
               setDotPositions([
-                { x: 20, y: 20, color: "red", label: "Player 1" },
-                { x: 40, y: 40, color: "blue", label: "Player 2" },
-                { x: 60, y: 60, color: "green", label: "Player 3" },
-                { x: 80, y: 80, color: "purple", label: "Player 4" },
-                { x: 25, y: 30, color: "orange", label: "Enemy 1" },
-                { x: 45, y: 50, color: "yellow", label: "Enemy 2" },
-                { x: 65, y: 70, color: "pink", label: "Enemy 3" },
-                { x: 85, y: 90, color: "cyan", label: "Enemy 4" }
+                // Party tokens
+                { x: 10, y: 10, color: "#EF4444", label: "Party 1" },
+                { x: 25, y: 10, color: "#3B82F6", label: "Party 2" },
+                { x: 40, y: 10, color: "#10B981", label: "Party 3" },
+                { x: 55, y: 10, color: "#8B5CF6", label: "Party 4" },
+                { x: 70, y: 10, color: "#06B6D4", label: "Party 5" },
+                { x: 85, y: 10, color: "#D946EF", label: "Party 6" },
+                // Enemy tokens
+                { x: 10, y: 90, color: "#F97316", label: "Enemy 1" },
+                { x: 25, y: 90, color: "#EAB308", label: "Enemy 2" },
+                { x: 40, y: 90, color: "#A3E635", label: "Enemy 3" },
+                { x: 55, y: 90, color: "#92400E", label: "Enemy 4" },
+                { x: 70, y: 90, color: "#6366F1", label: "Enemy 5" },
+                { x: 85, y: 90, color: "#14B8A6", label: "Enemy 6" }
               ]);
             }
           };
@@ -1210,8 +1216,6 @@
       );
     }
 
-    /** Note: BulkActions component removed as requested since it's already in the combat tracker */
-
     /** Main DnDTracker */
     function DnDTracker() {
       const [collapsedCharacters, toggleCharacterCollapse] = useCollapseState("collapsedCharacters");
@@ -1267,16 +1271,21 @@
       const [mapImage, setMapImage] = React.useState(() => localStorage.getItem("mapImage") || null);
       const [dotPositions, setDotPositions] = React.useState(() => {
         const saved = localStorage.getItem("dotPositions");
-        // Default enemy dots with different colors and labels
         const defaultDots = [
-          { x: 20, y: 20, color: "red", label: "Player 1" },
-          { x: 40, y: 40, color: "blue", label: "Player 2" },
-          { x: 60, y: 60, color: "green", label: "Player 3" },
-          { x: 80, y: 80, color: "purple", label: "Player 4" },
-          { x: 25, y: 30, color: "orange", label: "Enemy 1" },
-          { x: 45, y: 50, color: "yellow", label: "Enemy 2" },
-          { x: 65, y: 70, color: "pink", label: "Enemy 3" },
-          { x: 85, y: 90, color: "cyan", label: "Enemy 4" }
+          // Party tokens
+          { x: 10, y: 10, color: "#EF4444", label: "Party 1" },
+          { x: 25, y: 10, color: "#3B82F6", label: "Party 2" },
+          { x: 40, y: 10, color: "#10B981", label: "Party 3" },
+          { x: 55, y: 10, color: "#8B5CF6", label: "Party 4" },
+          { x: 70, y: 10, color: "#06B6D4", label: "Party 5" },
+          { x: 85, y: 10, color: "#D946EF", label: "Party 6" },
+          // Enemy tokens
+          { x: 10, y: 90, color: "#F97316", label: "Enemy 1" },
+          { x: 25, y: 90, color: "#EAB308", label: "Enemy 2" },
+          { x: 40, y: 90, color: "#A3E635", label: "Enemy 3" },
+          { x: 55, y: 90, color: "#92400E", label: "Enemy 4" },
+          { x: 70, y: 90, color: "#6366F1", label: "Enemy 5" },
+          { x: 85, y: 90, color: "#14B8A6", label: "Enemy 6" }
         ];
         return saved ? JSON.parse(saved) : defaultDots;
       });
