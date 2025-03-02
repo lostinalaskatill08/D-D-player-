@@ -359,8 +359,8 @@
                 <input id={`edit-name-${char.id}`} className="border p-1 rounded w-full" value={editName} onChange={(e) => setEditName(e.target.value)} />
               </div>
               <div>
-                <label htmlFor={`edit-class-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Class/Race</label>
-                <input id={`edit-class-${char.id}`} className="border p-1 rounded w-full" value={editClass} onChange={(e) => setEditClass(e.target.value)} placeholder="Fighter/Human" />
+                <label htmlFor={`edit-class-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Character Class</label>
+                <input id={`edit-class-${char.id}`} className="border p-1 rounded w-full" value={editClass} onChange={(e) => setEditClass(e.target.value)} />
               </div>
               <div>
                 <label htmlFor={`edit-maxhealth-${char.id}`} className="block text-sm font-medium text-amber-400 mb-1">Max Health</label>
@@ -859,11 +859,7 @@
                 { x: 35, y: 45, color: "lime", label: "Enemy 5" },
                 { x: 55, y: 65, color: "magenta", label: "Enemy 6" },
                 { x: 75, y: 85, color: "teal", label: "Enemy 7" },
-                { x: 15, y: 55, color: "indigo", label: "Enemy 8" },
-                { x: 30, y: 75, color: "violet", label: "Enemy 9" },
-                { x: 50, y: 25, color: "crimson", label: "Enemy 10" },
-                { x: 70, y: 35, color: "darkgreen", label: "Enemy 11" },
-                { x: 90, y: 15, color: "navy", label: "Enemy 12" }
+                { x: 15, y: 55, color: "indigo", label: "Enemy 8" }
               ]);
             }
           };
@@ -949,7 +945,6 @@
                       top: `${dot.y}%`,
                       transform: "translate(-50%, -50%)",
                       cursor: "grab",
-                      zIndex: 10
                     }}
                   >
                     <div
@@ -961,8 +956,8 @@
                       onMouseDown={handleMouseDown(index)}
                       onTouchStart={handleTouchStart(index)}
                     ></div>
-                    <div className="absolute top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold bg-black bg-opacity-75 text-white px-1 py-0.5 rounded whitespace-nowrap" style={{ zIndex: 20 }}>
-                      {dot.label}
+                    <div className="absolute top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold bg-black bg-opacity-50 text-white px-1 rounded whitespace-nowrap">
+                      {dot.label || `Token ${index+1}`}
                     </div>
                   </div>
                 ))}
@@ -1170,11 +1165,7 @@
           { x: 35, y: 45, color: "lime", label: "Enemy 5" },
           { x: 55, y: 65, color: "magenta", label: "Enemy 6" },
           { x: 75, y: 85, color: "teal", label: "Enemy 7" },
-          { x: 15, y: 55, color: "indigo", label: "Enemy 8" },
-          { x: 30, y: 75, color: "violet", label: "Enemy 9" },
-          { x: 50, y: 25, color: "crimson", label: "Enemy 10" },
-          { x: 70, y: 35, color: "darkgreen", label: "Enemy 11" },
-          { x: 90, y: 15, color: "navy", label: "Enemy 12" }
+          { x: 15, y: 55, color: "indigo", label: "Enemy 8" }
         ];
         return saved ? JSON.parse(saved) : defaultDots;
       });
@@ -1193,6 +1184,7 @@
         localStorage.setItem("dotPositions", JSON.stringify(dotPositions));
       }, [mapImage, dotPositions]);
 
+      // Fixed "Add Character" form with clear labels
       function addCharacter() {
         const newId = Date.now();
         setCharacters((prev) => [
@@ -1200,7 +1192,7 @@
           {
             id: newId,
             name: "New Character",
-            class: "Class/Race",
+            class: "Unassigned",
             health: 50,
             maxHealth: 50,
             status: [],
@@ -1353,15 +1345,14 @@
           <div className="app-container p-4 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-2">D&D Character & Party Tracker</h2>
             <div className="mb-6 bg-gray-800 p-3 rounded-lg border border-amber-900">
-              <h3 className="text-amber-400 font-bold mb-1">D&D Player Tracker Features:</h3>
+              <h3 className="text-amber-400 font-bold mb-1">How To Use This Tracker:</h3>
               <ol className="list-decimal pl-5 text-sm text-amber-300">
-                <li className="mb-1">Track character details including Class/Race combinations</li>
-                <li className="mb-1">Manage health, status effects, inventory, and abilities</li>
-                <li className="mb-1">Use the interactive map with up to 12 enemy tokens</li>
-                <li className="mb-1">Organize character stats with the calculator</li>
-                <li className="mb-1">Track enemies and their health separately</li>
-                <li className="mb-1">Quick-reference D&D classes and races through external links</li>
-                <li className="mb-1">Backup and restore your campaign data</li>
+                <li className="mb-1">Add characters by clicking "Add Character" button</li>
+                <li className="mb-1">Track health, status effects, inventory and abilities</li>
+                <li className="mb-1">Use the map to visualize party and enemy positions</li>
+                <li className="mb-1">Apply bulk damage or healing to multiple targets at once</li>
+                <li className="mb-1">Calculate ability score modifiers with the stat calculator</li>
+                <li className="mb-1">View character portraits in the Party Images section</li>
               </ol>
             </div>
 
